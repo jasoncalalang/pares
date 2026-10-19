@@ -1,0 +1,13 @@
+name: mealpal_ph
+description: >-
+  Philippine-first domain core for MealPal PH — the meal, recipe and grocery
+  planner. Pure Dart (no Flutter dependency) so it is trivially unit-testable
+  and reusable by the Flutter app, background jobs and tests.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: ^3.13.0
+
+dev_dependencies:
+  test: ^1.31.0
