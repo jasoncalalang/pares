@@ -49,3 +49,6 @@ app.*.map.json
 
 # keep the lockfile out: this is an app, but pubspec.lock churn is noise until first release
 pubspec.lock
+
+# web/ is a dev-only preview target (flutter run -d chrome); the product is Android + iOS
+/web/

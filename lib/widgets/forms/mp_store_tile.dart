@@ -65,7 +65,7 @@ class MpStoreTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       name,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: (selected
                               ? MpTypography.bodyBold()

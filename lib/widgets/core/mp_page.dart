@@ -49,8 +49,9 @@ class MpPage extends StatelessWidget {
   }
 }
 
-/// Two-column grid built from plain rows so every tile keeps its natural
-/// height (no aspect-ratio guessing).
+/// Two-column grid built from plain rows so tiles keep their natural height
+/// (no aspect-ratio guessing); the two tiles in a row stretch to match each
+/// other, so a name that wraps doesn't leave its neighbour shorter.
 class MpGrid2 extends StatelessWidget {
   const MpGrid2({super.key, required this.children, this.gap = MpSpacing.tileGap});
 
@@ -62,15 +63,17 @@ class MpGrid2 extends StatelessWidget {
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i += 2) {
       if (i > 0) rows.add(SizedBox(height: gap));
-      rows.add(Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: children[i]),
-          SizedBox(width: gap),
-          Expanded(
-            child: i + 1 < children.length ? children[i + 1] : const SizedBox(),
-          ),
-        ],
+      rows.add(IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: children[i]),
+            SizedBox(width: gap),
+            Expanded(
+              child: i + 1 < children.length ? children[i + 1] : const SizedBox(),
+            ),
+          ],
+        ),
       ));
     }
     return Column(children: rows);
