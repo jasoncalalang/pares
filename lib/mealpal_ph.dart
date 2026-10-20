@@ -7,4 +7,6 @@ library;
 
 export 'src/locale/currency.dart';
 export 'src/nutrition/calorie_target.dart';
+export 'src/nutrition/macro_split.dart';
+export 'src/plan/plan_models.dart';
 export 'src/stores/catalog.dart';
