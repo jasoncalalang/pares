@@ -1,13 +1,39 @@
 name: mealpal_ph
 description: >-
-  Philippine-first domain core for MealPal PH — the meal, recipe and grocery
-  planner. Pure Dart (no Flutter dependency) so it is trivially unit-testable
-  and reusable by the Flutter app, background jobs and tests.
+  MealPal PH — a Philippine, calorie-driven meal, recipe and grocery planner.
+  Body stats → daily calorie target → stores + ₱ budget → Filipino meal plan →
+  grocery list. The domain core under lib/src stays pure Dart (no Flutter
+  import) so background jobs and plain `dart test` can reuse it.
 publish_to: 'none'
-version: 0.0.1
+version: 0.1.0+1
 
 environment:
   sdk: ^3.13.0
 
+dependencies:
+  flutter:
+    sdk: flutter
+  lucide_icons_flutter: ^3.1.15
+
 dev_dependencies:
-  test: ^1.31.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  test: ^1.31.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/meals/
+
+  # Both faces ship as variable fonts (Google Fonts has no static instances
+  # for either). MpTypography sets the wght / opsz axes explicitly via
+  # FontVariation; the weight entries here let FontWeight fall back sanely.
+  fonts:
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces-Variable.ttf
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Variable.ttf
