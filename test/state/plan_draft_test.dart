@@ -14,7 +14,7 @@ void main() {
       expect(d.activity, ActivityLevel.moderate);
       expect(d.goal, Goal.lose);
       expect(d.weeklyBudgetPhp, 2500);
-      expect(d.selectedStoreIds, {'puregold', 'wet-market'});
+      expect(d.selectedStoreIds, {'puregold', 'palengke'});
     });
 
     test('derives the calorie target and macros from its stats', () {

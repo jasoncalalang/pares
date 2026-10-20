@@ -32,4 +32,13 @@ void main() {
       expect(php.symbol, '₱');
     });
   });
+
+  group('formatThousands', () {
+    test('groups digits without a symbol', () {
+      expect(formatThousands(2087), '2,087');
+      expect(formatThousands(157), '157');
+      expect(formatThousands(1234567), '1,234,567');
+      expect(formatThousands(-500), '-500');
+    });
+  });
 }

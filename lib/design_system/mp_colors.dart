@@ -206,3 +206,34 @@ class MpColors extends ThemeExtension<MpColors> {
 extension MpColorsContext on BuildContext {
   MpColors get mp => Theme.of(this).extension<MpColors>() ?? MpColors.light;
 }
+
+/// The three accent families a control can take. Annatto for supermarket
+/// chains, CTAs and the breakfast/lunch/dinner slots; green for local stores,
+/// budget progress and protein; amber for snacks and fat.
+enum MpAccent { annatto, green, amber }
+
+extension MpAccentColors on MpAccent {
+  Color main(MpColors c) => switch (this) {
+        MpAccent.annatto => c.annatto,
+        MpAccent.green => c.green,
+        MpAccent.amber => c.amber,
+      };
+
+  Color deep(MpColors c) => switch (this) {
+        MpAccent.annatto => c.annattoDeep,
+        MpAccent.green => c.greenDeep,
+        MpAccent.amber => c.amber,
+      };
+
+  Color tint(MpColors c) => switch (this) {
+        MpAccent.annatto => c.annattoTint,
+        MpAccent.green => c.greenTint,
+        MpAccent.amber => c.amberTint,
+      };
+
+  Color tintBorder(MpColors c) => switch (this) {
+        MpAccent.annatto => c.annattoTintBorder,
+        MpAccent.green => c.greenTintBorder,
+        MpAccent.amber => c.amberTint,
+      };
+}

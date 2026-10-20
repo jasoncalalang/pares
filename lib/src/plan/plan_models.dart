@@ -31,7 +31,7 @@ class PlannedMeal {
     required this.name,
     required this.kcal,
     required this.pricePhp,
-    required this.image,
+    this.image,
   });
 
   final MealSlot slot;
@@ -40,7 +40,9 @@ class PlannedMeal {
   final int pricePhp;
 
   /// Image key, e.g. `tapsilog` → `assets/images/meals/tapsilog.jpg`.
-  final String image;
+  /// Null when the bank has no photo yet; the card falls back to a tinted
+  /// initial.
+  final String? image;
 }
 
 class DayPlan {
@@ -76,7 +78,20 @@ class GroceryItem {
   final GroceryKind kind;
 }
 
-enum GroceryKind { meat, produce, fruit, aromatics, grain, egg, pantry, oil }
+enum GroceryKind {
+  meat,
+  poultry,
+  produce,
+  fruit,
+  aromatics,
+  grain,
+  egg,
+  legume,
+  oil,
+  condiment,
+  spice,
+  pantry,
+}
 
 /// Items to buy at one store.
 class GrocerySection {

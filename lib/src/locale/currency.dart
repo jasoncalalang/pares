@@ -38,6 +38,13 @@ String formatPeso(num amount, {int decimals = 2}) {
   return '${negative ? '-' : ''}${php.symbol}$body';
 }
 
+/// Group an integer's thousands with commas: `formatThousands(2087)` ->
+/// `2,087`. Used for calorie and gram figures, which carry no symbol.
+String formatThousands(int n) {
+  final grouped = _groupThousands(n.abs());
+  return n < 0 ? '-$grouped' : grouped;
+}
+
 int _pow10(int n) {
   var result = 1;
   for (var i = 0; i < n; i++) {

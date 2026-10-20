@@ -16,7 +16,7 @@ class PlanDraft extends ChangeNotifier {
   ActivityLevel _activity = ActivityLevel.moderate;
   Goal _goal = Goal.lose;
   int _weeklyBudgetPhp = 2500;
-  final Set<String> _selectedStoreIds = {'puregold', 'wet-market'};
+  final Set<String> _selectedStoreIds = {'puregold', 'palengke'};
 
   BiologicalSex get sex => _sex;
   set sex(BiologicalSex v) => _set(() => _sex = v);
