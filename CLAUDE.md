@@ -1,7 +1,8 @@
 # mealpal_ph: MealPal PH
 
-Flutter app (Android + iOS) for the Philippine market: body stats → daily
-calorie target → stores + ₱ budget → Filipino meal plan → grocery list.
+Flutter app (Android + iOS) for the Philippine market: welcome → body
+stats → daily calorie target → stores + ₱ budget → Filipino meal plan →
+grocery list.
 Warm, editorial, grounded: a Filipino food magazine, not a clinical
 tracker. GitHub repo is `jasoncalalang/pares`; the product name stays
 MealPal PH.
@@ -24,11 +25,16 @@ MealPal PH.
   Exported through `lib/mealpal_ph.dart`.
 - `lib/design_system/`: tokens + theme (pinned by `test/design_system/`).
 - `lib/widgets/<core|forms|data>/`: components; barrel `widgets.dart`.
-- `lib/screens/`: the five screens.
+- `lib/screens/`: the six screens (Welcome, then the four steps, then the
+  grocery list). Every screen has an on-screen way back: the fade routes
+  have no iOS edge swipe.
 - `lib/state/plan_draft.dart`: one `ChangeNotifier` for the whole flow.
 - `lib/data/`: sample week / grocery list / store tiles (stand-ins for the
   meal bank + AI recommender). `nextAlternative` drives the meal swap.
-- `test/` mirrors `lib/`; `test/helpers.dart` has `host()` and `phone()`.
+- `test/` mirrors `lib/`; `test/helpers.dart` has `host()`, `phone()`,
+  `contrast()` and `paintedColor()`. `test/flutter_test_config.dart` loads
+  the real Fraunces and Plus Jakarta Sans for every test, so widths and
+  wrapping match a phone (the default test font is a full em per glyph).
 
 ## Design system (lib/design_system/)
 
@@ -74,16 +80,32 @@ The design is filtered with the antislop rules; keep it that way:
   action: "Compute my target", "Build my plan (n)", "See grocery list".
 - Every control does something real, or it does not exist. A placeholder
   needs a `// TODO(...)` in code AND a visible "coming soon" line in the UI
-  (the GrabMart handoff is the one example).
+  (the GrabMart handoff; the Welcome sign-in buttons).
 - Data screens carry their states: This week has building/failed, the
   grocery list has an empty state, CTAs disable with a helper line when
   inputs are missing.
 - `MpPress` is the only tap primitive: it is keyboard-operable (Enter/Space),
-  paints a 2px annatto focus ring, and announces disabled. Never reach for a
-  bare `GestureDetector` for something a person taps.
-- Tap targets are 44px or larger (`MpSize.tap`); pill buttons reserve it.
+  paints a 2px annatto focus ring 2px OUTSIDE the control (so it shows on
+  an annatto fill or an accent border; don't put one inside a clipping
+  parent), announces disabled, and carries `selected` / `expanded` for
+  screen readers. Never reach for a bare `GestureDetector` for something
+  a person taps.
+- Screen readers hear each thing once: decorative text (monograms, the
+  visible label of a field that names itself) is excluded; choices, store
+  tiles and days say whether they are selected.
+- Tap targets are 44px or larger (`MpSize.tap`); pill buttons, header back
+  links and grocery section headers reserve it.
+- Large text (150-200%, iOS up to 310%) must not overflow or break a word
+  in two: numbers and one-word labels shrink to fit, CTAs wrap and grow,
+  the store grid shrinks names (to 80%) or drops to one column, and a
+  pinned footer scrolls past half the screen. `large_text_test.dart`
+  checks it.
 - Contrast is checked, not eyeballed: text 4.5:1, control edges 3:1
-  (`outline`), via the antislop contrast script.
+  (`outline`), via the antislop contrast script or `contrast()` in tests.
+  Dim with the `faint` token, never with opacity.
+- Numbers on screen are the math's, not the goal's: when the target is
+  raised to the safe floor, Daily target shows the real change from
+  maintenance and drops the weekly-rate claim.
 - Uppercase kickers, Lucide glyphs, the selection halo and the two shadows
   are deliberate and written up in the design-system doc; do not add more
   decoration without writing the reason down.
