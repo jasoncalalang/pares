@@ -20,8 +20,9 @@ import ph.mealpal.server.plan.PlannerUnavailable;
 import ph.mealpal.server.plan.SwapRequest;
 
 /**
- * The app's API. Building a week takes minutes, so POSTs answer 202 with the
- * plan's id and the app polls GET /plans/{id} until it is ready or failed.
+ * The app's API. POSTs answer 202 with the plan's id; the app polls
+ * GET /plans/{id}, and each poll moves the planner along, until the plan is
+ * ready or failed.
  */
 @Path("/plans")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,9 +59,6 @@ public class PlanResource {
     @POST
     @Path("{id}/swaps")
     public Response swap(@PathParam("id") String id, SwapRequest swap) {
-        if (plans.find(id).isEmpty()) {
-            return message(Status.NOT_FOUND, "No plan " + id + ".");
-        }
         List<String> problems = new ArrayList<>();
         if (swap == null || swap.weekday() == null) {
             problems.add("weekday is required: mon to sun.");

@@ -1,5 +1,6 @@
 package ph.mealpal.server.plan;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -31,6 +32,15 @@ class PlanBriefsTest {
         assertTrue(text.contains("something cheaper"), text);
         assertTrue(text.contains("whole week"), text);
         assertTrue(text.contains("submit_plan"), text);
+    }
+
+    @Test
+    void theServerReadsTheSwapBackOutOfItsOwnMessage() {
+        SwapRequest swap = new SwapRequest(Weekday.TUE, Slot.LUNCH, "something cheaper");
+        assertEquals(java.util.Optional.of(swap), briefs.readSwap(briefs.swap(swap)).map(
+                s -> new SwapRequest(s.weekday(), s.slot(), "something cheaper")));
+        assertEquals(java.util.Optional.empty(),
+                briefs.readSwap(briefs.kickoff(new PlanRequest(2087, 2000, Goal.LOSE, List.of("palengke")))));
     }
 
     @Test

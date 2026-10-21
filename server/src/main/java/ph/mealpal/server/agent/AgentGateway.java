@@ -1,17 +1,22 @@
 package ph.mealpal.server.agent;
 
+import java.util.Map;
+import java.util.Optional;
+
 /**
- * The planner agent as the rest of the server sees it: a session per plan,
- * and turns within it. The real one talks to Claude Managed Agents.
+ * The planner agent as the server sees it. The server holds no plan state:
+ * a plan is its session, and its event history is the record.
  */
 public interface AgentGateway {
 
-    /** Opens an idle session for the planner and returns its id. */
-    String openSession(String title);
+    /** Starts a session tagged with {@code metadata} that begins working on {@code kickoff}; returns its id. */
+    String startSession(String title, Map<String, String> metadata, String kickoff);
 
-    /**
-     * Sends {@code message} into the session and blocks until the agent's turn
-     * ends, answering each custom tool call with {@code tools} on the way.
-     */
-    SessionEnd converse(String sessionId, String message, ToolHandler tools);
+    /** The session's metadata and full event history; empty when there is no such session. */
+    Optional<SessionView> view(String sessionId);
+
+    void sendToolResult(String sessionId, String toolUseId, ToolReply reply);
+
+    /** Starts a new turn in the session. */
+    void sendMessage(String sessionId, String text);
 }

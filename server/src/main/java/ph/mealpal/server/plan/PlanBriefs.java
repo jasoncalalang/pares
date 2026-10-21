@@ -1,6 +1,10 @@
 package ph.mealpal.server.plan;
 
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import ph.mealpal.server.bank.MealBank;
+import ph.mealpal.server.bank.Slot;
 
 /**
  * The messages the server sends the planner. The standing rules live in the
@@ -41,9 +45,25 @@ public final class PlanBriefs {
     public String swap(SwapRequest s) {
         String note = s.note() == null || s.note().isBlank() ? "" : " They said: \"" + s.note().strip() + "\".";
         return """
+                Swap: %s %s
                 The person wants a different dish for %s's %s.%s
                 Keep every other meal as it is unless the day's total or the budget needs a change.
                 Call submit_plan with the whole week again.
-                """.formatted(s.weekday().label(), s.slot().json(), note);
+                """.formatted(s.weekday().json(), s.slot().json(), s.weekday().label(), s.slot().json(), note);
     }
+
+    /** The day and slot of a swap message this class wrote; empty for any other message. */
+    public Optional<SwapRequest> readSwap(String message) {
+        Matcher m = SWAP_LINE.matcher(message);
+        if (!m.lookingAt()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(new SwapRequest(Weekday.fromJson(m.group(1)), Slot.fromJson(m.group(2)), null));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
+    private static final Pattern SWAP_LINE = Pattern.compile("Swap: ([a-z]+) ([a-z]+)\\n");
 }

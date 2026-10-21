@@ -3,20 +3,18 @@ package ph.mealpal.server.api;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.startsWith;
 
-import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
+import jakarta.inject.Inject;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ph.mealpal.server.agent.AgentGateway;
-import ph.mealpal.server.agent.SessionEnd;
-import ph.mealpal.server.agent.ToolHandler;
+import ph.mealpal.server.agent.FakeAgent.Turn;
+import ph.mealpal.server.agent.SessionEvent.Stop;
 import ph.mealpal.server.plan.Weekday;
 
 @QuarkusTest
@@ -37,41 +35,43 @@ class PlanResourceTest {
                 .collect(Collectors.joining(",", "{\"days\": [", "]}"));
     }
 
-    @InjectMock
-    AgentGateway gateway;
+    @Inject
+    FakeAgentBean agent;
 
     @BeforeEach
-    void plannerSubmitsAValidWeek() {
-        when(gateway.openSession(anyString())).thenReturn("sesn_test");
-        when(gateway.converse(anyString(), anyString(), any())).thenAnswer(call -> {
-            String message = call.getArgument(1);
-            ToolHandler tools = call.getArgument(2);
-            tools.handle("submit_plan", week(message.contains("different dish") ? "adobo" : "tinola"));
-            return SessionEnd.endTurn();
-        });
+    void plannerSubmitsAValidWeekThenAnAdoboSwap() {
+        agent.reset();
+        agent.script(Turn.submitting(Stop.END_TURN, week("tinola")), Turn.submitting(Stop.END_TURN, week("adobo")));
     }
 
-    /** Polls until the plan stops building; the planner runs on its own thread. */
-    private static io.restassured.response.ValidatableResponse settled(String id) throws InterruptedException {
-        for (int i = 0; i < 50; i++) {
-            String status = given().get("/plans/" + id).then().statusCode(200).extract().path("status");
+    /** The app: every call carries the app key from the build. */
+    private static RequestSpecification app() {
+        return given().header("X-MealPal-Key", "test-key");
+    }
+
+    /** Polls until the plan stops building; each read moves the planner along. */
+    private static ValidatableResponse settled(String id) {
+        for (int i = 0; i < 20; i++) {
+            String status = app().get("/plans/" + id).then().statusCode(200).extract().path("status");
             if (!"building".equals(status)) {
                 break;
             }
-            Thread.sleep(20);
         }
-        return given().get("/plans/" + id).then().statusCode(200);
+        return app().get("/plans/" + id).then().statusCode(200);
+    }
+
+    private static String newPlan() {
+        return app().contentType(ContentType.JSON).body(REQUEST)
+                .post("/plans")
+                .then().statusCode(202)
+                .body("status", equalTo("building"))
+                .body("id", startsWith("sesn_"))
+                .extract().path("id");
     }
 
     @Test
-    void aPlanIsAcceptedAndBuildsIntoAWeek() throws InterruptedException {
-        String id = given().contentType(ContentType.JSON).body(REQUEST)
-                .post("/plans")
-                .then().statusCode(202)
-                .body("id", notNullValue())
-                .extract().path("id");
-
-        settled(id)
+    void aPlanIsAcceptedAndBuildsIntoAWeek() {
+        settled(newPlan())
                 .body("status", equalTo("ready"))
                 .body("week.days.size()", equalTo(7))
                 .body("week.days[0].weekday", equalTo("mon"))
@@ -83,15 +83,14 @@ class PlanResourceTest {
     }
 
     @Test
-    void aSwapRebuildsTheWeekInTheSameSession() throws InterruptedException {
-        String id = given().contentType(ContentType.JSON).body(REQUEST)
-                .post("/plans").then().statusCode(202).extract().path("id");
+    void aSwapRebuildsTheWeekInTheSameSession() {
+        String id = newPlan();
         settled(id).body("status", equalTo("ready"));
 
-        given().contentType(ContentType.JSON)
+        app().contentType(ContentType.JSON)
                 .body("{\"weekday\": \"tue\", \"slot\": \"lunch\", \"note\": \"no tinola\"}")
                 .post("/plans/" + id + "/swaps")
-                .then().statusCode(202);
+                .then().statusCode(202).body("status", equalTo("building"));
 
         settled(id)
                 .body("status", equalTo("ready"))
@@ -99,8 +98,17 @@ class PlanResourceTest {
     }
 
     @Test
+    void aSwapWhileBuildingIsAConflict() {
+        String id = newPlan();
+        app().contentType(ContentType.JSON).body("{\"weekday\": \"tue\", \"slot\": \"lunch\"}")
+                .post("/plans/" + id + "/swaps")
+                .then().statusCode(409)
+                .body("message", equalTo("The week is still building."));
+    }
+
+    @Test
     void anIncompleteRequestIsRefusedWithItsProblems() {
-        given().contentType(ContentType.JSON)
+        app().contentType(ContentType.JSON)
                 .body("{\"targetKcal\": 900, \"budgetPhp\": 2000, \"goal\": \"lose\", \"storeIds\": []}")
                 .post("/plans")
                 .then().statusCode(400)
@@ -110,7 +118,7 @@ class PlanResourceTest {
 
     @Test
     void anUnknownGoalIsABadRequest() {
-        given().contentType(ContentType.JSON)
+        app().contentType(ContentType.JSON)
                 .body("{\"targetKcal\": 2087, \"budgetPhp\": 2000, \"goal\": \"bulk\", \"storeIds\": [\"palengke\"]}")
                 .post("/plans")
                 .then().statusCode(400);
@@ -118,30 +126,38 @@ class PlanResourceTest {
 
     @Test
     void whenThePlannerCannotBeReachedThePlanIsNotStarted() {
-        when(gateway.openSession(anyString())).thenThrow(new IllegalStateException("no credentials"));
-        given().contentType(ContentType.JSON).body(REQUEST)
+        agent.startFailure = new IllegalStateException("no credentials");
+        app().contentType(ContentType.JSON).body(REQUEST)
                 .post("/plans")
                 .then().statusCode(503)
                 .body("message", equalTo("Could not open a planner session: no credentials"));
     }
 
     @Test
-    void unknownPlansAreNotFound() {
-        given().get("/plans/nope").then().statusCode(404);
-        given().contentType(ContentType.JSON)
+    void unknownPlansAndOtherAppsSessionsAreNotFound() {
+        app().get("/plans/nope").then().statusCode(404);
+        app().get("/plans/" + agent.foreignSession()).then().statusCode(404);
+        app().contentType(ContentType.JSON)
                 .body("{\"weekday\": \"tue\", \"slot\": \"lunch\"}")
                 .post("/plans/nope/swaps")
                 .then().statusCode(404);
     }
 
     @Test
-    void aSwapNeedsADayAndASlot() throws InterruptedException {
-        String id = given().contentType(ContentType.JSON).body(REQUEST)
-                .post("/plans").then().statusCode(202).extract().path("id");
+    void aSwapNeedsADayAndASlot() {
+        String id = newPlan();
         settled(id);
-        given().contentType(ContentType.JSON).body("{\"slot\": \"lunch\"}")
+        app().contentType(ContentType.JSON).body("{\"slot\": \"lunch\"}")
                 .post("/plans/" + id + "/swaps")
                 .then().statusCode(400)
                 .body("problems", hasItem("weekday is required: mon to sun."));
+    }
+
+    @Test
+    void callsWithoutTheAppKeyAreRefused() {
+        given().get("/plans/nope").then().statusCode(401);
+        given().header("X-MealPal-Key", "guess").contentType(ContentType.JSON).body(REQUEST)
+                .post("/plans").then().statusCode(401);
+        org.junit.jupiter.api.Assertions.assertEquals(0, agent.sessionCount(), "no session was started");
     }
 }

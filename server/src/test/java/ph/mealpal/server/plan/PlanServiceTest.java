@@ -2,27 +2,28 @@ package ph.mealpal.server.plan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
-import ph.mealpal.server.agent.AgentGateway;
-import ph.mealpal.server.agent.SessionEnd;
-import ph.mealpal.server.agent.ToolHandler;
-import ph.mealpal.server.agent.ToolReply;
+import ph.mealpal.server.agent.FakeAgent;
+import ph.mealpal.server.agent.FakeAgent.Turn;
+import ph.mealpal.server.agent.SessionEvent.Stop;
 import ph.mealpal.server.bank.MealBank;
 import ph.mealpal.server.bank.Slot;
 
+/**
+ * The server keeps no plan state: each read of a plan replays its agent
+ * session, answers any submit_plan waiting for the server, and reports where
+ * the plan stands. These tests poll the way the app does.
+ */
 class PlanServiceTest {
 
-    private static final PlanRequest REQUEST = new PlanRequest(2087, 2000, Goal.LOSE, List.of("palengke"));
+    private static final PlanRequest REQUEST = new PlanRequest(2087, 2000, Goal.LOSE, List.of("palengke", "sm"));
 
     /** The app's Monday every day: 2,087 kcal, ₱1,750 for the week. */
     private static String week(String lunch) {
@@ -37,129 +38,122 @@ class PlanServiceTest {
     }
 
     private static final String VALID = week("tinola");
-    private static final String OVER_TARGET = week("tinola").replace("\"meal_id\": \"tapsilog\"",
+    private static final String OVER_TARGET = VALID.replace("\"meal_id\": \"tapsilog\"",
             "\"meal_id\": \"tapsilog\", \"servings\": 2");
 
-    /** One scripted turn: the tool calls the agent makes, then how the turn ends. */
-    record Turn(List<String[]> calls, SessionEnd end, RuntimeException failure) {
-        static Turn of(SessionEnd end, String... submissions) {
-            List<String[]> calls = new ArrayList<>();
-            for (String s : submissions) {
-                calls.add(new String[] {"submit_plan", s});
-            }
-            return new Turn(calls, end, null);
-        }
-
-        static Turn failing(RuntimeException e) {
-            return new Turn(List.of(), null, e);
-        }
-    }
-
-    static class FakeGateway implements AgentGateway {
-        final Deque<Turn> turns = new ArrayDeque<>();
-        final List<String> sessions = new ArrayList<>();
-        final List<String> messages = new ArrayList<>();
-        final List<ToolReply> replies = new ArrayList<>();
-        RuntimeException openFailure;
-
-        FakeGateway script(Turn... script) {
-            turns.addAll(List.of(script));
-            return this;
-        }
-
-        @Override
-        public String openSession(String title) {
-            if (openFailure != null) {
-                throw openFailure;
-            }
-            String id = "sesn_" + (sessions.size() + 1);
-            sessions.add(id);
-            return id;
-        }
-
-        @Override
-        public SessionEnd converse(String sessionId, String message, ToolHandler handler) {
-            assertTrue(sessions.contains(sessionId), "talks to a session it opened");
-            messages.add(message);
-            Turn turn = turns.removeFirst();
-            if (turn.failure() != null) {
-                throw turn.failure();
-            }
-            for (String[] call : turn.calls()) {
-                replies.add(handler.handle(call[0], call[1]));
-            }
-            return turn.end();
-        }
-    }
-
     private final MealBank bank = MealBank.fromClasspath("meal-bank.json");
-    private final Executor now = Runnable::run;
+    private final FakeAgent agent = new FakeAgent();
+    private final PlanService plans = new PlanService(agent, new PlanCheck(bank), new PlanBriefs(bank));
 
-    private PlanService service(FakeGateway gateway, Executor executor) {
-        return new PlanService(gateway, new PlanCheck(bank), new PlanBriefs(bank), executor);
+    /** Reads the plan until it stops building, as the app's polling does. */
+    private PlanRecord settle(String id) {
+        PlanRecord plan = null;
+        for (int i = 0; i < 20; i++) {
+            plan = plans.find(id).orElseThrow();
+            if (plan.status() != PlanStatus.BUILDING) {
+                return plan;
+            }
+        }
+        return plan;
     }
 
     @Test
-    void theAcceptedWeekIsPublishedWhenTheTurnEnds() {
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.endTurn(), VALID));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+    void creatingAPlanStartsASessionWithTheKickoffAndAnswersBuilding() {
+        agent.script(Turn.submitting(Stop.END_TURN, VALID));
+        PlanRecord plan = plans.create(REQUEST);
 
+        assertEquals(PlanStatus.BUILDING, plan.status());
+        assertNull(plan.week());
+        assertTrue(agent.messages.getFirst().contains("2,087 kcal a day"));
+        assertTrue(agent.replies.isEmpty(), "nothing is answered until the plan is read");
+    }
+
+    @Test
+    void readingThePlanAnswersTheSubmissionAndTheWeekIsReadyWhenTheTurnEnds() {
+        agent.script(Turn.submitting(Stop.END_TURN, VALID));
+        String id = plans.create(REQUEST).id();
+
+        PlanRecord first = plans.find(id).orElseThrow();
+        assertEquals(PlanStatus.BUILDING, first.status(), "answered, but the agent has not finished its turn");
+        assertFalse(agent.replies.getFirst().error());
+
+        PlanRecord ready = plans.find(id).orElseThrow();
+        assertEquals(PlanStatus.READY, ready.status());
+        assertEquals(7, ready.week().days().size());
+        assertEquals(1750, ready.week().pricePhp());
+        assertEquals(1, agent.replies.size(), "each submission is answered once");
+    }
+
+    @Test
+    void theRequestTravelsWithTheSessionSoAnyServerCanCheckIt() {
+        agent.script(Turn.submitting(Stop.END_TURN, VALID));
+        String id = plans.create(REQUEST).id();
+        PlanService another = new PlanService(agent, new PlanCheck(bank), new PlanBriefs(bank));
+
+        PlanRecord plan = another.find(id).orElseThrow();
+        plan = another.find(id).orElseThrow();
         assertEquals(PlanStatus.READY, plan.status());
-        assertEquals(7, plan.week().days().size());
-        assertEquals(1750, plan.week().pricePhp());
-        assertFalse(gateway.replies.getFirst().error());
-        assertTrue(gateway.messages.getFirst().contains("2,087 kcal a day"));
     }
 
     @Test
     void aRejectedWeekGoesBackWithItsProblemsAndTheFixIsAccepted() {
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.endTurn(), OVER_TARGET, VALID));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+        agent.script(Turn.submitting(Stop.END_TURN, OVER_TARGET, VALID));
+        PlanRecord plan = settle(plans.create(REQUEST).id());
 
-        ToolReply first = gateway.replies.getFirst();
-        assertTrue(first.error());
-        assertTrue(first.text().contains("Monday comes to 2,647 kcal"), first.text());
-        assertTrue(first.text().contains("call submit_plan again"), first.text());
+        assertTrue(agent.replies.getFirst().error());
+        assertTrue(agent.replies.getFirst().text().contains("Monday comes to 2,647 kcal"));
+        assertTrue(agent.replies.getFirst().text().contains("call submit_plan again"));
         assertEquals(PlanStatus.READY, plan.status());
     }
 
     @Test
     void threeRejectedWeeksFailThePlan() {
-        FakeGateway gateway = new FakeGateway()
-                .script(Turn.of(SessionEnd.endTurn(), OVER_TARGET, OVER_TARGET, OVER_TARGET));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+        agent.script(Turn.submitting(Stop.END_TURN, OVER_TARGET, OVER_TARGET, OVER_TARGET));
+        PlanRecord plan = settle(plans.create(REQUEST).id());
 
         assertEquals(PlanStatus.FAILED, plan.status());
         assertEquals("The planner could not fit a week to your target and budget after 3 tries.", plan.message());
-        assertTrue(gateway.replies.getLast().text().startsWith("Stop."), gateway.replies.getLast().text());
+        assertTrue(agent.replies.getLast().text().startsWith("Stop."));
+    }
+
+    @Test
+    void submissionsAfterGivingUpAreToldToStop() {
+        agent.script(Turn.submitting(Stop.END_TURN, OVER_TARGET, OVER_TARGET, OVER_TARGET, VALID));
+        String id = plans.create(REQUEST).id();
+        assertEquals(PlanStatus.FAILED, settle(id).status(), "failed as soon as the third week is rejected");
+
+        PlanRecord later = plans.find(id).orElseThrow();
+        assertEquals(PlanStatus.FAILED, later.status());
+        assertEquals("Stop. This plan has already failed.", agent.replies.getLast().text());
     }
 
     @Test
     void inputThatIsNotAWeekCountsAsATry() {
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.endTurn(), "not json", VALID));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+        agent.script(Turn.submitting(Stop.END_TURN, "not json", VALID));
+        PlanRecord plan = settle(plans.create(REQUEST).id());
 
-        assertTrue(gateway.replies.getFirst().error());
-        assertTrue(gateway.replies.getFirst().text().contains("not a valid week"), gateway.replies.getFirst().text());
+        assertTrue(agent.replies.getFirst().text().contains("not a valid week"));
         assertEquals(PlanStatus.READY, plan.status());
     }
 
     @Test
-    void anUnknownToolIsRefused() {
-        FakeGateway gateway = new FakeGateway().script(new Turn(
-                List.of(new String[] {"order_groceries", "{}"}, new String[] {"submit_plan", VALID}),
-                SessionEnd.endTurn(), null));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+    void anUnknownToolIsRefusedWithoutCountingAsATry() {
+        agent.script(new Turn(List.of(
+                new String[] {"order_groceries", "{}"},
+                new String[] {"submit_plan", OVER_TARGET},
+                new String[] {"submit_plan", OVER_TARGET},
+                new String[] {"submit_plan", VALID}), Stop.END_TURN));
+        PlanRecord plan = settle(plans.create(REQUEST).id());
 
-        assertTrue(gateway.replies.getFirst().error());
-        assertTrue(gateway.replies.getFirst().text().contains("submit_plan"));
+        assertTrue(agent.replies.getFirst().error());
+        assertTrue(agent.replies.getFirst().text().contains("submit_plan"));
         assertEquals(PlanStatus.READY, plan.status());
     }
 
     @Test
     void stoppingWithoutAWeekFails() {
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.endTurn()));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+        agent.script(Turn.submitting(Stop.END_TURN));
+        PlanRecord plan = settle(plans.create(REQUEST).id());
 
         assertEquals(PlanStatus.FAILED, plan.status());
         assertEquals("The planner stopped without sending a week.", plan.message());
@@ -167,109 +161,106 @@ class PlanServiceTest {
 
     @Test
     void hittingTheSpendCapFails() {
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.budgetReached()));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+        agent.script(Turn.submitting(Stop.BUDGET_REACHED));
+        PlanRecord plan = settle(plans.create(REQUEST).id());
 
-        assertEquals(PlanStatus.FAILED, plan.status());
         assertEquals("The planner hit its spending cap before it finished.", plan.message());
     }
 
     @Test
-    void aSessionErrorFailsWithItsReason() {
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.failed("retries exhausted")));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
+    void aSessionThatGivesUpFailsWithTheReason() {
+        agent.script(Turn.submitting(Stop.RETRIES_EXHAUSTED));
+        assertEquals("The planner stopped: it ran out of retries.", settle(plans.create(REQUEST).id()).message());
 
-        assertEquals(PlanStatus.FAILED, plan.status());
-        assertEquals("The planner stopped: retries exhausted.", plan.message());
+        agent.script(Turn.submitting(Stop.TERMINATED));
+        assertEquals("The planner stopped: the session ended.", settle(plans.create(REQUEST).id()).message());
     }
 
     @Test
-    void losingTheConnectionMidRunFails() {
-        FakeGateway gateway = new FakeGateway().script(Turn.failing(new IllegalStateException("stream closed")));
-        PlanRecord plan = service(gateway, now).create(REQUEST);
-
-        assertEquals(PlanStatus.FAILED, plan.status());
-        assertEquals("Lost the connection to the planner: stream closed.", plan.message());
-    }
-
-    @Test
-    void whenNoSessionCanBeOpenedCreateSaysSo() {
-        FakeGateway gateway = new FakeGateway();
-        gateway.openFailure = new IllegalStateException("401");
-        assertThrows(PlannerUnavailable.class, () -> service(gateway, now).create(REQUEST));
+    void whenNoSessionCanBeStartedCreateSaysSo() {
+        agent.startFailure = new IllegalStateException("401");
+        PlannerUnavailable e = assertThrows(PlannerUnavailable.class, () -> plans.create(REQUEST));
+        assertEquals("Could not open a planner session: 401", e.getMessage());
     }
 
     @Test
     void aSwapGoesIntoTheSameSessionAndPublishesTheNewWeek() {
-        FakeGateway gateway = new FakeGateway().script(
-                Turn.of(SessionEnd.endTurn(), VALID),
-                Turn.of(SessionEnd.endTurn(), week("adobo")));
-        PlanService plans = service(gateway, now);
-        PlanRecord first = plans.create(REQUEST);
+        agent.script(Turn.submitting(Stop.END_TURN, VALID), Turn.submitting(Stop.END_TURN, week("adobo")));
+        PlanRecord first = settle(plans.create(REQUEST).id());
 
-        PlanRecord swapped = plans.swap(first.id(), new SwapRequest(Weekday.TUE, Slot.LUNCH, "no tinola"));
+        PlanRecord building = plans.swap(first.id(), new SwapRequest(Weekday.TUE, Slot.LUNCH, "no tinola"));
+        assertEquals(PlanStatus.BUILDING, building.status());
+        assertEquals(first.week(), building.week(), "the last week stays visible while the swap builds");
 
-        assertEquals(1, gateway.sessions.size(), "one session for the plan's whole life");
-        assertTrue(gateway.messages.getLast().contains("Tuesday's lunch"));
+        PlanRecord swapped = settle(first.id());
+        assertEquals(1, agent.sessionCount(), "one session for the plan's whole life");
+        assertTrue(agent.messages.getLast().contains("Tuesday's lunch"));
         assertEquals(PlanStatus.READY, swapped.status());
+        assertNull(swapped.message());
         assertEquals("Chicken adobo with rice", swapped.week().days().get(1).meals().get(1).name());
     }
 
     @Test
+    void aSwapThatLeavesTheMealAsItWasSaysSo() {
+        agent.script(Turn.submitting(Stop.END_TURN, VALID), Turn.submitting(Stop.END_TURN, VALID));
+        String id = settle(plans.create(REQUEST).id()).id();
+        plans.swap(id, new SwapRequest(Weekday.TUE, Slot.LUNCH, "no chicken"));
+
+        PlanRecord after = settle(id);
+        assertEquals(PlanStatus.READY, after.status());
+        assertEquals("No other lunch in the meal bank fits this week, so Tuesday keeps "
+                + "Chicken tinola with moringa and rice.", after.message());
+    }
+
+    @Test
     void aFailedSwapKeepsTheWeekItHad() {
-        FakeGateway gateway = new FakeGateway().script(
-                Turn.of(SessionEnd.endTurn(), VALID),
-                Turn.of(SessionEnd.endTurn()));
-        PlanService plans = service(gateway, now);
-        PlanRecord first = plans.create(REQUEST);
+        agent.script(Turn.submitting(Stop.END_TURN, VALID), Turn.submitting(Stop.END_TURN));
+        PlanRecord first = settle(plans.create(REQUEST).id());
+        plans.swap(first.id(), new SwapRequest(Weekday.TUE, Slot.LUNCH, null));
 
-        PlanRecord after = plans.swap(first.id(), new SwapRequest(Weekday.TUE, Slot.LUNCH, null));
-
+        PlanRecord after = settle(first.id());
         assertEquals(PlanStatus.READY, after.status());
         assertEquals(first.week(), after.week());
         assertEquals("The swap did not go through: the planner stopped without sending a week.", after.message());
     }
 
     @Test
-    void aSwapThatLeavesTheMealAsItWasSaysSo() {
-        FakeGateway gateway = new FakeGateway().script(
-                Turn.of(SessionEnd.endTurn(), VALID),
-                Turn.of(SessionEnd.endTurn(), VALID));
-        PlanService plans = service(gateway, now);
-        PlanRecord first = plans.create(REQUEST);
+    void aSwapThatRunsOutOfTriesKeepsTheWeekItHad() {
+        agent.script(Turn.submitting(Stop.END_TURN, VALID),
+                Turn.submitting(Stop.END_TURN, OVER_TARGET, OVER_TARGET, OVER_TARGET));
+        PlanRecord first = settle(plans.create(REQUEST).id());
+        plans.swap(first.id(), new SwapRequest(Weekday.WED, Slot.DINNER, null));
 
-        PlanRecord after = plans.swap(first.id(), new SwapRequest(Weekday.TUE, Slot.LUNCH, "no chicken"));
-
+        PlanRecord after = settle(first.id());
         assertEquals(PlanStatus.READY, after.status());
         assertEquals(first.week(), after.week());
-        assertEquals("No other lunch in the meal bank fits this week, so Tuesday keeps "
-                + "Chicken tinola with moringa and rice.", after.message());
+        assertTrue(after.message().startsWith("The swap did not go through: the planner could not fit"),
+                after.message());
     }
 
     @Test
     void aSwapWhileTheWeekIsStillBuildingIsRefused() {
-        List<Runnable> queued = new ArrayList<>();
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.endTurn(), VALID));
-        PlanService plans = service(gateway, queued::add);
-        PlanRecord building = plans.create(REQUEST);
+        agent.script(Turn.submitting(Stop.END_TURN, VALID));
+        String id = plans.create(REQUEST).id();
 
-        assertEquals(PlanStatus.BUILDING, building.status());
         assertThrows(IllegalStateException.class,
-                () -> plans.swap(building.id(), new SwapRequest(Weekday.MON, Slot.SNACK, null)));
-
-        queued.getFirst().run();
-        assertEquals(PlanStatus.READY, plans.find(building.id()).orElseThrow().status());
+                () -> plans.swap(id, new SwapRequest(Weekday.MON, Slot.SNACK, null)));
     }
 
     @Test
-    void plansAreFoundByIdAndUnknownIdsAreNot() {
-        FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.endTurn(), VALID));
-        PlanService plans = service(gateway, now);
-        PlanRecord plan = plans.create(REQUEST);
+    void aFailedPlanCannotBeSwapped() {
+        agent.script(Turn.submitting(Stop.END_TURN));
+        String id = settle(plans.create(REQUEST).id()).id();
 
-        assertNotNull(plans.find(plan.id()).orElse(null));
+        assertThrows(IllegalStateException.class,
+                () -> plans.swap(id, new SwapRequest(Weekday.MON, Slot.SNACK, null)));
+    }
+
+    @Test
+    void onlyMealPalSessionsAreReadAsPlans() {
         assertTrue(plans.find("nope").isEmpty());
-        assertThrows(java.util.NoSuchElementException.class,
+        assertTrue(plans.find(agent.foreignSession()).isEmpty(), "another app's session in the workspace");
+        assertThrows(NoSuchElementException.class,
                 () -> plans.swap("nope", new SwapRequest(Weekday.MON, Slot.SNACK, null)));
     }
 }
