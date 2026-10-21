@@ -10,7 +10,8 @@ void main() {
       expect(c.cream, const Color(0xFFFCF8EF));
       expect(c.ink, const Color(0xFF241C15));
       expect(c.muted, const Color(0xFF6B5D4C));
-      expect(c.faint, const Color(0xFF8A7B68));
+      // Faint copy is still read at 12px, so it clears 4.5:1 on cream and white.
+      expect(c.faint, const Color(0xFF776855));
       expect(c.annatto, const Color(0xFFB5401C));
       expect(c.annattoDeep, const Color(0xFFA8370F));
       expect(c.annattoTint, const Color(0xFFFBEDE5));
@@ -18,10 +19,13 @@ void main() {
       expect(c.green, const Color(0xFF2E7D4F));
       expect(c.greenDeep, const Color(0xFF1F6B3F));
       expect(c.greenTint, const Color(0xFFEAF4EC));
-      expect(c.amber, const Color(0xFF9A6A12));
+      // Amber labels the fat macro and snacks at 11-12px: 4.5:1 on its tint.
+      expect(c.amber, const Color(0xFF8C5F10));
       expect(c.amberTint, const Color(0xFFFBF0D8));
       expect(c.surface, const Color(0xFFFFFFFF));
       expect(c.hairline, const Color(0xFFECE3D2));
+      // Control boundaries (inputs, toggles, tiles) clear 3:1 on cream and white.
+      expect(c.outline, const Color(0xFF998871));
       expect(c.divider, const Color(0xFFF2EADB));
       expect(c.track, const Color(0xFFEEE6D7));
       expect(c.heroSurface, const Color(0xFF241C15));
@@ -31,6 +35,7 @@ void main() {
     test('is a ThemeExtension that survives lerp', () {
       final mid = c.lerp(c, 0.5);
       expect(mid.annatto, c.annatto);
+      expect(mid.outline, c.outline);
       expect(c.copyWith(), isA<MpColors>());
     });
   });
@@ -67,13 +72,12 @@ void main() {
   });
 
   group('MpMotion', () {
-    test('pins the entrance and press timings', () {
-      expect(MpMotion.rise, const Duration(milliseconds: 380));
-      expect(MpMotion.stagger, const Duration(milliseconds: 50));
+    test('pins the feedback and reveal timings', () {
       expect(MpMotion.press, const Duration(milliseconds: 120));
       expect(MpMotion.pressScale, 0.97);
       expect(MpMotion.select, const Duration(milliseconds: 250));
       expect(MpMotion.reveal, const Duration(milliseconds: 850));
+      expect(MpMotion.expand, const Duration(milliseconds: 350));
     });
 
     testWidgets('collapses durations when animations are disabled',
@@ -84,7 +88,7 @@ void main() {
           data: const MediaQueryData(disableAnimations: true),
           child: Builder(
             builder: (context) {
-              seen = MpMotion.of(context, MpMotion.rise);
+              seen = MpMotion.of(context, MpMotion.reveal);
               return const SizedBox();
             },
           ),
@@ -116,6 +120,11 @@ void main() {
       expect(MpSize.control, 52);
       expect(MpSize.bigInput, 64);
       expect(MpSize.tap, 44);
+    });
+
+    test('every square control is at least the 44px tap target', () {
+      expect(MpSize.swap, greaterThanOrEqualTo(MpSize.tap));
+      expect(MpSize.stepper, greaterThanOrEqualTo(MpSize.tap));
     });
   });
 }

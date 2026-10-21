@@ -77,4 +77,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(nexts, 1);
   });
+
+  testWidgets('with no store picked the CTA is disabled and says why',
+      (tester) async {
+    await pump(tester);
+    await tester.tap(find.text('Puregold'));
+    await tester.tap(find.text('Wet market'));
+    await tester.pumpAndSettle();
+    expect(draft.selectedStoreCount, 0);
+    expect(find.text('Build my plan (0)'), findsOneWidget);
+    expect(find.text('Pick at least one store to build a plan.'), findsOneWidget);
+    await tester.tap(find.text('Build my plan (0)'));
+    await tester.pumpAndSettle();
+    expect(nexts, 0);
+
+    await tester.tap(find.text('Puregold'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pick at least one store to build a plan.'), findsNothing);
+    await tester.tap(find.text('Build my plan (1)'));
+    await tester.pumpAndSettle();
+    expect(nexts, 1);
+  });
 }

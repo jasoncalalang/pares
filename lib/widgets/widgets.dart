@@ -6,7 +6,6 @@ export 'core/mp_cta.dart';
 export 'core/mp_header.dart';
 export 'core/mp_page.dart';
 export 'core/mp_press.dart';
-export 'core/mp_rise.dart';
 export 'data/mp_calorie_ring.dart';
 export 'data/mp_grocery_section.dart';
 export 'data/mp_macro_card.dart';

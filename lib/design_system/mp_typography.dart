@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// other piece of UI text.
 ///
 /// Both ship as variable fonts, so each style sets the `wght` axis through
-/// [TextStyle.fontVariations] as well as [TextStyle.fontWeight] — the latter
+/// [TextStyle.fontVariations] as well as [TextStyle.fontWeight]: the latter
 /// alone does not move a variable font's axis. Fraunces also gets an `opsz`
 /// matched to its point size so small serif text keeps its ink traps.
 abstract final class MpTypography {
@@ -25,10 +25,10 @@ abstract final class MpTypography {
 
   // ---- Plus Jakarta Sans ----
 
-  /// "STEP 1 OF 4" — annatto, 0.12em tracking.
+  /// "STEP 1 OF 4": annatto, 0.12em tracking.
   static TextStyle eyebrow() => _ui(12, FontWeight.w700, tracking: 0.12);
 
-  /// "WEEKLY BUDGET", "LOCAL TO THE PHILIPPINES" — 0.08em tracking.
+  /// "WEEKLY BUDGET", "LOCAL TO THE PHILIPPINES": 0.08em tracking.
   static TextStyle sectionEyebrow() => _ui(12, FontWeight.w700, tracking: 0.08);
 
   /// Meal-card slot ("BREAKFAST").

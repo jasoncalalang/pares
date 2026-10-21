@@ -7,7 +7,8 @@ import '../mealpal_ph.dart';
 import '../state/plan_draft.dart';
 import '../widgets/widgets.dart';
 
-/// Step 3 of 4 — weekly ₱ budget stepper, supermarket grid, local stores.
+/// Step 3 of 4: weekly ₱ budget stepper, supermarket grid, local stores.
+/// The CTA waits until at least one store is picked.
 class WhereYouShopScreen extends StatelessWidget {
   const WhereYouShopScreen({
     super.key,
@@ -25,26 +26,20 @@ class WhereYouShopScreen extends StatelessWidget {
     final c = context.mp;
     return ListenableBuilder(
       listenable: draft,
-      builder: (context, _) => MpPage(
-        content: [
-          const MpProgressSegments(step: 3),
-          const SizedBox(height: 16),
-          MpRise(
-            delay: const Duration(milliseconds: 50),
-            child: MpStepHeader(step: 3, onBack: onBack),
-          ),
-          const SizedBox(height: 24),
-          const MpRise(
-            delay: Duration(milliseconds: 100),
-            child: MpTitle(
+      builder: (context, _) {
+        final count = draft.selectedStoreCount;
+        return MpPage(
+          content: [
+            const MpProgressSegments(step: 3),
+            const SizedBox(height: 16),
+            MpStepHeader(step: 3, onBack: onBack),
+            const SizedBox(height: 24),
+            const MpTitle(
               title: 'Where do you shop?',
               subtitle: 'Pick the stores you actually buy from.',
             ),
-          ),
-          const SizedBox(height: 22),
-          MpRise(
-            delay: const Duration(milliseconds: 140),
-            child: MpCard(
+            const SizedBox(height: 22),
+            MpCard(
               radius: MpRadius.cardLg,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               child: Row(
@@ -100,61 +95,50 @@ class WhereYouShopScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          MpGrid2(children: [
-            for (final (i, t) in chainTiles.indexed)
-              MpRise(
-                delay: Duration(milliseconds: 180 + 40 * i),
-                child: MpStoreTile(
+            const SizedBox(height: 16),
+            MpGrid2(children: [
+              for (final t in chainTiles)
+                MpStoreTile(
                   name: t.name,
                   monogram: t.monogram,
                   selected: draft.isStoreSelected(t.id),
                   onTap: () => draft.toggleStore(t.id),
                 ),
-              ),
-          ]),
-          const SizedBox(height: 24),
-          MpRise(
-            delay: const Duration(milliseconds: 500),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'LOCAL TO THE PHILIPPINES',
-                  style: MpTypography.sectionEyebrow().copyWith(color: c.green),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Pick the ones you actually use',
-                  style: MpTypography.small().copyWith(color: c.faint),
-                ),
-              ],
+            ]),
+            const SizedBox(height: 24),
+            Text(
+              'LOCAL TO THE PHILIPPINES',
+              style: MpTypography.sectionEyebrow().copyWith(color: c.green),
             ),
-          ),
-          const SizedBox(height: 12),
-          MpGrid2(children: [
-            for (final (i, t) in localTiles.indexed)
-              MpRise(
-                delay: Duration(milliseconds: 560 + 40 * i),
-                child: MpStoreTile(
+            const SizedBox(height: 5),
+            Text(
+              'Pick the ones you actually use',
+              style: MpTypography.small().copyWith(color: c.faint),
+            ),
+            const SizedBox(height: 12),
+            MpGrid2(children: [
+              for (final t in localTiles)
+                MpStoreTile(
                   name: t.name,
                   monogram: t.monogram,
                   local: true,
                   selected: draft.isStoreSelected(t.id),
                   onTap: () => draft.toggleStore(t.id),
                 ),
+            ]),
+          ],
+          footer: Column(
+            children: [
+              MpCta(
+                label: 'Build my plan ($count)',
+                onPressed: count > 0 ? onNext : null,
               ),
-          ]),
-        ],
-        footer: MpRise(
-          delay: const Duration(milliseconds: 640),
-          child: MpCta(
-            label: 'Build my plan (${draft.selectedStoreCount})',
-            onPressed: onNext,
+              if (count == 0)
+                const MpCtaNote('Pick at least one store to build a plan.'),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

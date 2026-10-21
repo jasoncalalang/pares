@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
+import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/screens/grocery_list_screen.dart';
 
 import '../helpers.dart';
 
 void main() {
   var backs = 0;
-  var orders = 0;
 
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(WidgetTester tester, {GroceryList? list}) async {
     await phone(tester);
     backs = 0;
-    orders = 0;
     await tester.pumpWidget(
       host(GroceryListScreen(
-        list: sampleGroceryList(budgetPhp: 2500),
+        list: list ?? sampleGroceryList(budgetPhp: 2500),
         onBack: () => backs++,
-        onOrder: () => orders++,
       )),
     );
     await tester.pumpAndSettle();
@@ -46,7 +44,18 @@ void main() {
     expect(find.text('Beef tapa cut'), findsOneWidget);
     expect(find.text('400 g'), findsOneWidget);
     expect(find.text('₱180'), findsOneWidget);
-    expect(find.text('Order delivery via GrabMart'), findsOneWidget);
+  });
+
+  testWidgets('the delivery handoff is an honest coming-soon note, not a button',
+      (tester) async {
+    await pump(tester);
+    expect(find.text('Order delivery via GrabMart'), findsNothing);
+    await tester.ensureVisible(find.textContaining('coming soon'));
+    expect(
+      find.text('Delivery handoff to GrabMart is coming soon. For now, shop '
+          'from the list.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('checking a row strikes it through', (tester) async {
@@ -76,13 +85,21 @@ void main() {
     expect(find.text('Rice'), findsOneWidget);
   });
 
-  testWidgets('back and order fire their callbacks', (tester) async {
+  testWidgets('back fires its callback', (tester) async {
     await pump(tester);
     await tester.tap(find.text('THIS WEEK'));
-    await tester.ensureVisible(find.text('Order delivery via GrabMart'));
-    await tester.tap(find.text('Order delivery via GrabMart'));
     await tester.pumpAndSettle();
     expect(backs, 1);
-    expect(orders, 1);
+  });
+
+  testWidgets('with nothing to buy it says why and what to do', (tester) async {
+    await pump(tester, list: const GroceryList(budgetPhp: 2500, sections: []));
+    expect(find.text('Nothing to buy yet'), findsOneWidget);
+    expect(
+      find.text("Build this week's plan first. The list fills itself in, "
+          'grouped by store.'),
+      findsOneWidget,
+    );
+    expect(find.text('ESTIMATED TOTAL'), findsNothing);
   });
 }

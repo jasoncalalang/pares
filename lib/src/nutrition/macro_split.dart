@@ -28,7 +28,7 @@ const _kcalPerGramCarbs = 4;
 const _kcalPerGramFat = 9;
 
 /// Split [targetCalories] into macro grams with a 30 / 45 / 25 ratio
-/// (protein / carbs / fat by calories) — a sensible general-purpose default
+/// (protein / carbs / fat by calories): a sensible general-purpose default
 /// for a rice-centred Filipino diet with a modest protein emphasis. Not
 /// personalised; the meal bank, not this number, is what the plan is built on.
 MacroSplit macroSplit(int targetCalories) {

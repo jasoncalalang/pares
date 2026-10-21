@@ -9,9 +9,12 @@ import 'screens/this_week_screen.dart';
 import 'screens/where_you_shop_screen.dart';
 import 'state/plan_draft.dart';
 
-/// MealPal PH — app root. One [PlanDraft] lives for the whole flow and is
+/// MealPal PH app root. One [PlanDraft] lives for the whole flow and is
 /// handed to every screen; screens navigate with plain pushes and fade
-/// between each other the way the mockups' view transitions do.
+/// between each other the way the mockups' view transitions do. The plan
+/// and grocery list come from the local sample bank for now, so they are
+/// ready the moment the screen opens; the building and failed states exist
+/// in [ThisWeekScreen] for when the recommender is wired in.
 class MealPalApp extends StatelessWidget {
   const MealPalApp({super.key});
 
@@ -56,12 +59,6 @@ class _FlowState extends State<_Flow> {
     );
   }
 
-  void _notYet(BuildContext context, String what) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$what is coming soon.')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BodyStatsScreen(
@@ -84,7 +81,6 @@ class _FlowState extends State<_Flow> {
                       builder: (context) => ThisWeekScreen(
                         draft: _draft,
                         week: sampleWeek(),
-                        onNew: () => _notYet(context, 'A fresh plan'),
                         onGrocery: () => _push(
                           context,
                           Builder(
@@ -93,8 +89,6 @@ class _FlowState extends State<_Flow> {
                                 budgetPhp: _draft.weeklyBudgetPhp,
                               ),
                               onBack: () => Navigator.of(context).pop(),
-                              onOrder: () =>
-                                  _notYet(context, 'Delivery handoff'),
                             ),
                           ),
                         ),

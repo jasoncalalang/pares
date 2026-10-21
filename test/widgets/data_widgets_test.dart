@@ -30,21 +30,6 @@ void main() {
     });
   });
 
-  group('MpRise', () {
-    testWidgets('starts invisible and ends fully opaque', (tester) async {
-      await tester.pumpWidget(host(const MpRise(child: Text('hi'))));
-      await tester.pump();
-      // Nearest FadeTransition ancestor is MpRise's own (the route adds one
-      // further up), so take the first match.
-      final fade = find
-          .ancestor(of: find.text('hi'), matching: find.byType(FadeTransition))
-          .first;
-      expect(tester.widget<FadeTransition>(fade).opacity.value, 0);
-      await tester.pumpAndSettle();
-      expect(tester.widget<FadeTransition>(fade).opacity.value, 1);
-    });
-  });
-
   group('MpProgressSegments', () {
     testWidgets('exposes the step to assistive tech', (tester) async {
       await tester.pumpWidget(host(const MpProgressSegments(step: 2, of: 4)));

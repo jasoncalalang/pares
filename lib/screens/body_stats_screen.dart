@@ -6,13 +6,19 @@ import '../mealpal_ph.dart';
 import '../state/plan_draft.dart';
 import '../widgets/widgets.dart';
 
-/// Step 1 of 4 — gender, age, height, weight and activity level.
-class BodyStatsScreen extends StatelessWidget {
+/// Step 1 of 4: gender, age, height, weight and activity level. The CTA
+/// waits until every number field holds a value.
+class BodyStatsScreen extends StatefulWidget {
   const BodyStatsScreen({super.key, required this.draft, required this.onNext});
 
   final PlanDraft draft;
   final VoidCallback onNext;
 
+  @override
+  State<BodyStatsScreen> createState() => _BodyStatsScreenState();
+}
+
+class _BodyStatsScreenState extends State<BodyStatsScreen> {
   static const _activities = [
     (ActivityLevel.sedentary, 'Sedentary'),
     (ActivityLevel.light, 'Light'),
@@ -20,118 +26,107 @@ class BodyStatsScreen extends StatelessWidget {
     (ActivityLevel.active, 'Active'),
   ];
 
+  /// Fields the user has emptied since the screen opened.
+  final Set<String> _empty = {};
+
+  void _field(String name, int? value, ValueChanged<int> write) {
+    setState(() {
+      if (value == null) {
+        _empty.add(name);
+      } else {
+        _empty.remove(name);
+        write(value);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.mp;
+    final draft = widget.draft;
+    final complete = _empty.isEmpty;
     return ListenableBuilder(
       listenable: draft,
       builder: (context, _) => MpPage(
         content: [
           const MpProgressSegments(step: 1),
           const SizedBox(height: 16),
-          const MpRise(
-            delay: Duration(milliseconds: 50),
-            child: MpStepHeader(step: 1),
-          ),
+          const MpStepHeader(step: 1),
           const SizedBox(height: 24),
-          const MpRise(
-            delay: Duration(milliseconds: 100),
-            child: MpTitle(
-              title: 'Tell us about you',
-              subtitle:
-                  "We'll set your daily calorie target. Everything in metric — kg and cm.",
-            ),
+          const MpTitle(
+            title: 'Tell us about you',
+            subtitle:
+                "We'll set your daily calorie target. Everything is in metric: kg and cm.",
           ),
           const SizedBox(height: 26),
-          MpRise(
-            delay: const Duration(milliseconds: 150),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Gender', style: MpTypography.label().copyWith(color: c.ink)),
-                const SizedBox(height: 9),
-                MpGrid2(children: [
-                  MpChoiceButton(
-                    label: 'Male',
-                    icon: LucideIcons.mars,
-                    selected: draft.sex == BiologicalSex.male,
-                    onTap: () => draft.sex = BiologicalSex.male,
-                  ),
-                  MpChoiceButton(
-                    label: 'Female',
-                    icon: LucideIcons.venus,
-                    selected: draft.sex == BiologicalSex.female,
-                    onTap: () => draft.sex = BiologicalSex.female,
-                  ),
-                ]),
-              ],
+          Text('Gender', style: MpTypography.label().copyWith(color: c.ink)),
+          const SizedBox(height: 9),
+          MpGrid2(children: [
+            MpChoiceButton(
+              label: 'Male',
+              icon: LucideIcons.mars,
+              selected: draft.sex == BiologicalSex.male,
+              onTap: () => draft.sex = BiologicalSex.male,
             ),
-          ),
-          const SizedBox(height: 18),
-          MpRise(
-            delay: const Duration(milliseconds: 200),
-            child: MpGrid2(gap: 12, children: [
-              MpBigValueField(
-                label: 'Age',
-                value: draft.age,
-                unit: 'yrs',
-                fieldKey: const ValueKey('field-age'),
-                onChanged: (v) => draft.age = v,
-              ),
-              MpBigValueField(
-                label: 'Height',
-                value: draft.heightCm,
-                unit: 'cm',
-                fieldKey: const ValueKey('field-height'),
-                onChanged: (v) => draft.heightCm = v,
-              ),
-            ]),
-          ),
-          const SizedBox(height: 18),
-          MpRise(
-            delay: const Duration(milliseconds: 250),
-            child: MpBigValueField(
-              label: 'Weight',
-              value: draft.weightKg,
-              unit: 'kg',
-              fieldKey: const ValueKey('field-weight'),
-              onChanged: (v) => draft.weightKg = v,
+            MpChoiceButton(
+              label: 'Female',
+              icon: LucideIcons.venus,
+              selected: draft.sex == BiologicalSex.female,
+              onTap: () => draft.sex = BiologicalSex.female,
             ),
+          ]),
+          const SizedBox(height: 18),
+          MpGrid2(gap: 12, children: [
+            MpBigValueField(
+              label: 'Age',
+              value: draft.age,
+              unit: 'yrs',
+              fieldKey: const ValueKey('field-age'),
+              onChanged: (v) => _field('age', v, (n) => draft.age = n),
+            ),
+            MpBigValueField(
+              label: 'Height',
+              value: draft.heightCm,
+              unit: 'cm',
+              fieldKey: const ValueKey('field-height'),
+              onChanged: (v) => _field('height', v, (n) => draft.heightCm = n),
+            ),
+          ]),
+          const SizedBox(height: 18),
+          MpBigValueField(
+            label: 'Weight',
+            value: draft.weightKg,
+            unit: 'kg',
+            fieldKey: const ValueKey('field-weight'),
+            onChanged: (v) => _field('weight', v, (n) => draft.weightKg = n),
           ),
           const SizedBox(height: 22),
-          MpRise(
-            delay: const Duration(milliseconds: 300),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Activity level',
-                    style: MpTypography.label().copyWith(color: c.ink)),
-                const SizedBox(height: 10),
-                MpGrid2(children: [
-                  for (final (level, label) in _activities)
-                    MpChoiceButton(
-                      label: label,
-                      accent: MpAccent.green,
-                      height: MpSize.pillButton,
-                      radius: MpRadius.pill,
-                      selected: draft.activity == level,
-                      onTap: () => draft.activity = level,
-                    ),
-                ]),
-              ],
-            ),
-          ),
-        ],
-        footer: MpRise(
-          delay: const Duration(milliseconds: 350),
-          child: Column(
-            children: [
-              MpCta(label: 'Compute my target', onPressed: onNext),
-              const MpCtaNote(
-                'An estimate, not medical advice — you can adjust it anytime.',
+          Text('Activity level', style: MpTypography.label().copyWith(color: c.ink)),
+          const SizedBox(height: 10),
+          MpGrid2(children: [
+            for (final (level, label) in _activities)
+              MpChoiceButton(
+                label: label,
+                accent: MpAccent.green,
+                height: MpSize.pillButton,
+                radius: MpRadius.pill,
+                selected: draft.activity == level,
+                onTap: () => draft.activity = level,
               ),
-            ],
-          ),
+          ]),
+        ],
+        footer: Column(
+          children: [
+            MpCta(
+              label: 'Compute my target',
+              onPressed: complete ? widget.onNext : null,
+            ),
+            MpCtaNote(
+              complete
+                  ? 'An estimate, not medical advice. You can adjust it anytime.'
+                  : 'Fill in age, height and weight to continue.',
+            ),
+          ],
         ),
       ),
     );

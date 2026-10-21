@@ -20,7 +20,7 @@ class MpMacroCard extends StatelessWidget {
   final String label;
   final int grams;
 
-  /// 0–1 share of the gauge to fill.
+  /// 0 to 1 share of the gauge to fill.
   final double fraction;
   final MpAccent accent;
 

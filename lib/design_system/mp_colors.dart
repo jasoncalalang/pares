@@ -24,6 +24,7 @@ class MpColors extends ThemeExtension<MpColors> {
     required this.amberTint,
     required this.surface,
     required this.hairline,
+    required this.outline,
     required this.divider,
     required this.dividerSoft,
     required this.track,
@@ -42,10 +43,11 @@ class MpColors extends ThemeExtension<MpColors> {
   /// Secondary text.
   final Color muted;
 
-  /// Faint labels, helper copy, quantities.
+  /// Faint labels, helper copy, quantities. Still body-sized text, so it
+  /// clears 4.5:1 on cream (5.1) and white (5.4).
   final Color faint;
 
-  /// Primary accent — CTAs, step eyebrow, supermarket chains.
+  /// Primary accent: CTAs, step eyebrow, supermarket chains.
   final Color annatto;
   final Color annattoDeep;
   final Color annattoTint;
@@ -54,21 +56,26 @@ class MpColors extends ThemeExtension<MpColors> {
   /// Warm fleck used for the eyebrow inside the dark hero card.
   final Color annattoFleck;
 
-  /// Secondary accent — local stores, budget progress, protein.
+  /// Secondary accent: local stores, budget progress, protein.
   final Color green;
   final Color greenDeep;
   final Color greenTint;
   final Color greenTintBorder;
 
-  /// Snack slot and fat macro.
+  /// Snack slot and fat macro: 4.9:1 on its own tint at 11px.
   final Color amber;
   final Color amberTint;
 
   /// Card surface.
   final Color surface;
 
-  /// 1px card borders.
+  /// 1px borders on non-interactive cards and dividers (decorative).
   final Color hairline;
+
+  /// 1px boundary on interactive controls (inputs, toggles, tiles,
+  /// steppers, checkboxes): 3.2:1 on cream and 3.4:1 on white, so the
+  /// control edge itself passes WCAG 1.4.11.
+  final Color outline;
 
   /// Row dividers inside cards.
   final Color divider;
@@ -87,7 +94,7 @@ class MpColors extends ThemeExtension<MpColors> {
     cream: Color(0xFFFCF8EF),
     ink: Color(0xFF241C15),
     muted: Color(0xFF6B5D4C),
-    faint: Color(0xFF8A7B68),
+    faint: Color(0xFF776855),
     annatto: Color(0xFFB5401C),
     annattoDeep: Color(0xFFA8370F),
     annattoTint: Color(0xFFFBEDE5),
@@ -97,10 +104,11 @@ class MpColors extends ThemeExtension<MpColors> {
     greenDeep: Color(0xFF1F6B3F),
     greenTint: Color(0xFFEAF4EC),
     greenTintBorder: Color(0xFFD6E8DB),
-    amber: Color(0xFF9A6A12),
+    amber: Color(0xFF8C5F10),
     amberTint: Color(0xFFFBF0D8),
     surface: Color(0xFFFFFFFF),
     hairline: Color(0xFFECE3D2),
+    outline: Color(0xFF998871),
     divider: Color(0xFFF2EADB),
     dividerSoft: Color(0xFFF4EDDF),
     track: Color(0xFFEEE6D7),
@@ -132,6 +140,7 @@ class MpColors extends ThemeExtension<MpColors> {
     Color? amberTint,
     Color? surface,
     Color? hairline,
+    Color? outline,
     Color? divider,
     Color? dividerSoft,
     Color? track,
@@ -158,6 +167,7 @@ class MpColors extends ThemeExtension<MpColors> {
       amberTint: amberTint ?? this.amberTint,
       surface: surface ?? this.surface,
       hairline: hairline ?? this.hairline,
+      outline: outline ?? this.outline,
       divider: divider ?? this.divider,
       dividerSoft: dividerSoft ?? this.dividerSoft,
       track: track ?? this.track,
@@ -190,6 +200,7 @@ class MpColors extends ThemeExtension<MpColors> {
       amberTint: l(amberTint, other.amberTint),
       surface: l(surface, other.surface),
       hairline: l(hairline, other.hairline),
+      outline: l(outline, other.outline),
       divider: l(divider, other.divider),
       dividerSoft: l(dividerSoft, other.dividerSoft),
       track: l(track, other.track),
@@ -201,7 +212,7 @@ class MpColors extends ThemeExtension<MpColors> {
   }
 }
 
-/// `context.mp` — the active [MpColors], falling back to [MpColors.light]
+/// `context.mp`: the active [MpColors], falling back to [MpColors.light]
 /// so bare widget tests without a theme still paint.
 extension MpColorsContext on BuildContext {
   MpColors get mp => Theme.of(this).extension<MpColors>() ?? MpColors.light;

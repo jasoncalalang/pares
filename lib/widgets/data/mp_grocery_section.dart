@@ -157,9 +157,10 @@ class _GroceryRow extends StatelessWidget {
     final c = context.mp;
     final (icon, accent) = _glyph(item.kind);
     final select = MpMotion.of(context, MpMotion.select);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return MpPress(
       onTap: onTap,
+      scale: 1,
+      focusRadius: MpRadius.iconBox,
       child: Semantics(
         checked: done,
         label: item.name,
@@ -218,7 +219,7 @@ class _GroceryRow extends StatelessWidget {
                     color: done ? c.green : Colors.transparent,
                     borderRadius: BorderRadius.circular(MpRadius.checkbox),
                     border: Border.all(
-                      color: done ? c.green : c.hairline,
+                      color: done ? c.green : c.outline,
                       width: MpStroke.selected,
                     ),
                   ),

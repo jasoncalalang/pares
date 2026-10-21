@@ -38,7 +38,10 @@ void main() {
       expect(find.text(a), findsOneWidget);
     }
     expect(find.text('Compute my target'), findsOneWidget);
-    expect(find.textContaining('not medical advice'), findsOneWidget);
+    expect(find.textContaining('Everything is in metric: kg and cm.'),
+        findsOneWidget);
+    expect(find.text('An estimate, not medical advice. You can adjust it anytime.'),
+        findsOneWidget);
   });
 
   testWidgets('prefills the draft values', (tester) async {
@@ -73,5 +76,26 @@ void main() {
     await tester.tap(find.text('Compute my target'));
     await tester.pumpAndSettle();
     expect(nexts, 1);
+  });
+
+  testWidgets('an emptied field disables the CTA until it is filled again',
+      (tester) async {
+    await pump(tester);
+    await tester.enterText(find.byKey(const ValueKey('field-weight')), '');
+    await tester.pumpAndSettle();
+    expect(find.text('Fill in age, height and weight to continue.'),
+        findsOneWidget);
+    await tester.tap(find.text('Compute my target'));
+    await tester.pumpAndSettle();
+    expect(nexts, 0);
+    expect(draft.weightKg, 74, reason: 'the draft keeps its last valid value');
+
+    await tester.enterText(find.byKey(const ValueKey('field-weight')), '80');
+    await tester.pumpAndSettle();
+    expect(find.text('Fill in age, height and weight to continue.'), findsNothing);
+    await tester.tap(find.text('Compute my target'));
+    await tester.pumpAndSettle();
+    expect(nexts, 1);
+    expect(draft.weightKg, 80);
   });
 }

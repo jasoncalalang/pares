@@ -55,7 +55,7 @@ String _logo(String id) => 'store-logos/$id.png';
 
 /// The Philippine store catalog.
 ///
-/// SEED DATA — chain names are widely known and stable, but parent-company
+/// SEED DATA: chain names are widely known and stable, but parent-company
 /// ownership and regional availability still need a data-team review before
 /// this is treated as authoritative.
 final List<Store> phStores = List.unmodifiable([

@@ -75,7 +75,8 @@ class MpPill extends StatelessWidget {
   }
 }
 
-/// Small outlined pill button with a leading icon ("Grocery list", "New").
+/// Small outlined pill button with a leading icon ("Grocery list"). The
+/// visual pill is ~30px tall; the widget reserves the 44px tap height.
 class MpPillButton extends StatelessWidget {
   const MpPillButton({
     super.key,
@@ -98,20 +99,26 @@ class MpPillButton extends StatelessWidget {
     final fg = accent?.main(c) ?? c.muted;
     return MpPress(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-        decoration: BoxDecoration(
-          color: c.surface,
-          borderRadius: BorderRadius.circular(MpRadius.pill),
-          border: Border.all(color: c.hairline),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: fg),
-            const SizedBox(width: 5),
-            Text(label, style: MpTypography.smallBold().copyWith(color: fg)),
-          ],
+      focusRadius: MpRadius.pill,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: MpSize.tap),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+            decoration: BoxDecoration(
+              color: c.surface,
+              borderRadius: BorderRadius.circular(MpRadius.pill),
+              border: Border.all(color: c.outline),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 14, color: fg),
+                const SizedBox(width: 5),
+                Text(label, style: MpTypography.smallBold().copyWith(color: fg)),
+              ],
+            ),
+          ),
         ),
       ),
     );

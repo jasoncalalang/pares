@@ -27,7 +27,7 @@ void main() {
     // Hero number and the number inside the ring (after its count-up).
     expect(find.text('2,087'), findsNWidgets(2));
     expect(find.text('KCAL/DAY'), findsOneWidget);
-    expect(find.textContaining('to lose ~0.5 kg per week'), findsOneWidget);
+    expect(find.textContaining('to lose about 0.5 kg a week'), findsOneWidget);
 
     expect(find.text('BMR (at rest)'), findsOneWidget);
     expect(find.text('1,669 kcal'), findsOneWidget);

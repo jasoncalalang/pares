@@ -91,13 +91,14 @@ class _MpMealCardState extends State<MpMealCard> {
           MpPress(
             onTap: _swap,
             semanticLabel: 'Swap meal',
+            focusRadius: MpRadius.swap,
             child: Container(
               width: MpSize.swap,
               height: MpSize.swap,
               decoration: BoxDecoration(
                 color: c.cream,
                 borderRadius: BorderRadius.circular(MpRadius.swap),
-                border: Border.all(color: c.hairline),
+                border: Border.all(color: c.outline),
               ),
               child: AnimatedRotation(
                 turns: _spins / 2,
@@ -162,9 +163,11 @@ class MpDayStrip extends StatelessWidget {
                   for (var i = 0; i < n; i++) ...[
                     if (i > 0) const SizedBox(width: _gap),
                     Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
+                      child: MpPress(
                         onTap: () => onSelect(i),
+                        semanticLabel: '${days[i].label} ${dayNumbers[i]}',
+                        scale: 1,
+                        focusRadius: MpRadius.segment,
                         child: SizedBox(
                           height: _height,
                           child: Column(

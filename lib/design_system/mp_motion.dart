@@ -1,19 +1,11 @@
 import 'package:flutter/widgets.dart';
 
-/// Motion tokens. Purposeful and quiet: entrance rise, data reveal, selection
-/// and press — nothing bouncy. Every consumer reads durations through
+/// Motion tokens. Motion only where it carries information or feedback:
+/// data reveals, selection, press and layout changes. There is no page-load
+/// entrance animation; screens are simply there. Nothing bouncy. Every consumer reads durations through
 /// [MpMotion.of] so `MediaQuery.disableAnimations` (the platform
 /// reduce-motion setting) collapses them to zero.
 abstract final class MpMotion {
-  /// Sections fade in and rise ~10px on load.
-  static const Duration rise = Duration(milliseconds: 380);
-
-  /// Delay between staggered siblings.
-  static const Duration stagger = Duration(milliseconds: 50);
-
-  /// Rise distance in logical pixels.
-  static const double riseOffset = 10;
-
   /// Button / tile press feedback.
   static const Duration press = Duration(milliseconds: 120);
   static const double pressScale = 0.97;

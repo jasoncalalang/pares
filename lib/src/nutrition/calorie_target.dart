@@ -1,10 +1,10 @@
 /// Biological sex, as used by the BMR equation (clinical input, not identity).
 /// The UI can let people pick or skip this; the domain needs one of the two
-/// to run Mifflin–St Jeor.
+/// to run Mifflin-St Jeor.
 enum BiologicalSex { male, female }
 
 /// How active someone is day to day. Multipliers are the standard
-/// Mifflin–St Jeor activity factors.
+/// Mifflin-St Jeor activity factors.
 enum ActivityLevel {
   sedentary(1.2),
   light(1.375),
@@ -57,9 +57,9 @@ class CalorieTargetResult {
   final bool clampedToFloor;
 }
 
-/// Compute a daily calorie target with the Mifflin–St Jeor equation.
+/// Compute a daily calorie target with the Mifflin-St Jeor equation.
 ///
-/// Metric only (kg, cm) — the Philippine norm. Throws [ArgumentError] on
+/// Metric only (kg, cm): the Philippine norm. Throws [ArgumentError] on
 /// non-physiological input rather than returning a nonsense number.
 CalorieTargetResult calorieTarget({
   required double weightKg,

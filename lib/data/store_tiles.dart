@@ -9,7 +9,7 @@ class StoreTile {
   final String monogram;
 }
 
-/// Supermarket chains, warehouse clubs and delivery — the annatto group.
+/// Supermarket chains, warehouse clubs and delivery: the annatto group.
 const List<StoreTile> chainTiles = [
   StoreTile(id: 'sm-supermarket', name: 'SM Supermarket', monogram: 'SM'),
   StoreTile(id: 'puregold', name: 'Puregold', monogram: 'P'),
@@ -21,7 +21,7 @@ const List<StoreTile> chainTiles = [
   StoreTile(id: 'grabmart', name: 'GrabMart', monogram: 'G'),
 ];
 
-/// Local to the Philippines — the green group.
+/// Local to the Philippines: the green group.
 const List<StoreTile> localTiles = [
   StoreTile(id: 'palengke', name: 'Wet market', monogram: 'W'),
   StoreTile(id: 'sari-sari', name: 'Corner store', monogram: 'C'),

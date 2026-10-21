@@ -31,6 +31,7 @@ class MpStoreTile extends StatelessWidget {
     final select = MpMotion.of(context, MpMotion.select);
     return MpPress(
       onTap: onTap,
+      focusRadius: MpRadius.tile,
       child: AnimatedScale(
         scale: selected ? MpMotion.popScale : 1,
         duration: MpMotion.of(context, MpMotion.pop),
@@ -46,7 +47,7 @@ class MpStoreTile extends StatelessWidget {
                 color: selected ? accent.tint(c) : c.surface,
                 borderRadius: BorderRadius.circular(MpRadius.tile),
                 border: Border.all(
-                  color: selected ? accent.main(c) : c.hairline,
+                  color: selected ? accent.main(c) : c.outline,
                   width: selected ? MpStroke.selected : MpStroke.hairline,
                 ),
                 boxShadow: [
@@ -101,7 +102,7 @@ class MpStoreTile extends StatelessWidget {
   }
 }
 
-/// Round 40px stepper button (− / +). [filled] draws it solid annatto.
+/// Round 44px stepper button (minus / plus). [filled] draws it solid annatto.
 class MpStepperButton extends StatelessWidget {
   const MpStepperButton({
     super.key,
@@ -122,6 +123,7 @@ class MpStepperButton extends StatelessWidget {
     return MpPress(
       onTap: onTap,
       semanticLabel: semanticLabel,
+      focusRadius: MpRadius.pill,
       child: Container(
         width: MpSize.stepper,
         height: MpSize.stepper,
@@ -129,7 +131,7 @@ class MpStepperButton extends StatelessWidget {
           color: filled ? c.annatto : c.surface,
           shape: BoxShape.circle,
           border: Border.all(
-            color: filled ? c.annatto : c.hairline,
+            color: filled ? c.annatto : c.outline,
             width: MpStroke.selected,
           ),
         ),

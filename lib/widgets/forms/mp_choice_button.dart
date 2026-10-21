@@ -5,7 +5,7 @@ import '../core/mp_press.dart';
 
 /// One option of a segmented choice (gender, activity, goal). Selected =
 /// accent tint, 1.5px accent border, 3px halo and deep-accent bold text;
-/// unselected = white, hairline, muted text. Transitions over
+/// unselected = white, 1px outline, muted text. Transitions over
 /// [MpMotion.select].
 class MpChoiceButton extends StatelessWidget {
   const MpChoiceButton({
@@ -34,6 +34,7 @@ class MpChoiceButton extends StatelessWidget {
     final style = selected ? MpTypography.chipSelected() : MpTypography.chip();
     return MpPress(
       onTap: onTap,
+      focusRadius: radius,
       child: AnimatedContainer(
         duration: MpMotion.of(context, MpMotion.select),
         curve: MpMotion.ease,
@@ -43,7 +44,7 @@ class MpChoiceButton extends StatelessWidget {
           color: selected ? accent.tint(c) : c.surface,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(
-            color: selected ? accent.main(c) : c.hairline,
+            color: selected ? accent.main(c) : c.outline,
             width: selected ? MpStroke.selected : MpStroke.hairline,
           ),
           boxShadow: [

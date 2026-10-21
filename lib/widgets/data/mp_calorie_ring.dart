@@ -19,7 +19,7 @@ class MpCalorieRing extends StatefulWidget {
 
   final int value;
 
-  /// 0–1 share of the ring to fill.
+  /// 0 to 1 share of the ring to fill.
   final double fraction;
   final double size;
 

@@ -61,11 +61,11 @@ abstract final class MpSize {
   /// Meal-card photo thumbnail.
   static const double thumb = 54;
 
-  /// Square swap button on a meal card.
-  static const double swap = 40;
+  /// Square swap button on a meal card (a full 44px tap target).
+  static const double swap = 44;
 
-  /// Round budget stepper button.
-  static const double stepper = 40;
+  /// Round budget stepper button (a full 44px tap target).
+  static const double stepper = 44;
 
   /// Grocery row ingredient icon box.
   static const double iconBox = 36;

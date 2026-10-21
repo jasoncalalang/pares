@@ -6,28 +6,28 @@ import '../mealpal_ph.dart';
 
 const _tapsilog = PlannedMeal(
   slot: MealSlot.breakfast,
-  name: 'Tapsilog — beef tapa, garlic rice & egg',
+  name: 'Tapsilog: beef tapa, garlic rice and egg',
   kcal: 560,
   pricePhp: 95,
   image: 'tapsilog',
 );
 const _tinola = PlannedMeal(
   slot: MealSlot.lunch,
-  name: 'Chicken tinola with moringa & rice',
+  name: 'Chicken tinola with moringa and rice',
   kcal: 620,
   pricePhp: 75,
   image: 'tinola',
 );
 const _munggo = PlannedMeal(
   slot: MealSlot.dinner,
-  name: 'Ginisang munggo with tofu & water spinach, rice',
+  name: 'Ginisang munggo with tofu, water spinach and rice',
   kcal: 560,
   pricePhp: 55,
   image: 'munggo',
 );
 const _sabaPeanuts = PlannedMeal(
   slot: MealSlot.snack,
-  name: 'Saba banana & peanuts',
+  name: 'Saba banana and peanuts',
   kcal: 347,
   pricePhp: 25,
   image: 'saba-peanuts',
@@ -35,13 +35,13 @@ const _sabaPeanuts = PlannedMeal(
 
 const _daingsilog = PlannedMeal(
   slot: MealSlot.breakfast,
-  name: 'Daingsilog — fried milkfish, garlic rice & egg',
+  name: 'Daingsilog: fried milkfish, garlic rice and egg',
   kcal: 540,
   pricePhp: 80,
 );
 const _lugaw = PlannedMeal(
   slot: MealSlot.breakfast,
-  name: 'Lugaw with egg & toasted garlic',
+  name: 'Lugaw with egg and toasted garlic',
   kcal: 420,
   pricePhp: 35,
 );
@@ -69,6 +69,30 @@ const _boiledSaba = PlannedMeal(
   kcal: 300,
   pricePhp: 20,
 );
+
+/// Every meal the stand-in bank knows, in slot order. Swapping a meal walks
+/// this list within the meal's slot.
+const List<PlannedMeal> mealBank = [
+  _tapsilog,
+  _daingsilog,
+  _lugaw,
+  _tinola,
+  _adobo,
+  _munggo,
+  _sinigang,
+  _pinakbet,
+  _sabaPeanuts,
+  _boiledSaba,
+];
+
+/// The next option in [mealBank] for the same slot as [meal], wrapping round
+/// to the first. Meals are matched by name, so a meal that is not in the bank
+/// starts the cycle at the slot's first option.
+PlannedMeal nextAlternative(PlannedMeal meal) {
+  final options = [for (final m in mealBank) if (m.slot == meal.slot) m];
+  final i = options.indexWhere((m) => m.name == meal.name);
+  return options[(i + 1) % options.length];
+}
 
 List<DayPlan> sampleWeek() => const [
       DayPlan(weekday: Weekday.mon, meals: [_tapsilog, _tinola, _munggo, _sabaPeanuts]),

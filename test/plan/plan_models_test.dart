@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   const tapsilog = PlannedMeal(
     slot: MealSlot.breakfast,
-    name: 'Tapsilog — beef tapa, garlic rice & egg',
+    name: 'Tapsilog: beef tapa, garlic rice and egg',
     kcal: 560,
     pricePhp: 95,
     image: 'tapsilog',

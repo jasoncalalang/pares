@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
 
 /// Hosts [child] the way the app does: themed, inside a Scaffold, at phone
-/// width. Entrance animations are left on so tests exercise them; call
-/// `tester.pumpAndSettle()` after pumping.
+/// width. Data reveals still animate, so call `tester.pumpAndSettle()`
+/// after pumping.
 Widget host(Widget child) {
   return MaterialApp(
     theme: MpTheme.light(),

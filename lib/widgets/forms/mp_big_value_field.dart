@@ -5,8 +5,9 @@ import '../../design_system/design_system.dart';
 
 /// Large-number input (age / height / weight): a 13px label, then a 64px
 /// white field with the value at 30px bold on the left and the unit muted
-/// on the right. Numeric keyboard, digits only; emits only valid positive
-/// integers.
+/// on the right. Numeric keyboard, digits only. Emits the value when it is
+/// a positive integer and `null` while the field is empty or zero, so the
+/// screen can hold the CTA until every field is filled.
 class MpBigValueField extends StatefulWidget {
   const MpBigValueField({
     super.key,
@@ -20,7 +21,7 @@ class MpBigValueField extends StatefulWidget {
   final String label;
   final int value;
   final String unit;
-  final ValueChanged<int> onChanged;
+  final ValueChanged<int?> onChanged;
 
   /// Key placed on the inner [TextField] for tests and automation.
   final Key? fieldKey;
@@ -41,7 +42,7 @@ class _MpBigValueFieldState extends State<MpBigValueField> {
 
   void _changed(String text) {
     final n = int.tryParse(text);
-    if (n != null && n > 0) widget.onChanged(n);
+    widget.onChanged(n != null && n > 0 ? n : null);
   }
 
   @override
@@ -58,7 +59,7 @@ class _MpBigValueFieldState extends State<MpBigValueField> {
           decoration: BoxDecoration(
             color: c.surface,
             borderRadius: BorderRadius.circular(MpRadius.input),
-            border: Border.all(color: c.hairline),
+            border: Border.all(color: c.outline),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,

@@ -4,7 +4,7 @@ import '../mealpal_ph.dart';
 
 /// Everything the onboarding flow collects, plus what the domain derives from
 /// it. One instance lives for the whole flow and is handed to each screen.
-/// In-memory only — there is no persistence layer yet.
+/// In-memory only: there is no persistence layer yet.
 class PlanDraft extends ChangeNotifier {
   static const int budgetStepPhp = 100;
   static const int budgetFloorPhp = 500;

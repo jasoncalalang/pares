@@ -4,8 +4,11 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../design_system/design_system.dart';
 import 'mp_press.dart';
 
-/// The full-width primary call to action: 54px, annatto, white bold label
-/// with a trailing arrow (or a leading [icon] when [iconLeading]).
+/// The full-width primary call to action: 54px, annatto, white bold label.
+/// The trailing arrow marks a step forward in the flow; pass a leading
+/// [icon] with [iconLeading] for an action that stays on the screen. A null
+/// [onPressed] renders it disabled (hairline fill, faint text) so the screen
+/// can hold the user until its inputs are complete.
 class MpCta extends StatelessWidget {
   const MpCta({
     super.key,
@@ -16,20 +19,22 @@ class MpCta extends StatelessWidget {
   });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final IconData icon;
   final bool iconLeading;
 
   @override
   Widget build(BuildContext context) {
     final c = context.mp;
-    final glyph = Icon(icon, size: 19, color: c.surface);
+    final enabled = onPressed != null;
+    final fg = enabled ? c.surface : c.faint;
+    final glyph = Icon(icon, size: 19, color: fg);
     return MpPress(
       onTap: onPressed,
       child: Container(
         height: MpSize.cta,
         decoration: BoxDecoration(
-          color: c.annatto,
+          color: enabled ? c.annatto : c.hairline,
           borderRadius: BorderRadius.circular(MpRadius.button),
         ),
         child: Row(
@@ -41,7 +46,7 @@ class MpCta extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: MpTypography.button().copyWith(color: c.surface),
+                style: MpTypography.button().copyWith(color: fg),
               ),
             ),
             if (!iconLeading) ...[const SizedBox(width: 8), glyph],
@@ -52,7 +57,7 @@ class MpCta extends StatelessWidget {
   }
 }
 
-/// The small muted line under a CTA ("An estimate, not medical advice…").
+/// The small muted line under a CTA ("An estimate, not medical advice.").
 class MpCtaNote extends StatelessWidget {
   const MpCtaNote(this.text, {super.key});
 
