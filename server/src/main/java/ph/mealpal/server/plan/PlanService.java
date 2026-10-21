@@ -45,7 +45,7 @@ public final class PlanService {
         }
         Plan plan = new Plan(UUID.randomUUID().toString(), sessionId, request);
         plans.put(plan.id, plan);
-        executor.execute(() -> runTurn(plan, briefs.kickoff(request), false));
+        executor.execute(() -> runTurn(plan, briefs.kickoff(request), null));
         return plan.snapshot();
     }
 
@@ -69,11 +69,12 @@ public final class PlanService {
             plan.status = PlanStatus.BUILDING;
             plan.message = null;
         }
-        executor.execute(() -> runTurn(plan, briefs.swap(swap), true));
+        executor.execute(() -> runTurn(plan, briefs.swap(swap), swap));
         return plan.snapshot();
     }
 
-    private void runTurn(Plan plan, String message, boolean isSwap) {
+    /** {@code swap} is null for the turn that builds the first week. */
+    private void runTurn(Plan plan, String message, SwapRequest swap) {
         Turn turn = new Turn(plan);
         String failure;
         try {
@@ -84,10 +85,15 @@ public final class PlanService {
         }
         synchronized (plan) {
             if (failure == null) {
+                PlannedMeal before = swap == null ? null : mealAt(plan.week, swap);
+                PlannedMeal after = swap == null ? null : mealAt(turn.accepted, swap);
                 plan.week = turn.accepted;
                 plan.status = PlanStatus.READY;
-                plan.message = null;
-            } else if (isSwap) {
+                plan.message = before != null && after != null && before.id().equals(after.id())
+                        ? "No other " + swap.slot().json() + " in the meal bank fits this week, so "
+                                + swap.weekday().label() + " keeps " + after.name() + "."
+                        : null;
+            } else if (swap != null) {
                 plan.status = PlanStatus.READY;
                 plan.message = "The swap did not go through: " + lowerFirst(failure);
             } else {
@@ -95,6 +101,15 @@ public final class PlanService {
                 plan.message = failure;
             }
         }
+    }
+
+    private static PlannedMeal mealAt(WeekPlan week, SwapRequest swap) {
+        return week.days().stream()
+                .filter(d -> d.weekday() == swap.weekday())
+                .flatMap(d -> d.meals().stream())
+                .filter(m -> m.slot() == swap.slot())
+                .findFirst()
+                .orElse(null);
     }
 
     private static String reason(SessionEnd end) {

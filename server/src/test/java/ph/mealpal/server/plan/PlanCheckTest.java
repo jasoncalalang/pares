@@ -68,7 +68,15 @@ class PlanCheckTest {
         List<SubmittedMeal> meals = new ArrayList<>(MONDAY);
         meals.set(0, new SubmittedMeal(Slot.BREAKFAST, "adobo", 1.0));
         List<String> problems = check.problems(request(2087, 2000), everyDay(meals));
-        assertTrue(problems.contains("Monday: 'adobo' is a lunch, not a breakfast."), problems.toString());
+        assertTrue(problems.contains("Monday: 'adobo' is a lunch or dinner, not a breakfast."), problems.toString());
+    }
+
+    @Test
+    void ulamFromTheDinnerListCanBeLunch() {
+        List<SubmittedMeal> meals = new ArrayList<>(MONDAY);
+        meals.set(1, new SubmittedMeal(Slot.LUNCH, "pinakbet", 1.25));
+        assertEquals(List.of(), check.problems(request(2067, 2000), everyDay(meals)));
+        assertEquals(Slot.LUNCH, check.toWeek(everyDay(meals)).days().getFirst().meals().get(1).slot());
     }
 
     @Test

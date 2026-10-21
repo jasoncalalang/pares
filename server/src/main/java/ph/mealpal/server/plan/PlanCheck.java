@@ -71,8 +71,8 @@ public final class PlanCheck {
                     continue;
                 }
                 Meal meal = found.get();
-                if (meal.slot() != sm.slot()) {
-                    problems.add(label + ": '" + meal.id() + "' is a " + meal.slot().json() + ", not a "
+                if (!meal.slots().contains(sm.slot())) {
+                    problems.add(label + ": '" + meal.id() + "' is a " + meal.slotsInWords() + ", not a "
                             + sm.slot().json() + ".");
                 }
                 if (!SERVINGS.contains(sm.servings())) {
@@ -115,7 +115,7 @@ public final class PlanCheck {
 
     private PlannedMeal planned(SubmittedMeal sm) {
         Meal meal = bank.find(sm.mealId()).orElseThrow();
-        return new PlannedMeal(meal.slot(), meal.id(), meal.name(), scaled(meal.kcal(), sm.servings()),
+        return new PlannedMeal(sm.slot(), meal.id(), meal.name(), scaled(meal.kcal(), sm.servings()),
                 scaled(meal.pricePhp(), sm.servings()), meal.image(), sm.servings());
     }
 

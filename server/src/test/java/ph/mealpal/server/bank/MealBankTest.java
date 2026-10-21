@@ -3,6 +3,7 @@ package ph.mealpal.server.bank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class MealBankTest {
@@ -17,10 +18,16 @@ class MealBankTest {
     @Test
     void findsAMealByIdWithItsNumbers() {
         Meal tapsilog = bank.find("tapsilog").orElseThrow();
-        assertEquals(Slot.BREAKFAST, tapsilog.slot());
+        assertEquals(List.of(Slot.BREAKFAST), tapsilog.slots());
         assertEquals(560, tapsilog.kcal());
         assertEquals(95, tapsilog.pricePhp());
         assertEquals("tapsilog", tapsilog.image());
+    }
+
+    @Test
+    void ulamWithRiceFitsLunchOrDinner() {
+        assertEquals(List.of(Slot.LUNCH, Slot.DINNER), bank.find("adobo").orElseThrow().slots());
+        assertEquals(List.of(Slot.LUNCH, Slot.DINNER), bank.find("pinakbet").orElseThrow().slots());
     }
 
     @Test

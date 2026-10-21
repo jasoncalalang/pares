@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "origin": {
+    "base_url": "https://api.anthropic.com",
+    "organization_id": "310e3e8b-b5d8-4f06-b60c-1ac2a90c77cb",
+    "workspace_id": "wrkspc_01QeX6gUcBc7gX8ax6jEy4dk"
+  },
+  "resources": {
+    "./agents/meal-planner.md": {
+      "kind": "agent",
+      "id": "agent_01WAZLgUqsKb2k5Z9epSBzVq",
+      "version": "1",
+      "hash": "4cc8207fe39743a7750e041a60593689",
+      "remote_hash": "5a94726bf719fc2582f900e48f62d411"
+    },
+    "./environments/planner.yaml": {
+      "kind": "environment",
+      "id": "env_01BWQP6izfQFnfUq2DoGXG1g",
+      "hash": "d62df1e20c09fd3e1464b62c58073420",
+      "remote_hash": "0326ccc059b83d83bcd0d409f8139be7"
+    }
+  }
+}

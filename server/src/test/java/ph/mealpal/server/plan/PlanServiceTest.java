@@ -231,6 +231,22 @@ class PlanServiceTest {
     }
 
     @Test
+    void aSwapThatLeavesTheMealAsItWasSaysSo() {
+        FakeGateway gateway = new FakeGateway().script(
+                Turn.of(SessionEnd.endTurn(), VALID),
+                Turn.of(SessionEnd.endTurn(), VALID));
+        PlanService plans = service(gateway, now);
+        PlanRecord first = plans.create(REQUEST);
+
+        PlanRecord after = plans.swap(first.id(), new SwapRequest(Weekday.TUE, Slot.LUNCH, "no chicken"));
+
+        assertEquals(PlanStatus.READY, after.status());
+        assertEquals(first.week(), after.week());
+        assertEquals("No other lunch in the meal bank fits this week, so Tuesday keeps "
+                + "Chicken tinola with moringa and rice.", after.message());
+    }
+
+    @Test
     void aSwapWhileTheWeekIsStillBuildingIsRefused() {
         List<Runnable> queued = new ArrayList<>();
         FakeGateway gateway = new FakeGateway().script(Turn.of(SessionEnd.endTurn(), VALID));

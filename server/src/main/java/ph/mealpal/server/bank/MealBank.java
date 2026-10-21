@@ -57,7 +57,7 @@ public final class MealBank {
             // Fixed key order, so the same bank always reads the same way.
             Map<String, Object> fields = new LinkedHashMap<>();
             fields.put("id", meal.id());
-            fields.put("slot", meal.slot().json());
+            fields.put("slots", meal.slots().stream().map(Slot::json).toList());
             fields.put("name", meal.name());
             fields.put("kcal", meal.kcal());
             fields.put("pricePhp", meal.pricePhp());

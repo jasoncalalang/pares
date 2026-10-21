@@ -1,15 +1,15 @@
 {
-  "note": "Stand-in bank copied from the app's sample week. kcal and pricePhp are placeholder estimates per serving until the FNRI-based bank exists.",
+  "note": "Stand-in bank copied from the app's sample week. kcal and pricePhp are placeholder estimates per serving until the FNRI-based bank exists. Ulam with rice fits lunch or dinner.",
   "meals": [
-    {"id": "tapsilog", "slot": "breakfast", "name": "Tapsilog: beef tapa, garlic rice and egg", "kcal": 560, "pricePhp": 95, "image": "tapsilog"},
-    {"id": "daingsilog", "slot": "breakfast", "name": "Daingsilog: fried milkfish, garlic rice and egg", "kcal": 540, "pricePhp": 80},
-    {"id": "lugaw", "slot": "breakfast", "name": "Lugaw with egg and toasted garlic", "kcal": 420, "pricePhp": 35},
-    {"id": "tinola", "slot": "lunch", "name": "Chicken tinola with moringa and rice", "kcal": 620, "pricePhp": 75, "image": "tinola"},
-    {"id": "adobo", "slot": "lunch", "name": "Chicken adobo with rice", "kcal": 650, "pricePhp": 70},
-    {"id": "munggo", "slot": "dinner", "name": "Ginisang munggo with tofu, water spinach and rice", "kcal": 560, "pricePhp": 55, "image": "munggo"},
-    {"id": "sinigang", "slot": "dinner", "name": "Pork sinigang with rice", "kcal": 610, "pricePhp": 85},
-    {"id": "pinakbet", "slot": "dinner", "name": "Pinakbet with rice", "kcal": 480, "pricePhp": 50},
-    {"id": "saba-peanuts", "slot": "snack", "name": "Saba banana and peanuts", "kcal": 347, "pricePhp": 25, "image": "saba-peanuts"},
-    {"id": "boiled-saba", "slot": "snack", "name": "Boiled saba with grated coconut", "kcal": 300, "pricePhp": 20}
+    {"id": "tapsilog", "slots": ["breakfast"], "name": "Tapsilog: beef tapa, garlic rice and egg", "kcal": 560, "pricePhp": 95, "image": "tapsilog"},
+    {"id": "daingsilog", "slots": ["breakfast"], "name": "Daingsilog: fried milkfish, garlic rice and egg", "kcal": 540, "pricePhp": 80},
+    {"id": "lugaw", "slots": ["breakfast"], "name": "Lugaw with egg and toasted garlic", "kcal": 420, "pricePhp": 35},
+    {"id": "tinola", "slots": ["lunch", "dinner"], "name": "Chicken tinola with moringa and rice", "kcal": 620, "pricePhp": 75, "image": "tinola"},
+    {"id": "adobo", "slots": ["lunch", "dinner"], "name": "Chicken adobo with rice", "kcal": 650, "pricePhp": 70},
+    {"id": "munggo", "slots": ["lunch", "dinner"], "name": "Ginisang munggo with tofu, water spinach and rice", "kcal": 560, "pricePhp": 55, "image": "munggo"},
+    {"id": "sinigang", "slots": ["lunch", "dinner"], "name": "Pork sinigang with rice", "kcal": 610, "pricePhp": 85},
+    {"id": "pinakbet", "slots": ["lunch", "dinner"], "name": "Pinakbet with rice", "kcal": 480, "pricePhp": 50},
+    {"id": "saba-peanuts", "slots": ["snack"], "name": "Saba banana and peanuts", "kcal": 347, "pricePhp": 25, "image": "saba-peanuts"},
+    {"id": "boiled-saba", "slots": ["snack"], "name": "Boiled saba with grated coconut", "kcal": 300, "pricePhp": 20}
   ]
 }

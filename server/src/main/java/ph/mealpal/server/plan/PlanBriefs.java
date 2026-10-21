@@ -24,7 +24,7 @@ public final class PlanBriefs {
                 Goal: %s.
                 Stores they shop at: %s.
 
-                Meal bank, one dish per line. kcal and pricePhp are per serving:
+                Meal bank, one dish per line. kcal and pricePhp are per serving; slots lists the meals it can be:
                 %s
 
                 When the week is ready, call submit_plan with all seven days.
