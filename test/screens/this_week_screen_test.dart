@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
@@ -169,5 +170,32 @@ void main() {
     await tester.tap(find.text('Try again'));
     await tester.pumpAndSettle();
     expect(retries, 1);
+  });
+
+  testWidgets('Tab reaches every meal before the pinned CTA, and the CTA once',
+      (tester) async {
+    await pump(tester);
+    String focused() {
+      final at = FocusManager.instance.primaryFocus!.context!;
+      final press = at.findAncestorWidgetOfExactType<MpPress>()!;
+      return press.semanticLabel ??
+          tester
+              .widget<Text>(find
+                  .descendant(of: find.byWidget(press), matching: find.byType(Text))
+                  .first)
+              .data!;
+    }
+
+    // Grocery list, seven days, four swaps and the CTA: one full pass.
+    final stops = <String>[];
+    for (var i = 0; i < 13; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      stops.add(focused());
+    }
+    expect(stops.where((s) => s == 'See grocery list'), hasLength(1),
+        reason: stops.join(', '));
+    expect(stops.last, 'See grocery list', reason: stops.join(', '));
+    expect(stops.indexOf('Swap snack'), lessThan(stops.indexOf('See grocery list')));
   });
 }

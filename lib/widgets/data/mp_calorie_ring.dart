@@ -96,20 +96,27 @@ class _MpCalorieRingState extends State<MpCalorieRing>
               arc: c.annatto,
               stroke: MpSize.ringStroke,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  formatThousands((widget.value * t).round()),
-                  style: MpTypography.ringNumber().copyWith(color: c.heroText),
+            // Inside the stroke, shrinking at large text sizes.
+            child: Padding(
+              padding: const EdgeInsets.all(MpSize.ringStroke),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      formatThousands((widget.value * t).round()),
+                      style: MpTypography.ringNumber().copyWith(color: c.heroText),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'KCAL/DAY',
+                      style:
+                          MpTypography.ringCaption().copyWith(color: c.heroMuted),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  'KCAL/DAY',
-                  style:
-                      MpTypography.ringCaption().copyWith(color: c.heroMuted),
-                ),
-              ],
+              ),
             ),
           );
         },

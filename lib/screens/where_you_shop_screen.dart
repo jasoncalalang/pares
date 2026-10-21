@@ -96,36 +96,51 @@ class WhereYouShopScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            MpGrid2(children: [
-              for (final t in chainTiles)
-                MpStoreTile(
-                  name: t.name,
-                  monogram: t.monogram,
-                  selected: draft.isStoreSelected(t.id),
-                  onTap: () => draft.toggleStore(t.id),
-                ),
-            ]),
-            const SizedBox(height: 24),
-            Text(
-              'LOCAL TO THE PHILIPPINES',
-              style: MpTypography.sectionEyebrow().copyWith(color: c.green),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              'Pick the ones you actually use',
-              style: MpTypography.small().copyWith(color: c.faint),
-            ),
-            const SizedBox(height: 12),
-            MpGrid2(children: [
-              for (final t in localTiles)
-                MpStoreTile(
-                  name: t.name,
-                  monogram: t.monogram,
-                  local: true,
-                  selected: draft.isStoreSelected(t.id),
-                  onTap: () => draft.toggleStore(t.id),
-                ),
-            ]),
+            // One fit for both grids, so every store name is the same size.
+            LayoutBuilder(builder: (context, box) {
+              final fit = MpStoreTile.fit(
+                context,
+                names: [for (final t in [...chainTiles, ...localTiles]) t.name],
+                width: box.maxWidth,
+              );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  MpGrid2(columns: fit.columns, children: [
+                    for (final t in chainTiles)
+                      MpStoreTile(
+                        name: t.name,
+                        monogram: t.monogram,
+                        nameScale: fit.nameScale,
+                        selected: draft.isStoreSelected(t.id),
+                        onTap: () => draft.toggleStore(t.id),
+                      ),
+                  ]),
+                  const SizedBox(height: 24),
+                  Text(
+                    'LOCAL TO THE PHILIPPINES',
+                    style: MpTypography.sectionEyebrow().copyWith(color: c.green),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    'Pick the ones you actually use',
+                    style: MpTypography.small().copyWith(color: c.faint),
+                  ),
+                  const SizedBox(height: 12),
+                  MpGrid2(columns: fit.columns, children: [
+                    for (final t in localTiles)
+                      MpStoreTile(
+                        name: t.name,
+                        monogram: t.monogram,
+                        local: true,
+                        nameScale: fit.nameScale,
+                        selected: draft.isStoreSelected(t.id),
+                        onTap: () => draft.toggleStore(t.id),
+                      ),
+                  ]),
+                ],
+              );
+            }),
           ],
           footer: Column(
             children: [

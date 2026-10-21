@@ -147,8 +147,8 @@ class MpDayStrip extends StatelessWidget {
         final spare = (constraints.maxWidth - n * MpSize.tap) / (n - 1);
         final gap = spare.clamp(0.0, _gap);
         final cell = (constraints.maxWidth - gap * (n - 1)) / n;
-        return SizedBox(
-          height: _height,
+        // At least 52px tall, growing with large text.
+        return IntrinsicHeight(
           child: Stack(
             // The focus ring is drawn round each day, outside its cell.
             clipBehavior: Clip.none,
@@ -158,8 +158,8 @@ class MpDayStrip extends StatelessWidget {
                 curve: MpMotion.ease,
                 left: selected * (cell + gap),
                 top: 0,
+                bottom: 0,
                 width: cell,
-                height: _height,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: c.heroSurface,
@@ -168,6 +168,7 @@ class MpDayStrip extends StatelessWidget {
                 ),
               ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (var i = 0; i < n; i++) ...[
                     if (i > 0) SizedBox(width: gap),
@@ -180,8 +181,8 @@ class MpDayStrip extends StatelessWidget {
                         focusRadius: MpRadius.segment,
                         // The label above says the day once, in full.
                         child: ExcludeSemantics(
-                          child: SizedBox(
-                            height: _height,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: _height),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -195,7 +196,10 @@ class MpDayStrip extends StatelessWidget {
                                         ? c.heroText.withValues(alpha: 0.7)
                                         : c.faint,
                                   ),
-                                  child: Text(days[i].short.toUpperCase()),
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(days[i].short.toUpperCase()),
+                                  ),
                                 ),
                                 const SizedBox(height: 3),
                                 AnimatedDefaultTextStyle(

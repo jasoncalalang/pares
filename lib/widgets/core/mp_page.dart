@@ -24,29 +24,36 @@ class MpPage extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, box) => Column(
               children: [
+                // Each area is one traversal group, so Tab walks all of the
+                // content before the pinned footer instead of interleaving
+                // them by where they sit on screen.
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.only(
-                      top: MpSpacing.top,
-                      bottom: footer == null ? MpSpacing.bottom : MpSpacing.md,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: content,
+                  child: FocusTraversalGroup(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.only(
+                        top: MpSpacing.top,
+                        bottom: footer == null ? MpSpacing.bottom : MpSpacing.md,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: content,
+                      ),
                     ),
                   ),
                 ),
                 if (footer != null)
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: box.maxHeight / 2),
-                    child: SingleChildScrollView(
-                      primary: false,
-                      physics: const ClampingScrollPhysics(),
-                      padding: const EdgeInsets.only(
-                        top: MpSpacing.sm,
-                        bottom: MpSpacing.bottom,
+                  FocusTraversalGroup(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: box.maxHeight / 2),
+                      child: SingleChildScrollView(
+                        primary: false,
+                        physics: const ClampingScrollPhysics(),
+                        padding: const EdgeInsets.only(
+                          top: MpSpacing.sm,
+                          bottom: MpSpacing.bottom,
+                        ),
+                        child: footer,
                       ),
-                      child: footer,
                     ),
                   ),
               ],
@@ -60,15 +67,33 @@ class MpPage extends StatelessWidget {
 
 /// Two-column grid built from plain rows so tiles keep their natural height
 /// (no aspect-ratio guessing); the two tiles in a row stretch to match each
-/// other, so a name that wraps doesn't leave its neighbour shorter.
+/// other, so a name that wraps doesn't leave its neighbour shorter. With
+/// [columns] 1 it stacks the tiles instead, for when two would not fit.
 class MpGrid2 extends StatelessWidget {
-  const MpGrid2({super.key, required this.children, this.gap = MpSpacing.tileGap});
+  const MpGrid2({
+    super.key,
+    required this.children,
+    this.gap = MpSpacing.tileGap,
+    this.columns = 2,
+  }) : assert(columns == 1 || columns == 2);
 
   final List<Widget> children;
   final double gap;
+  final int columns;
 
   @override
   Widget build(BuildContext context) {
+    if (columns == 1) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) SizedBox(height: gap),
+            children[i],
+          ],
+        ],
+      );
+    }
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i += 2) {
       if (i > 0) rows.add(SizedBox(height: gap));

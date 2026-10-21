@@ -4,7 +4,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../design_system/design_system.dart';
 import 'mp_press.dart';
 
-/// The full-width primary call to action: 54px, annatto, white bold label.
+/// The full-width primary call to action: 54px, annatto, white bold label
+/// that wraps (and the button grows) at large text sizes rather than cut
+/// off the action's name.
 /// The trailing arrow marks a step forward in the flow; pass a leading
 /// [icon] with [iconLeading] for an action that stays on the screen. A null
 /// [onPressed] renders it disabled (hairline fill, faint text) so the screen
@@ -32,7 +34,11 @@ class MpCta extends StatelessWidget {
     return MpPress(
       onTap: onPressed,
       child: Container(
-        height: MpSize.cta,
+        constraints: const BoxConstraints(minHeight: MpSize.cta),
+        padding: const EdgeInsets.symmetric(
+          horizontal: MpSpacing.lg,
+          vertical: MpSpacing.md,
+        ),
         decoration: BoxDecoration(
           color: enabled ? c.annatto : c.hairline,
           borderRadius: BorderRadius.circular(MpRadius.button),
@@ -44,8 +50,7 @@ class MpCta extends StatelessWidget {
             Flexible(
               child: Text(
                 label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: MpTypography.button().copyWith(color: fg),
               ),
             ),

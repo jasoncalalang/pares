@@ -108,10 +108,16 @@ class DailyTargetScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          formatThousands(target.targetCalories),
-                          style: MpTypography.heroNumber()
-                              .copyWith(color: c.heroText),
+                        // Shrinks rather than wrap at large text sizes; a
+                        // target split over two lines reads as two numbers.
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            formatThousands(target.targetCalories),
+                            style: MpTypography.heroNumber()
+                                .copyWith(color: c.heroText),
+                          ),
                         ),
                         const SizedBox(height: 9),
                         Text(

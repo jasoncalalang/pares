@@ -57,15 +57,23 @@ class MpChoiceButton extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 17, color: fg),
-                const SizedBox(width: 7),
-              ],
-              Text(label, style: style.copyWith(color: fg)),
-            ],
+          // A one-word label shrinks to fit rather than break mid-word at
+          // large text sizes.
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: MpSpacing.sm),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 17, color: fg),
+                    const SizedBox(width: 7),
+                  ],
+                  Text(label, style: style.copyWith(color: fg)),
+                ],
+              ),
+            ),
           ),
         ),
       ),
