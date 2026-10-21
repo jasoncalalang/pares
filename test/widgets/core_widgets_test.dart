@@ -1,6 +1,7 @@
 import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -80,6 +81,114 @@ void main() {
       await tester.pump();
       expect(focusRing(), findsOneWidget);
     });
+
+    testWidgets('disabling a held press neither throws nor sticks pressed',
+        (tester) async {
+      VoidCallback? onTap = () {};
+      late StateSetter rebuild;
+      await tester.pumpWidget(host(StatefulBuilder(builder: (context, set) {
+        rebuild = set;
+        return Center(
+          child: MpPress(
+            onTap: onTap,
+            child: const SizedBox(width: 120, height: 50, child: Text('hold')),
+          ),
+        );
+      })));
+      final finger = await tester.startGesture(tester.getCenter(find.text('hold')));
+      await tester.pump(const Duration(milliseconds: 200));
+      rebuild(() => onTap = null);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await finger.up();
+      await tester.pumpAndSettle();
+      final scale = tester.widget<AnimatedScale>(find.descendant(
+          of: find.byType(MpPress), matching: find.byType(AnimatedScale)));
+      expect(scale.scale, 1.0);
+    });
+
+    // How wide a band, in px, visibly changes round [control] when keyboard
+    // focus lands on it: clearly changed pixels over the control's perimeter.
+    // The ring has to show on the control's own fill, whatever colour it is.
+    Future<double> ringWidth(WidgetTester tester, Widget control) async {
+      await tester.pumpWidget(host(Center(
+        child: RepaintBoundary(
+          key: const ValueKey('shot'),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: SizedBox(width: 200, child: control),
+          ),
+        ),
+      )));
+      await tester.pumpAndSettle();
+      Future<List<int>> shot() async {
+        final boundary =
+            tester.renderObject<RenderRepaintBoundary>(find.byKey(const ValueKey('shot')));
+        final bytes = await tester.runAsync(() async {
+          final image = await boundary.toImage();
+          final data = await image.toByteData();
+          image.dispose();
+          return data!.buffer.asUint8List();
+        });
+        return bytes!;
+      }
+
+      final before = await shot();
+      // Tab both switches to keyboard highlighting and focuses the control.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusRing(), findsOneWidget);
+      final after = await shot();
+      // Count clear changes in lightness only. A border that thickens by half
+      // a pixel, or swaps green for annatto at the same lightness, reads as
+      // no change at all to someone with red-green colour blindness.
+      double luma(List<int> px, int i) =>
+          0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+      var changed = 0;
+      for (var i = 0; i < before.length; i += 4) {
+        if ((luma(before, i) - luma(after, i)).abs() > 40) changed++;
+      }
+      final size = tester.getSize(find.byType(MpPress));
+      return changed / (2 * (size.width + size.height));
+    }
+
+    testWidgets('the focus ring shows on the annatto-filled CTA', (tester) async {
+      expect(await ringWidth(tester, MpCta(label: 'Go', onPressed: () {})),
+          greaterThanOrEqualTo(1.5));
+    });
+
+    testWidgets('the focus ring shows on the filled stepper', (tester) async {
+      expect(
+        await ringWidth(
+          tester,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: MpStepperButton(
+              icon: LucideIcons.plus,
+              semanticLabel: 'Increase budget',
+              filled: true,
+              onTap: () {},
+            ),
+          ),
+        ),
+        // A circle's perimeter is pi/4 of its box's, so this is a 1.5px band.
+        greaterThanOrEqualTo(1.5 * 0.785),
+      );
+    });
+
+    for (final accent in MpAccent.values) {
+      testWidgets('the focus ring shows on a selected ${accent.name} choice',
+          (tester) async {
+        expect(
+          await ringWidth(
+            tester,
+            MpChoiceButton(label: 'Pick', selected: true, accent: accent, onTap: () {}),
+          ),
+          greaterThanOrEqualTo(1.5),
+        );
+      });
+    }
+
 
     testWidgets('autofocus takes primary focus on the first frame',
         (tester) async {

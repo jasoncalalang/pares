@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
@@ -35,6 +36,25 @@ void main() {
       await tester.pumpWidget(host(const MpProgressSegments(step: 2, of: 4)));
       await tester.pumpAndSettle();
       expect(find.bySemanticsLabel('Step 2 of 4'), findsOneWidget);
+    });
+  });
+
+  group('MpDayStrip', () {
+    testWidgets('does not clip the focus ring drawn round each day',
+        (tester) async {
+      await phone(tester);
+      await tester.pumpWidget(host(Padding(
+        padding: const EdgeInsets.all(22),
+        child: MpDayStrip(
+          days: Weekday.values,
+          dayNumbers: const [20, 21, 22, 23, 24, 25, 26],
+          selected: 0,
+          onSelect: (_) {},
+        ),
+      )));
+      final stack = tester.widget<Stack>(find.descendant(
+          of: find.byType(MpDayStrip), matching: find.byType(Stack)));
+      expect(stack.clipBehavior, Clip.none);
     });
   });
 }

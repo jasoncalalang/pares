@@ -104,4 +104,9 @@ abstract final class MpStroke {
   static const double halo = 3;
   static const double icon = 2;
   static const double iconBold = 2.2;
+
+  /// Keyboard focus ring width, and the clear space between it and the
+  /// control, so the ring sits on the page whatever the control's fill.
+  static const double focus = 2;
+  static const double focusGap = 2;
 }

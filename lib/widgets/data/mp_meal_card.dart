@@ -143,6 +143,8 @@ class MpDayStrip extends StatelessWidget {
         return SizedBox(
           height: _height,
           child: Stack(
+            // The focus ring is drawn round each day, outside its cell.
+            clipBehavior: Clip.none,
             children: [
               AnimatedPositioned(
                 duration: MpMotion.of(context, MpMotion.slide),

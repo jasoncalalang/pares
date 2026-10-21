@@ -138,6 +138,11 @@ void main() {
       expect(MpElevation.sticker(c).single.blurRadius, 12);
     });
 
+    test('the keyboard focus ring is 2px, 2px clear of the control', () {
+      expect(MpStroke.focus, 2);
+      expect(MpStroke.focusGap, 2);
+    });
+
     test('every square control is at least the 44px tap target', () {
       expect(MpSize.swap, greaterThanOrEqualTo(MpSize.tap));
       expect(MpSize.stepper, greaterThanOrEqualTo(MpSize.tap));
