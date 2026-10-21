@@ -15,6 +15,7 @@ class MpBigValueField extends StatefulWidget {
     required this.value,
     required this.unit,
     required this.onChanged,
+    this.spokenUnit,
     this.fieldKey,
   });
 
@@ -22,6 +23,10 @@ class MpBigValueField extends StatefulWidget {
   final int value;
   final String unit;
   final ValueChanged<int?> onChanged;
+
+  /// The unit as a screen reader should say it ("kilograms" for "kg");
+  /// defaults to [unit].
+  final String? spokenUnit;
 
   /// Key placed on the inner [TextField] for tests and automation.
   final Key? fieldKey;
@@ -51,7 +56,10 @@ class _MpBigValueFieldState extends State<MpBigValueField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: MpTypography.label().copyWith(color: c.ink)),
+        // The field itself carries the label and unit for screen readers.
+        ExcludeSemantics(
+          child: Text(widget.label, style: MpTypography.label().copyWith(color: c.ink)),
+        ),
         const SizedBox(height: 7),
         Container(
           height: MpSize.bigInput,
@@ -65,28 +73,33 @@ class _MpBigValueFieldState extends State<MpBigValueField> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: TextField(
-                  key: widget.fieldKey,
-                  controller: _controller,
-                  onChanged: _changed,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(3),
-                  ],
-                  style: MpTypography.bigValue().copyWith(color: c.ink),
-                  cursorColor: c.annatto,
-                  decoration: const InputDecoration(
-                    isCollapsed: true,
-                    border: InputBorder.none,
+                child: Semantics(
+                  label: '${widget.label}, in ${widget.spokenUnit ?? widget.unit}',
+                  child: TextField(
+                    key: widget.fieldKey,
+                    controller: _controller,
+                    onChanged: _changed,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                    style: MpTypography.bigValue().copyWith(color: c.ink),
+                    cursorColor: c.annatto,
+                    decoration: const InputDecoration(
+                      isCollapsed: true,
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
               ),
-              Text(
-                widget.unit,
-                style: MpTypography.label().copyWith(
-                  color: c.faint,
-                  fontWeight: FontWeight.w400,
+              ExcludeSemantics(
+                child: Text(
+                  widget.unit,
+                  style: MpTypography.label().copyWith(
+                    color: c.faint,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
             ],

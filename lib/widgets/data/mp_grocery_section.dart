@@ -37,6 +37,7 @@ class MpGrocerySection extends StatelessWidget {
       children: [
         MpPress(
           onTap: onToggle,
+          expanded: expanded,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
             child: Row(
@@ -163,7 +164,6 @@ class _GroceryRow extends StatelessWidget {
       focusRadius: MpRadius.iconBox,
       child: Semantics(
         checked: done,
-        label: item.name,
         child: AnimatedOpacity(
           opacity: done ? 0.5 : 1,
           duration: MpMotion.of(context, MpMotion.expand),

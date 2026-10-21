@@ -32,37 +32,41 @@ class MpChoiceButton extends StatelessWidget {
     final c = context.mp;
     final fg = selected ? accent.deep(c) : c.muted;
     final style = selected ? MpTypography.chipSelected() : MpTypography.chip();
-    return MpPress(
-      onTap: onTap,
-      focusRadius: radius,
-      child: AnimatedContainer(
-        duration: MpMotion.of(context, MpMotion.select),
-        curve: MpMotion.ease,
-        height: height,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? accent.tint(c) : c.surface,
-          borderRadius: BorderRadius.circular(radius),
-          border: Border.all(
-            color: selected ? accent.main(c) : c.outline,
-            width: selected ? MpStroke.selected : MpStroke.hairline,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: selected ? c.halo(accent.main(c)) : Colors.transparent,
-              spreadRadius: MpStroke.halo,
+    return Semantics(
+      inMutuallyExclusiveGroup: true,
+      child: MpPress(
+        onTap: onTap,
+        selected: selected,
+        focusRadius: radius,
+        child: AnimatedContainer(
+          duration: MpMotion.of(context, MpMotion.select),
+          curve: MpMotion.ease,
+          height: height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: selected ? accent.tint(c) : c.surface,
+            borderRadius: BorderRadius.circular(radius),
+            border: Border.all(
+              color: selected ? accent.main(c) : c.outline,
+              width: selected ? MpStroke.selected : MpStroke.hairline,
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 17, color: fg),
-              const SizedBox(width: 7),
+            boxShadow: [
+              BoxShadow(
+                color: selected ? c.halo(accent.main(c)) : Colors.transparent,
+                spreadRadius: MpStroke.halo,
+              ),
             ],
-            Text(label, style: style.copyWith(color: fg)),
-          ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 17, color: fg),
+                const SizedBox(width: 7),
+              ],
+              Text(label, style: style.copyWith(color: fg)),
+            ],
+          ),
         ),
       ),
     );

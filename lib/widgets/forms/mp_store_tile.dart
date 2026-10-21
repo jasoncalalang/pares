@@ -31,6 +31,7 @@ class MpStoreTile extends StatelessWidget {
     final select = MpMotion.of(context, MpMotion.select);
     return MpPress(
       onTap: onTap,
+      selected: selected,
       focusRadius: MpRadius.tile,
       child: AnimatedScale(
         scale: selected ? MpMotion.popScale : 1,

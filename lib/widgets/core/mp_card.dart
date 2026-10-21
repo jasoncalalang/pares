@@ -154,11 +154,14 @@ class MpMonogram extends StatelessWidget {
         color: filled ? accent.main(c) : accent.tint(c),
         borderRadius: BorderRadius.circular(MpRadius.chip),
       ),
-      child: Text(
-        text,
-        style: MpTypography.monogram().copyWith(
-          color: filled ? c.surface : accent.deep(c),
-          fontSize: text.length > 2 ? 12 : null,
+      // Decoration: the store name beside it is what gets read out.
+      child: ExcludeSemantics(
+        child: Text(
+          text,
+          style: MpTypography.monogram().copyWith(
+            color: filled ? c.surface : accent.deep(c),
+            fontSize: text.length > 2 ? 12 : null,
+          ),
         ),
       ),
     );

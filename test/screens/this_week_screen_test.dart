@@ -67,7 +67,7 @@ void main() {
   testWidgets('swapping a meal replaces it and re-totals the day',
       (tester) async {
     await pump(tester);
-    await tester.tap(find.bySemanticsLabel('Swap meal').first);
+    await tester.tap(find.bySemanticsLabel('Swap breakfast'));
     await tester.pumpAndSettle();
     expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
         findsOneWidget);
@@ -82,7 +82,7 @@ void main() {
   testWidgets('swapping again moves on from the meal now showing',
       (tester) async {
     await pump(tester);
-    final swap = find.bySemanticsLabel('Swap meal').first;
+    final swap = find.bySemanticsLabel('Swap breakfast');
     await tester.tap(swap);
     await tester.pumpAndSettle();
     expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
@@ -99,7 +99,7 @@ void main() {
 
   testWidgets('a swap survives visiting another day', (tester) async {
     await pump(tester);
-    await tester.tap(find.bySemanticsLabel('Swap meal').first);
+    await tester.tap(find.bySemanticsLabel('Swap breakfast'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('TUE'));
     await tester.pumpAndSettle();

@@ -75,9 +75,13 @@ class _MpMealCardState extends State<MpMealCard> {
                   style: MpTypography.slotLabel().copyWith(color: c.annatto),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  meal.name,
-                  style: MpTypography.bodyStrong().copyWith(color: c.ink),
+                // A live region, so a swap reads out the new dish.
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    meal.name,
+                    style: MpTypography.bodyStrong().copyWith(color: c.ink),
+                  ),
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -90,7 +94,7 @@ class _MpMealCardState extends State<MpMealCard> {
           const SizedBox(width: 10),
           MpPress(
             onTap: _swap,
-            semanticLabel: 'Swap meal',
+            semanticLabel: 'Swap ${meal.slot.label.toLowerCase()}',
             focusRadius: MpRadius.swap,
             child: Container(
               width: MpSize.swap,
@@ -168,32 +172,36 @@ class MpDayStrip extends StatelessWidget {
                       child: MpPress(
                         onTap: () => onSelect(i),
                         semanticLabel: '${days[i].label} ${dayNumbers[i]}',
+                        selected: i == selected,
                         scale: 1,
                         focusRadius: MpRadius.segment,
-                        child: SizedBox(
-                          height: _height,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              AnimatedDefaultTextStyle(
-                                duration:
-                                    MpMotion.of(context, MpMotion.select),
-                                style: MpTypography.dayName().copyWith(
-                                  color: (i == selected ? c.heroText : c.muted)
-                                      .withValues(alpha: 0.7),
+                        // The label above says the day once, in full.
+                        child: ExcludeSemantics(
+                          child: SizedBox(
+                            height: _height,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                AnimatedDefaultTextStyle(
+                                  duration:
+                                      MpMotion.of(context, MpMotion.select),
+                                  style: MpTypography.dayName().copyWith(
+                                    color: (i == selected ? c.heroText : c.muted)
+                                        .withValues(alpha: 0.7),
+                                  ),
+                                  child: Text(days[i].short.toUpperCase()),
                                 ),
-                                child: Text(days[i].short.toUpperCase()),
-                              ),
-                              const SizedBox(height: 3),
-                              AnimatedDefaultTextStyle(
-                                duration:
-                                    MpMotion.of(context, MpMotion.select),
-                                style: MpTypography.dayNumber().copyWith(
-                                  color: i == selected ? c.heroText : c.muted,
+                                const SizedBox(height: 3),
+                                AnimatedDefaultTextStyle(
+                                  duration:
+                                      MpMotion.of(context, MpMotion.select),
+                                  style: MpTypography.dayNumber().copyWith(
+                                    color: i == selected ? c.heroText : c.muted,
+                                  ),
+                                  child: Text('${dayNumbers[i]}'),
                                 ),
-                                child: Text('${dayNumbers[i]}'),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

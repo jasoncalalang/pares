@@ -18,6 +18,8 @@ class MpPress extends StatefulWidget {
     this.focusGap = MpStroke.focusGap,
     this.focusNode,
     this.autofocus = false,
+    this.selected,
+    this.expanded,
   });
 
   final VoidCallback? onTap;
@@ -36,6 +38,14 @@ class MpPress extends StatefulWidget {
 
   /// Take focus when first built (the first control of a sheet).
   final bool autofocus;
+
+  /// Selection state for assistive tech; null when the control is not one
+  /// of a set of options.
+  final bool? selected;
+
+  /// Disclosure state for assistive tech; null when the control does not
+  /// show and hide content.
+  final bool? expanded;
 
   @override
   State<MpPress> createState() => _MpPressState();
@@ -64,6 +74,8 @@ class _MpPressState extends State<MpPress> {
     return Semantics(
       button: true,
       enabled: enabled,
+      selected: widget.selected,
+      expanded: widget.expanded,
       label: widget.semanticLabel,
       child: FocusableActionDetector(
         enabled: enabled,
