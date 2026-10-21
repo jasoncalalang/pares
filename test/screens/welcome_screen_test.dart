@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -103,6 +104,19 @@ void main() {
     expect(find.text(_sheetBody), findsOneWidget);
     expect(tester.takeException(), isNull);
     expect(tester.getRect(find.text('Close')).bottom, lessThanOrEqualTo(844));
+  });
+
+  testWidgets('"or continue with" sits on one line between the rules',
+      (tester) async {
+    await pump(tester);
+    final label = tester.renderObject<RenderParagraph>(find.text('or continue with'));
+    final boxes = label.getBoxesForSelection(
+        const TextSelection(baseOffset: 0, extentOffset: 16));
+    expect(boxes.map((b) => b.top).toSet(), hasLength(1));
+    final rule = find.byWidgetPredicate(
+        (w) => w is Container && w.color == MpColors.light.hairline);
+    expect(tester.getSize(rule).width, 390 - 2 * MpSpacing.gutter,
+        reason: 'the rule runs the full width behind the label');
   });
 
   testWidgets('the primary action starts the flow', (tester) async {

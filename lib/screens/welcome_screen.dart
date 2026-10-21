@@ -311,12 +311,20 @@ class _OrDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.mp;
-    final rule = Expanded(child: Container(height: MpStroke.hairline, color: c.hairline));
-    return Row(
-      children: [
-        rule,
-        Flexible(
-          child: Padding(
+    // A full-width rule behind the label, the label on a cream backing: it
+    // stays on one line until the row itself is too narrow, then wraps.
+    return SizedBox(
+      width: double.infinity,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(
+            child: Center(
+              child: Container(height: MpStroke.hairline, color: c.hairline),
+            ),
+          ),
+          Container(
+            color: c.cream,
             padding: const EdgeInsets.symmetric(horizontal: MpSpacing.md),
             child: Text(
               'or continue with',
@@ -327,9 +335,8 @@ class _OrDivider extends StatelessWidget {
               ),
             ),
           ),
-        ),
-        rule,
-      ],
+        ],
+      ),
     );
   }
 }
