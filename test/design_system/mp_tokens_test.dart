@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
@@ -76,6 +78,18 @@ void main() {
   });
 
   group('MpMotion', () {
+    test('nothing in lib/ uses a curve that overshoots', () {
+      final bouncy = RegExp(r'Curves\.(\w*Back\b|elastic\w*|bounce\w*)');
+      final sources = Directory('lib')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'));
+      for (final f in sources) {
+        expect(bouncy.firstMatch(f.readAsStringSync())?.group(0), isNull,
+            reason: f.path);
+      }
+    });
+
     test('pins the feedback and reveal timings', () {
       expect(MpMotion.press, const Duration(milliseconds: 120));
       expect(MpMotion.pressScale, 0.97);

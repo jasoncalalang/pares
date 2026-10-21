@@ -189,8 +189,11 @@ class MpDayStrip extends StatelessWidget {
                                   duration:
                                       MpMotion.of(context, MpMotion.select),
                                   style: MpTypography.dayName().copyWith(
-                                    color: (i == selected ? c.heroText : c.muted)
-                                        .withValues(alpha: 0.7),
+                                    // faint, not dimmed muted: 10px names
+                                    // need 4.5:1 on cream.
+                                    color: i == selected
+                                        ? c.heroText.withValues(alpha: 0.7)
+                                        : c.faint,
                                   ),
                                   child: Text(days[i].short.toUpperCase()),
                                 ),

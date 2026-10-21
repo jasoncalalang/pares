@@ -58,6 +58,22 @@ void main() {
           of: find.byType(MpDayStrip), matching: find.byType(Stack)));
       expect(stack.clipBehavior, Clip.none);
     });
+
+    testWidgets('unselected day names clear 4.5:1 on cream', (tester) async {
+      await phone(tester);
+      await tester.pumpWidget(host(MpDayStrip(
+        days: Weekday.values,
+        dayNumbers: const [20, 21, 22, 23, 24, 25, 26],
+        selected: 3,
+        onSelect: (_) {},
+      )));
+      await tester.pumpAndSettle();
+      for (final d in ['MON', 'TUE', 'WED', 'FRI', 'SAT', 'SUN']) {
+        expect(contrast(paintedColor(tester, find.text(d)), MpColors.light.cream),
+            greaterThanOrEqualTo(4.5),
+            reason: d);
+      }
+    });
   });
 
   group('MpGrocerySection', () {
@@ -72,6 +88,31 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getSize(find.byType(MpPress)).height,
           greaterThanOrEqualTo(MpSize.tap));
+    });
+
+    testWidgets('a checked row dims its text to faint, not to half opacity',
+        (tester) async {
+      await tester.pumpWidget(host(SingleChildScrollView(
+        child: MpGrocerySection(
+          section: sampleGroceryList(budgetPhp: 2500).sections[1],
+          expanded: true,
+          onToggle: () {},
+          checked: const {0},
+          onCheck: (_) {},
+        ),
+      )));
+      await tester.pumpAndSettle();
+      final faded = find.byWidgetPredicate((w) =>
+          (w is Opacity && w.opacity < 1) ||
+          (w is AnimatedOpacity && w.opacity < 1));
+      for (final t in ['Rice', '5 kg', '₱285']) {
+        expect(find.ancestor(of: find.text(t), matching: faded), findsNothing,
+            reason: t);
+        expect(paintedColor(tester, find.text(t)), MpColors.light.faint, reason: t);
+        expect(contrast(paintedColor(tester, find.text(t)), MpColors.light.surface),
+            greaterThanOrEqualTo(4.5),
+            reason: t);
+      }
     });
   });
 }

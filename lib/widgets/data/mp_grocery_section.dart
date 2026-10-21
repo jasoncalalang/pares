@@ -165,75 +165,74 @@ class _GroceryRow extends StatelessWidget {
       onTap: onTap,
       scale: 1,
       focusRadius: MpRadius.iconBox,
+      // Checked rows dim their text to faint (still 4.5:1 on white) and
+      // strike the name through; fading the whole row made it unreadable.
       child: Semantics(
         checked: done,
-        child: AnimatedOpacity(
-          opacity: done ? 0.5 : 1,
-          duration: MpMotion.of(context, MpMotion.expand),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              border: last
-                  ? null
-                  : Border(bottom: BorderSide(color: c.dividerSoft)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: MpSize.iconBox,
-                  height: MpSize.iconBox,
-                  decoration: BoxDecoration(
-                    color: accent.tint(c),
-                    borderRadius: BorderRadius.circular(MpRadius.iconBox),
-                  ),
-                  child: Icon(icon, size: 18, color: accent.deep(c)),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            border: last
+                ? null
+                : Border(bottom: BorderSide(color: c.dividerSoft)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: MpSize.iconBox,
+                height: MpSize.iconBox,
+                decoration: BoxDecoration(
+                  color: accent.tint(c),
+                  borderRadius: BorderRadius.circular(MpRadius.iconBox),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: MpTypography.bodyStrong().copyWith(
-                          color: done ? c.faint : c.ink,
-                          decoration: done ? TextDecoration.lineThrough : null,
-                          decorationColor: c.faint,
-                        ),
+                child: Icon(icon, size: 18, color: accent.deep(c)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: MpTypography.bodyStrong().copyWith(
+                        color: done ? c.faint : c.ink,
+                        decoration: done ? TextDecoration.lineThrough : null,
+                        decorationColor: c.faint,
                       ),
-                      Text(
-                        item.quantity,
-                        style: MpTypography.small().copyWith(color: c.faint),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  formatPeso(item.pricePhp, decimals: 0),
-                  style: MpTypography.bodyStrong().copyWith(color: c.ink),
-                ),
-                const SizedBox(width: 12),
-                AnimatedContainer(
-                  duration: select,
-                  width: MpSize.checkbox,
-                  height: MpSize.checkbox,
-                  decoration: BoxDecoration(
-                    color: done ? c.green : Colors.transparent,
-                    borderRadius: BorderRadius.circular(MpRadius.checkbox),
-                    border: Border.all(
-                      color: done ? c.green : c.outline,
-                      width: MpStroke.selected,
                     ),
-                  ),
-                  child: AnimatedOpacity(
-                    opacity: done ? 1 : 0,
-                    duration: select,
-                    child: Icon(LucideIcons.check, size: 13, color: c.surface),
+                    Text(
+                      item.quantity,
+                      style: MpTypography.small().copyWith(color: c.faint),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                formatPeso(item.pricePhp, decimals: 0),
+                style: MpTypography.bodyStrong()
+                    .copyWith(color: done ? c.faint : c.ink),
+              ),
+              const SizedBox(width: 12),
+              AnimatedContainer(
+                duration: select,
+                width: MpSize.checkbox,
+                height: MpSize.checkbox,
+                decoration: BoxDecoration(
+                  color: done ? c.green : Colors.transparent,
+                  borderRadius: BorderRadius.circular(MpRadius.checkbox),
+                  border: Border.all(
+                    color: done ? c.green : c.outline,
+                    width: MpStroke.selected,
                   ),
                 ),
-              ],
-            ),
+                child: AnimatedOpacity(
+                  opacity: done ? 1 : 0,
+                  duration: select,
+                  child: Icon(LucideIcons.check, size: 13, color: c.surface),
+                ),
+              ),
+            ],
           ),
         ),
       ),

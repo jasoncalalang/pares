@@ -84,7 +84,7 @@ class MpStoreTile extends StatelessWidget {
               child: AnimatedScale(
                 scale: selected ? 1 : 0,
                 duration: MpMotion.of(context, MpMotion.select),
-                curve: Curves.easeOutBack,
+                curve: MpMotion.ease,
                 child: Container(
                   width: 22,
                   height: 22,
