@@ -1,0 +1,7 @@
+# What `gcloud run deploy --source server` does not upload to Cloud Build.
+.gcloudignore
+.gradle/
+build/
+anthropic/
+deploy/
+*.md
