@@ -275,6 +275,19 @@ void main() {
           greaterThanOrEqualTo(MpSize.tap));
     });
 
+    testWidgets('header back links reserve the 44px tap height',
+        (tester) async {
+      await tester.pumpWidget(host(Column(children: [
+        MpStepHeader(step: 2, onBack: () {}),
+        MpBackHeader(label: 'THIS WEEK', onBack: () {}),
+      ])));
+      final links = find.byType(MpPress);
+      expect(links, findsNWidgets(2));
+      for (var i = 0; i < 2; i++) {
+        expect(tester.getSize(links.at(i)).height, greaterThanOrEqualTo(MpSize.tap));
+      }
+    });
+
     testWidgets('an unselected choice draws the 3:1 outline, not the hairline',
         (tester) async {
       await tester.pumpWidget(

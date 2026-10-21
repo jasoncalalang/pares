@@ -38,61 +38,64 @@ class MpGrocerySection extends StatelessWidget {
         MpPress(
           onTap: onToggle,
           expanded: expanded,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
-            child: Row(
-              children: [
-                MpMonogram(text: section.monogram, accent: accent),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              section.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: MpTypography.rowTitle().copyWith(color: c.ink),
-                            ),
-                          ),
-                          if (section.note != null) ...[
-                            const SizedBox(width: 4),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: MpSize.tap),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+              child: Row(
+                children: [
+                  MpMonogram(text: section.monogram, accent: accent),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
                             Flexible(
                               child: Text(
-                                section.note!,
+                                section.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: MpTypography.rowTitle().copyWith(
-                                  color: c.faint,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: MpTypography.rowTitle().copyWith(color: c.ink),
                               ),
                             ),
+                            if (section.note != null) ...[
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  section.note!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: MpTypography.rowTitle().copyWith(
+                                    color: c.faint,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                      Text(
-                        '${section.items.length} items',
-                        style: MpTypography.small().copyWith(color: c.faint),
-                      ),
-                    ],
+                        ),
+                        Text(
+                          '${section.items.length} items',
+                          style: MpTypography.small().copyWith(color: c.faint),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Text(
-                  formatPeso(section.subtotalPhp, decimals: 0),
-                  style: MpTypography.rowTitle().copyWith(color: c.ink),
-                ),
-                const SizedBox(width: 12),
-                AnimatedRotation(
-                  turns: expanded ? 0 : -0.25,
-                  duration: MpMotion.of(context, MpMotion.expand),
-                  curve: MpMotion.ease,
-                  child: Icon(LucideIcons.chevronDown, size: 18, color: c.faint),
-                ),
-              ],
+                  Text(
+                    formatPeso(section.subtotalPhp, decimals: 0),
+                    style: MpTypography.rowTitle().copyWith(color: c.ink),
+                  ),
+                  const SizedBox(width: 12),
+                  AnimatedRotation(
+                    turns: expanded ? 0 : -0.25,
+                    duration: MpMotion.of(context, MpMotion.expand),
+                    curve: MpMotion.ease,
+                    child: Icon(LucideIcons.chevronDown, size: 18, color: c.faint),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -9,10 +9,18 @@ import '../widgets/widgets.dart';
 /// Step 1 of 4: gender, age, height, weight and activity level. The CTA
 /// waits until every number field holds a value.
 class BodyStatsScreen extends StatefulWidget {
-  const BodyStatsScreen({super.key, required this.draft, required this.onNext});
+  const BodyStatsScreen({
+    super.key,
+    required this.draft,
+    required this.onNext,
+    this.onBack,
+  });
 
   final PlanDraft draft;
   final VoidCallback onNext;
+
+  /// Back to Welcome.
+  final VoidCallback? onBack;
 
   @override
   State<BodyStatsScreen> createState() => _BodyStatsScreenState();
@@ -50,9 +58,9 @@ class _BodyStatsScreenState extends State<BodyStatsScreen> {
       builder: (context, _) => MpPage(
         content: [
           const MpProgressSegments(step: 1),
-          const SizedBox(height: 16),
-          const MpStepHeader(step: 1),
-          const SizedBox(height: 24),
+          const SizedBox(height: 3),
+          MpStepHeader(step: 1, onBack: widget.onBack),
+          const SizedBox(height: 10),
           const MpTitle(
             title: 'Tell us about you',
             subtitle:

@@ -51,7 +51,7 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
     return MpPage(
       content: [
         MpBackHeader(label: 'THIS WEEK', onBack: widget.onBack),
-        const SizedBox(height: 22),
+        const SizedBox(height: 9),
         const MpTitle(
           title: 'Grocery list',
           subtitle: 'Everything for this week, grouped by where to buy it.',

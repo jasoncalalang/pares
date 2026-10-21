@@ -63,9 +63,9 @@ class DailyTargetScreen extends StatelessWidget {
         return MpPage(
           content: [
             const MpProgressSegments(step: 2),
-            const SizedBox(height: 16),
+            const SizedBox(height: 3),
             MpStepHeader(step: 2, onBack: onBack),
-            const SizedBox(height: 24),
+            const SizedBox(height: 10),
             const MpTitle(
               title: 'Your daily target',
               subtitle: 'Based on your stats and goal.',

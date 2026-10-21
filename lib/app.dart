@@ -62,6 +62,7 @@ class _FlowState extends State<_Flow> {
 
   Widget _bodyStats(BuildContext context) => BodyStatsScreen(
         draft: _draft,
+        onBack: () => Navigator.of(context).pop(),
         onNext: () => _push(context, Builder(builder: _dailyTarget)),
       );
 
@@ -80,6 +81,7 @@ class _FlowState extends State<_Flow> {
   Widget _thisWeek(BuildContext context) => ThisWeekScreen(
         draft: _draft,
         week: sampleWeek(),
+        onBack: () => Navigator.of(context).pop(),
         onGrocery: () => _push(context, Builder(builder: _groceries)),
       );
 

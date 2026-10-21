@@ -39,4 +39,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('This week'), findsOneWidget);
   });
+
+  testWidgets('every screen has an on-screen way back', (tester) async {
+    await phone(tester);
+    await tester.pumpWidget(const MealPalApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Find my calorie target'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('STEP 1 OF 4'));
+    await tester.pumpAndSettle();
+    expect(find.text('Find my calorie target'), findsOneWidget);
+
+    await tester.tap(find.text('Find my calorie target'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compute my target'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Next: where you shop'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Build my plan (2)'));
+    await tester.pumpAndSettle();
+    expect(find.text('This week'), findsOneWidget);
+    await tester.tap(find.text('STORES'));
+    await tester.pumpAndSettle();
+    expect(find.text('Where do you shop?'), findsOneWidget);
+  });
 }

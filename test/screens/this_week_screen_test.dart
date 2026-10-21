@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/screens/this_week_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';
+import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
 
@@ -108,6 +111,27 @@ void main() {
     expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
         findsOneWidget);
     expect(find.text('Monday · 2,067 kcal · ₱235'), findsOneWidget);
+  });
+
+  testWidgets('day buttons stay full tap targets on a 360dp phone',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(host(ThisWeekScreen(
+      draft: PlanDraft(),
+      week: sampleWeek(),
+      onGrocery: () {},
+    )));
+    await tester.pumpAndSettle();
+    final days = find.descendant(
+        of: find.byType(MpDayStrip), matching: find.byType(MpPress));
+    expect(days, findsNWidgets(7));
+    for (var i = 0; i < 7; i++) {
+      final size = tester.getSize(days.at(i));
+      expect(size.width, greaterThanOrEqualTo(MpSize.tap), reason: 'day $i');
+      expect(size.height, greaterThanOrEqualTo(MpSize.tap), reason: 'day $i');
+    }
   });
 
   testWidgets('both grocery entry points fire the callback', (tester) async {

@@ -21,6 +21,7 @@ class ThisWeekScreen extends StatefulWidget {
     required this.draft,
     required this.week,
     required this.onGrocery,
+    this.onBack,
     this.status = PlanStatus.ready,
     this.onRetry,
     this.weekStart,
@@ -29,6 +30,9 @@ class ThisWeekScreen extends StatefulWidget {
   final PlanDraft draft;
   final List<DayPlan> week;
   final VoidCallback onGrocery;
+
+  /// Back to the stores and budget.
+  final VoidCallback? onBack;
   final PlanStatus status;
 
   /// Rebuilds the plan after a failure.
@@ -85,6 +89,10 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
         final day = ready ? _dayPlan : null;
         return MpPage(
           content: [
+            if (widget.onBack != null) ...[
+              MpBackHeader(label: 'STORES', onBack: widget.onBack!),
+              const SizedBox(height: 9),
+            ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

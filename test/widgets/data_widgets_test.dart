@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mealpal_ph/data/sample_week.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
@@ -55,6 +57,21 @@ void main() {
       final stack = tester.widget<Stack>(find.descendant(
           of: find.byType(MpDayStrip), matching: find.byType(Stack)));
       expect(stack.clipBehavior, Clip.none);
+    });
+  });
+
+  group('MpGrocerySection', () {
+    testWidgets('the store header is a full 44px tap target', (tester) async {
+      await tester.pumpWidget(host(MpGrocerySection(
+        section: sampleGroceryList(budgetPhp: 2500).sections[1],
+        expanded: false,
+        onToggle: () {},
+        checked: const {},
+        onCheck: (_) {},
+      )));
+      await tester.pumpAndSettle();
+      expect(tester.getSize(find.byType(MpPress)).height,
+          greaterThanOrEqualTo(MpSize.tap));
     });
   });
 }

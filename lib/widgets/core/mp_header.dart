@@ -108,15 +108,44 @@ class MpStepHeader extends StatelessWidget {
       'STEP $step OF $of',
       style: MpTypography.eyebrow().copyWith(color: c.annatto),
     );
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (onBack == null)
-          eyebrow
-        else
-          MpPress(onTap: onBack, semanticLabel: 'Back', child: eyebrow),
-        const MpWordmark(),
-      ],
+    return _TapBand(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: onBack == null
+                ? eyebrow
+                : MpPress(
+                    onTap: onBack,
+                    semanticLabel: 'Back',
+                    child: _TapBand(child: eyebrow),
+                  ),
+          ),
+          const MpWordmark(),
+        ],
+      ),
+    );
+  }
+}
+
+/// Holds [child] in a band at least [MpSize.tap] tall, centred on its left,
+/// so a one-line back link is a full tap target. Screens trim the spacing
+/// round a header by the band's extra height, so the text stays put.
+class _TapBand extends StatelessWidget {
+  const _TapBand({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: MpSize.tap),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        widthFactor: 1,
+        heightFactor: 1,
+        child: child,
+      ),
     );
   }
 }
@@ -134,21 +163,27 @@ class MpBackHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        MpPress(
-          onTap: onBack,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(LucideIcons.arrowLeft, size: 16, color: c.annatto),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: MpTypography.eyebrow().copyWith(
-                  color: c.annatto,
-                  letterSpacing: 12 * 0.10,
-                ),
+        Flexible(
+          child: MpPress(
+            onTap: onBack,
+            child: _TapBand(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.arrowLeft, size: 16, color: c.annatto),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: MpTypography.eyebrow().copyWith(
+                        color: c.annatto,
+                        letterSpacing: 12 * 0.10,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
         const MpWordmark(),

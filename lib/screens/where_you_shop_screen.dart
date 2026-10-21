@@ -31,9 +31,9 @@ class WhereYouShopScreen extends StatelessWidget {
         return MpPage(
           content: [
             const MpProgressSegments(step: 3),
-            const SizedBox(height: 16),
+            const SizedBox(height: 3),
             MpStepHeader(step: 3, onBack: onBack),
-            const SizedBox(height: 24),
+            const SizedBox(height: 10),
             const MpTitle(
               title: 'Where do you shop?',
               subtitle: 'Pick the stores you actually buy from.',

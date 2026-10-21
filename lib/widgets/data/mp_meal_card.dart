@@ -143,7 +143,10 @@ class MpDayStrip extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final n = days.length;
-        final cell = (constraints.maxWidth - _gap * (n - 1)) / n;
+        // Narrow phones give up gap before a day drops under MpSize.tap.
+        final spare = (constraints.maxWidth - n * MpSize.tap) / (n - 1);
+        final gap = spare.clamp(0.0, _gap);
+        final cell = (constraints.maxWidth - gap * (n - 1)) / n;
         return SizedBox(
           height: _height,
           child: Stack(
@@ -153,7 +156,7 @@ class MpDayStrip extends StatelessWidget {
               AnimatedPositioned(
                 duration: MpMotion.of(context, MpMotion.slide),
                 curve: MpMotion.ease,
-                left: selected * (cell + _gap),
+                left: selected * (cell + gap),
                 top: 0,
                 width: cell,
                 height: _height,
@@ -167,7 +170,7 @@ class MpDayStrip extends StatelessWidget {
               Row(
                 children: [
                   for (var i = 0; i < n; i++) ...[
-                    if (i > 0) const SizedBox(width: _gap),
+                    if (i > 0) SizedBox(width: gap),
                     Expanded(
                       child: MpPress(
                         onTap: () => onSelect(i),
