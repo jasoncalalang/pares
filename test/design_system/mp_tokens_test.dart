@@ -61,6 +61,10 @@ void main() {
       expect(MpTypography.body().fontSize, 14);
       expect(MpTypography.button().fontSize, 15);
       expect(MpTypography.button().fontWeight, FontWeight.w700);
+      expect(MpTypography.display().fontFamily, 'Fraunces');
+      expect(MpTypography.display().fontSize, 30);
+      expect(MpTypography.sheetTitle().fontFamily, 'Fraunces');
+      expect(MpTypography.sheetTitle().fontSize, 20);
     });
 
     test('drives the variable-font weight axis, not just FontWeight', () {
@@ -120,6 +124,18 @@ void main() {
       expect(MpSize.control, 52);
       expect(MpSize.bigInput, 64);
       expect(MpSize.tap, 44);
+    });
+
+    test('the welcome collage and provider buttons have their own sizes', () {
+      expect(MpSize.collageTile, 150);
+      expect(MpSize.brandMark, 22);
+      expect(MpSize.sheetButton, 48);
+    });
+
+    test('only the welcome collage lifts off the page', () {
+      const c = MpColors.light;
+      expect(MpElevation.plate(c).single.blurRadius, 20);
+      expect(MpElevation.sticker(c).single.blurRadius, 12);
     });
 
     test('every square control is at least the 44px tap target', () {

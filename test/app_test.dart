@@ -10,6 +10,10 @@ void main() {
     await tester.pumpWidget(const MealPalApp());
     await tester.pumpAndSettle();
 
+    expect(find.text('Find my calorie target'), findsOneWidget);
+    await tester.tap(find.text('Find my calorie target'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Tell us about you'), findsOneWidget);
     await tester.tap(find.text('Compute my target'));
     await tester.pumpAndSettle();

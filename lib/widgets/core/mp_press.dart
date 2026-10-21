@@ -16,6 +16,7 @@ class MpPress extends StatefulWidget {
     this.scale = MpMotion.pressScale,
     this.focusRadius = MpRadius.button,
     this.focusNode,
+    this.autofocus = false,
   });
 
   final VoidCallback? onTap;
@@ -26,6 +27,9 @@ class MpPress extends StatefulWidget {
   /// Corner radius of the keyboard focus ring, matched to the child's shape.
   final double focusRadius;
   final FocusNode? focusNode;
+
+  /// Take focus when first built (the first control of a sheet).
+  final bool autofocus;
 
   @override
   State<MpPress> createState() => _MpPressState();
@@ -50,6 +54,7 @@ class _MpPressState extends State<MpPress> {
       child: FocusableActionDetector(
         enabled: enabled,
         focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
         mouseCursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
         onShowFocusHighlight: (v) => setState(() => _focused = v),
         // Space is an ActivateIntent everywhere; Enter is an ActivateIntent on

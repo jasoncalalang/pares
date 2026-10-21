@@ -57,6 +57,41 @@ class MpCta extends StatelessWidget {
   }
 }
 
+/// The quiet full-width button: white, 1px outline, ink label. Used where
+/// the primary annatto CTA would shout (closing a sheet).
+class MpSecondaryButton extends StatelessWidget {
+  const MpSecondaryButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.autofocus = false,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+  final bool autofocus;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.mp;
+    return MpPress(
+      onTap: onPressed,
+      autofocus: autofocus,
+      focusRadius: MpRadius.input,
+      child: Container(
+        height: MpSize.sheetButton,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(MpRadius.input),
+          border: Border.all(color: c.outline),
+        ),
+        child: Text(label, style: MpTypography.bodyBold().copyWith(color: c.ink)),
+      ),
+    );
+  }
+}
+
 /// The small muted line under a CTA ("An estimate, not medical advice.").
 class MpCtaNote extends StatelessWidget {
   const MpCtaNote(this.text, {super.key});

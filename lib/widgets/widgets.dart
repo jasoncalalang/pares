@@ -1,6 +1,7 @@
 /// MealPal PH design-system components.
 library;
 
+export 'core/mp_brand_mark.dart';
 export 'core/mp_card.dart';
 export 'core/mp_cta.dart';
 export 'core/mp_header.dart';

@@ -4,6 +4,7 @@
 library;
 
 export 'mp_colors.dart';
+export 'mp_elevation.dart';
 export 'mp_motion.dart';
 export 'mp_spacing.dart';
 export 'mp_theme.dart';

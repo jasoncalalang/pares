@@ -6,11 +6,12 @@ import 'screens/body_stats_screen.dart';
 import 'screens/daily_target_screen.dart';
 import 'screens/grocery_list_screen.dart';
 import 'screens/this_week_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'screens/where_you_shop_screen.dart';
 import 'state/plan_draft.dart';
 
-/// MealPal PH app root. One [PlanDraft] lives for the whole flow and is
-/// handed to every screen; screens navigate with plain pushes and fade
+/// MealPal PH app root. The flow opens on Welcome; one [PlanDraft] lives
+/// for the whole flow and is handed to every screen; screens navigate with plain pushes and fade
 /// between each other the way the mockups' view transitions do. The plan
 /// and grocery list come from the local sample bank for now, so they are
 /// ready the moment the screen opens; the building and failed states exist
@@ -59,48 +60,39 @@ class _FlowState extends State<_Flow> {
     );
   }
 
+  Widget _bodyStats(BuildContext context) => BodyStatsScreen(
+        draft: _draft,
+        onNext: () => _push(context, Builder(builder: _dailyTarget)),
+      );
+
+  Widget _dailyTarget(BuildContext context) => DailyTargetScreen(
+        draft: _draft,
+        onBack: () => Navigator.of(context).pop(),
+        onNext: () => _push(context, Builder(builder: _whereYouShop)),
+      );
+
+  Widget _whereYouShop(BuildContext context) => WhereYouShopScreen(
+        draft: _draft,
+        onBack: () => Navigator.of(context).pop(),
+        onNext: () => _push(context, Builder(builder: _thisWeek)),
+      );
+
+  Widget _thisWeek(BuildContext context) => ThisWeekScreen(
+        draft: _draft,
+        week: sampleWeek(),
+        onGrocery: () => _push(context, Builder(builder: _groceries)),
+      );
+
+  Widget _groceries(BuildContext context) => GroceryListScreen(
+        list: sampleGroceryList(budgetPhp: _draft.weeklyBudgetPhp),
+        onBack: () => Navigator.of(context).pop(),
+      );
+
   @override
   Widget build(BuildContext context) {
-    return BodyStatsScreen(
-      draft: _draft,
-      onNext: () => _push(
-        context,
-        Builder(
-          builder: (context) => DailyTargetScreen(
-            draft: _draft,
-            onBack: () => Navigator.of(context).pop(),
-            onNext: () => _push(
-              context,
-              Builder(
-                builder: (context) => WhereYouShopScreen(
-                  draft: _draft,
-                  onBack: () => Navigator.of(context).pop(),
-                  onNext: () => _push(
-                    context,
-                    Builder(
-                      builder: (context) => ThisWeekScreen(
-                        draft: _draft,
-                        week: sampleWeek(),
-                        onGrocery: () => _push(
-                          context,
-                          Builder(
-                            builder: (context) => GroceryListScreen(
-                              list: sampleGroceryList(
-                                budgetPhp: _draft.weeklyBudgetPhp,
-                              ),
-                              onBack: () => Navigator.of(context).pop(),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return WelcomeScreen(
+      exampleDay: sampleWeek().first,
+      onStart: () => _push(context, Builder(builder: _bodyStats)),
     );
   }
 }

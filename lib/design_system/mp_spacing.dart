@@ -73,6 +73,15 @@ abstract final class MpSize {
   /// Grocery row checkbox.
   static const double checkbox = 22;
 
+  /// One plate in the welcome collage.
+  static const double collageTile = 150;
+
+  /// Google / Apple mark inside a provider button.
+  static const double brandMark = 22;
+
+  /// Secondary button inside a bottom sheet.
+  static const double sheetButton = 48;
+
   /// Calorie ring diameter / stroke.
   static const double ring = 118;
   static const double ringStroke = 8;

@@ -16,6 +16,12 @@ abstract final class MpTypography {
 
   static TextStyle wordmark() => _display(18, FontWeight.w600, height: 1.2);
   static TextStyle h1() => _display(28, FontWeight.w600, height: 1.1);
+
+  /// The welcome headline, one step up from [h1].
+  static TextStyle display() => _display(30, FontWeight.w600, height: 1.1);
+
+  /// Bottom-sheet title.
+  static TextStyle sheetTitle() => _display(20, FontWeight.w600, height: 1.2);
   static TextStyle heroNumber() => _display(50, FontWeight.w600, height: 1.0);
   static TextStyle ringNumber() => _display(30, FontWeight.w600, height: 1.0);
   static TextStyle totalValue() => _display(34, FontWeight.w600, height: 1.0);

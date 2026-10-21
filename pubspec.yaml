@@ -1,6 +1,6 @@
 name: mealpal_ph
 description: >-
-  MealPal PH — a Philippine, calorie-driven meal, recipe and grocery planner.
+  MealPal PH: a Philippine, calorie-driven meal, recipe and grocery planner.
   Body stats → daily calorie target → stores + ₱ budget → Filipino meal plan →
   grocery list. The domain core under lib/src stays pure Dart (no Flutter
   import) so background jobs and plain `dart test` can reuse it.
@@ -14,6 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   lucide_icons_flutter: ^3.1.15
+  path_drawing: ^1.0.1
 
 dev_dependencies:
   flutter_test:
