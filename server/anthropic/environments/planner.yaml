@@ -1,0 +1,6 @@
+name: mealpal-planner
+description: Sandbox for the MealPal planner. No network; the planner only computes over the bank it is sent.
+config:
+  type: cloud
+  networking:
+    type: limited
