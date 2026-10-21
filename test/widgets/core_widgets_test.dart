@@ -232,6 +232,33 @@ void main() {
     });
   });
 
+  group('MpPage', () {
+    testWidgets('a footer taller than half the screen scrolls instead of '
+        'overflowing', (tester) async {
+      await phone(tester);
+      await tester.pumpWidget(host(MpPage(
+        content: const [Text('content')],
+        footer: Column(children: [
+          for (var i = 0; i < 20; i++) SizedBox(height: 60, child: Text('action $i')),
+        ]),
+      )));
+      expect(tester.takeException(), isNull);
+      expect(find.text('content'), findsOneWidget);
+    });
+
+    testWidgets('a footer that fits stays pinned under the content',
+        (tester) async {
+      await phone(tester);
+      await tester.pumpWidget(host(MpPage(
+        content: [for (var i = 0; i < 30; i++) SizedBox(height: 60, child: Text('row $i'))],
+        footer: const SizedBox(height: 54, child: Text('cta')),
+      )));
+      expect(tester.getRect(find.text('cta')).bottom,
+          lessThanOrEqualTo(844 - MpSpacing.bottom));
+      expect(tester.getRect(find.text('cta')).top, greaterThan(700));
+    });
+  });
+
   group('MpCta', () {
     testWidgets('a disabled CTA loses the accent fill and takes no focus',
         (tester) async {

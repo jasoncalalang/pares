@@ -51,7 +51,8 @@ class WelcomeScreen extends StatelessWidget {
           const _OrDivider(),
           const SizedBox(height: MpSpacing.lg),
           // TODO(auth): wire Google, Apple and email sign-in once accounts
-          // exist. Until then each opens a sheet that says so.
+          // exist. Until then each opens a sheet that says so, and the line
+          // under the row says it before anyone taps.
           Row(
             children: [
               Expanded(
@@ -67,7 +68,13 @@ class WelcomeScreen extends StatelessWidget {
                   label: 'Continue with Apple',
                   dark: true,
                   onTap: signIn,
-                  child: MpBrandMark(MpBrand.apple, size: 20, color: c.cream),
+                  // The Apple mark and the mail glyph sit a touch under
+                  // brandMark so all three read as the same size.
+                  child: MpBrandMark(
+                    MpBrand.apple,
+                    size: MpSize.brandMark - 2,
+                    color: c.cream,
+                  ),
                 ),
               ),
               const SizedBox(width: MpSpacing.tileGap),
@@ -75,11 +82,16 @@ class WelcomeScreen extends StatelessWidget {
                 child: _ProviderButton(
                   label: 'Continue with email',
                   onTap: signIn,
-                  child: Icon(LucideIcons.mail, size: 21, color: c.ink),
+                  child: Icon(
+                    LucideIcons.mail,
+                    size: MpSize.brandMark - 1,
+                    color: c.ink,
+                  ),
                 ),
               ),
             ],
           ),
+          const MpCtaNote('Sign-in is coming soon. No account is needed to plan.'),
         ],
       ),
     );
@@ -118,20 +130,38 @@ class _SignInSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 22, 22, 28),
+        padding: const EdgeInsets.fromLTRB(
+          MpSpacing.gutter,
+          MpSpacing.gutter,
+          MpSpacing.gutter,
+          MpSpacing.xxl + MpSpacing.xs,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Semantics(
-              header: true,
-              child: Text('Sign in', style: MpTypography.sheetTitle().copyWith(color: c.ink)),
-            ),
-            const SizedBox(height: MpSpacing.sm),
-            Text(
-              'Sign-in arrives with accounts. For now your plan stays on this '
-              'device, and no account is needed.',
-              style: MpTypography.body().copyWith(color: c.muted, height: 1.45),
+            // The words scroll at large text sizes; Close stays on screen.
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        'Sign in',
+                        style: MpTypography.sheetTitle().copyWith(color: c.ink),
+                      ),
+                    ),
+                    const SizedBox(height: MpSpacing.sm),
+                    Text(
+                      'Sign-in is coming soon. For now no account is needed, '
+                      'and your plan is not kept after you close the app.',
+                      style: MpTypography.body().copyWith(color: c.muted, height: 1.45),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 18),
             MpSecondaryButton(
@@ -161,10 +191,10 @@ class _Collage extends StatelessWidget {
   /// left, top, right, bottom (one of each pair is null), size, tilt in
   /// degrees, and paint order (higher draws on top).
   static const _slots = [
-    (left: 8.0, top: 6.0, right: null, bottom: null, size: 150.0, tilt: -4.0, z: 2),
-    (left: null, top: 0.0, right: 6.0, bottom: null, size: 152.0, tilt: 3.0, z: 1),
-    (left: 18.0, top: null, right: null, bottom: 0.0, size: 148.0, tilt: 2.0, z: 1),
-    (left: null, top: null, right: 16.0, bottom: 4.0, size: 150.0, tilt: -3.0, z: 2),
+    (left: 8.0, top: 6.0, right: null, bottom: null, size: MpSize.collageTile, tilt: -4.0, z: 2),
+    (left: null, top: 0.0, right: 6.0, bottom: null, size: MpSize.collageTile + 2, tilt: 3.0, z: 1),
+    (left: 18.0, top: null, right: null, bottom: 0.0, size: MpSize.collageTile - 2, tilt: 2.0, z: 1),
+    (left: null, top: null, right: 16.0, bottom: 4.0, size: MpSize.collageTile, tilt: -3.0, z: 2),
   ];
 
   @override
@@ -200,9 +230,10 @@ class _Collage extends StatelessWidget {
                   top: 118,
                   child: _Sticker('${formatThousands(lead.kcal)} kcal', color: c.annatto),
                 ),
+                // Both lead stickers sit on the lead plate, which they quote.
                 Positioned(
-                  right: 0,
-                  top: 138,
+                  left: 96,
+                  top: 0,
                   child: _Sticker(formatPeso(lead.pricePhp, decimals: 0), color: c.green),
                 ),
               ],
@@ -284,13 +315,16 @@ class _OrDivider extends StatelessWidget {
     return Row(
       children: [
         rule,
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MpSpacing.md),
-          child: Text(
-            'or continue with',
-            style: MpTypography.small().copyWith(
-              color: c.faint,
-              fontWeight: FontWeight.w500,
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: MpSpacing.md),
+            child: Text(
+              'or continue with',
+              textAlign: TextAlign.center,
+              style: MpTypography.small().copyWith(
+                color: c.faint,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),

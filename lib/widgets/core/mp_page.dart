@@ -4,7 +4,9 @@ import '../../design_system/design_system.dart';
 
 /// Page frame every screen uses: cream ground, safe area, 22px gutters,
 /// 24px top padding, scrolling [content], and an optional [footer] (the
-/// CTA block) pinned beneath the scroll area.
+/// CTA block) pinned beneath the scroll area. At the largest text sizes a
+/// footer may not fit; past half the screen's height it scrolls on its own
+/// rather than overflow.
 class MpPage extends StatelessWidget {
   const MpPage({super.key, required this.content, this.footer});
 
@@ -19,29 +21,36 @@ class MpPage extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: MpSpacing.gutter),
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    top: MpSpacing.top,
-                    bottom: footer == null ? MpSpacing.bottom : MpSpacing.md,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: content,
+          child: LayoutBuilder(
+            builder: (context, box) => Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      top: MpSpacing.top,
+                      bottom: footer == null ? MpSpacing.bottom : MpSpacing.md,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: content,
+                    ),
                   ),
                 ),
-              ),
-              if (footer != null)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: MpSpacing.sm,
-                    bottom: MpSpacing.bottom,
+                if (footer != null)
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: box.maxHeight / 2),
+                    child: SingleChildScrollView(
+                      primary: false,
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.only(
+                        top: MpSpacing.sm,
+                        bottom: MpSpacing.bottom,
+                      ),
+                      child: footer,
+                    ),
                   ),
-                  child: footer,
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

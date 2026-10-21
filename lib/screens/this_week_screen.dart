@@ -217,8 +217,8 @@ class _PlanStateCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             failed
-                ? 'Your stats and stores are saved. Check your connection and '
-                    'try again.'
+                ? 'Your stats and stores are still here. Check your connection '
+                    'and try again.'
                 : 'Matching meals to your $target kcal target and $budget '
                     'weekly budget from the stores you picked.',
             style: MpTypography.body().copyWith(color: c.muted),

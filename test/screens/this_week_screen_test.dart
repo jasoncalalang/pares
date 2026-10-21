@@ -161,8 +161,8 @@ void main() {
     await pump(tester, status: PlanStatus.failed);
     expect(find.text("We couldn't build your week."), findsOneWidget);
     expect(
-      find.text('Your stats and stores are saved. Check your connection and '
-          'try again.'),
+      find.text('Your stats and stores are still here. Check your connection '
+          'and try again.'),
       findsOneWidget,
     );
     expect(find.text('BREAKFAST'), findsNothing);
