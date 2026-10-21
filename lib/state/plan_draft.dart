@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../mealpal_ph.dart';
 
+/// The number fields on Body stats.
+enum BodyStat { age, height, weight }
+
 /// Everything the onboarding flow collects, plus what the domain derives from
 /// it. One instance lives for the whole flow and is handed to each screen.
 /// In-memory only: there is no persistence layer yet.
@@ -17,6 +20,7 @@ class PlanDraft extends ChangeNotifier {
   Goal _goal = Goal.lose;
   int _weeklyBudgetPhp = 2500;
   final Set<String> _selectedStoreIds = {'puregold', 'palengke'};
+  final Set<BodyStat> _blank = {};
 
   BiologicalSex get sex => _sex;
   set sex(BiologicalSex v) => _set(() => _sex = v);
@@ -30,6 +34,15 @@ class PlanDraft extends ChangeNotifier {
   int get weightKg => _weightKg;
   set weightKg(int v) => _set(() => _weightKg = v);
 
+  /// Whether the user has emptied [stat]'s field. The draft keeps the last
+  /// value it was given, but the field shows empty and the flow waits until
+  /// it is filled again. Kept here, not in the screen, because the draft
+  /// outlives the screen when the user goes back and returns.
+  bool isBlank(BodyStat stat) => _blank.contains(stat);
+  bool get bodyStatsComplete => _blank.isEmpty;
+  void setBlank(BodyStat stat, {required bool blank}) =>
+      _set(() => blank ? _blank.add(stat) : _blank.remove(stat));
+
   ActivityLevel get activity => _activity;
   set activity(ActivityLevel v) => _set(() => _activity = v);
 
@@ -37,6 +50,7 @@ class PlanDraft extends ChangeNotifier {
   set goal(Goal v) => _set(() => _goal = v);
 
   int get weeklyBudgetPhp => _weeklyBudgetPhp;
+  bool get canBudgetDown => _weeklyBudgetPhp > budgetFloorPhp;
 
   void budgetUp() => _set(() => _weeklyBudgetPhp += budgetStepPhp);
 

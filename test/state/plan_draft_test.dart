@@ -57,6 +57,23 @@ void main() {
       expect(d.weeklyBudgetPhp, 500);
     });
 
+    test('remembers which body stats were emptied, and the budget floor',
+        () {
+      final d = PlanDraft();
+      expect(d.bodyStatsComplete, isTrue);
+      d.setBlank(BodyStat.weight, blank: true);
+      expect(d.isBlank(BodyStat.weight), isTrue);
+      expect(d.bodyStatsComplete, isFalse);
+      d.setBlank(BodyStat.weight, blank: false);
+      expect(d.bodyStatsComplete, isTrue);
+
+      expect(d.canBudgetDown, isTrue);
+      while (d.weeklyBudgetPhp > PlanDraft.budgetFloorPhp) {
+        d.budgetDown();
+      }
+      expect(d.canBudgetDown, isFalse);
+    });
+
     test('toggles store selection', () {
       final d = PlanDraft();
       d.toggleStore('sm-supermarket');

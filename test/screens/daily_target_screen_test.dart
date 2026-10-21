@@ -68,4 +68,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(nexts, 1);
   });
+
+  testWidgets('a target raised past maintenance says so, not a deficit',
+      (tester) async {
+    await pump(tester);
+    draft
+      ..sex = BiologicalSex.female
+      ..age = 60
+      ..heightCm = 150
+      ..weightKg = 45
+      ..activity = ActivityLevel.sedentary;
+    await tester.pumpAndSettle();
+    expect(find.text('1,112 kcal'), findsOneWidget);
+    expect(find.text('Above maintenance'), findsOneWidget);
+    expect(find.text('+88 kcal'), findsOneWidget);
+    expect(find.text('−500 kcal'), findsNothing);
+    expect(find.textContaining('0.5 kg'), findsNothing);
+    expect(find.text('kcal a day, the safe minimum for you'), findsOneWidget);
+    expect(
+      find.text('Raised to the safe minimum of 1,200 kcal, which is above '
+          'your maintenance of 1,112 kcal. Talk to a doctor before trying to '
+          'lose weight.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a target raised to the floor shows the real, smaller deficit',
+      (tester) async {
+    await pump(tester);
+    draft
+      ..sex = BiologicalSex.female
+      ..age = 30
+      ..heightCm = 160
+      ..weightKg = 55
+      ..activity = ActivityLevel.sedentary;
+    await tester.pumpAndSettle();
+    expect(find.text('1,487 kcal'), findsOneWidget);
+    expect(find.text('Deficit for losing'), findsOneWidget);
+    expect(find.text('−287 kcal'), findsOneWidget);
+    expect(find.textContaining('0.5 kg'), findsNothing);
+    expect(
+      find.text('Raised to the safe minimum of 1,200 kcal. A steeper deficit '
+          'needs a doctor in the loop.'),
+      findsOneWidget,
+    );
+  });
 }

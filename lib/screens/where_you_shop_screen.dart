@@ -83,7 +83,7 @@ class WhereYouShopScreen extends StatelessWidget {
                   MpStepperButton(
                     icon: LucideIcons.minus,
                     semanticLabel: 'Decrease budget',
-                    onTap: draft.budgetDown,
+                    onTap: draft.canBudgetDown ? draft.budgetDown : null,
                   ),
                   const SizedBox(width: 10),
                   MpStepperButton(

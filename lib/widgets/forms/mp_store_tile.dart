@@ -104,6 +104,7 @@ class MpStoreTile extends StatelessWidget {
 }
 
 /// Round 44px stepper button (minus / plus). [filled] draws it solid annatto.
+/// A null [onTap] disables it (at a limit) and draws its glyph faint.
 class MpStepperButton extends StatelessWidget {
   const MpStepperButton({
     super.key,
@@ -114,7 +115,7 @@ class MpStepperButton extends StatelessWidget {
   });
 
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final String semanticLabel;
   final bool filled;
 
@@ -136,7 +137,11 @@ class MpStepperButton extends StatelessWidget {
             width: MpStroke.selected,
           ),
         ),
-        child: Icon(icon, size: 18, color: filled ? c.surface : c.ink),
+        child: Icon(
+          icon,
+          size: 18,
+          color: onTap == null ? c.faint : (filled ? c.surface : c.ink),
+        ),
       ),
     );
   }

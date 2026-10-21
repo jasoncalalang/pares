@@ -27,21 +27,17 @@ class DailyTargetScreen extends StatelessWidget {
         ActivityLevel.veryActive => 'very active',
       };
 
-  static ({String row, String delta, String tagline}) _goalCopy(Goal g) =>
-      switch (g) {
+  static ({String row, String tagline}) _goalCopy(Goal g) => switch (g) {
         Goal.lose => (
             row: 'Deficit for losing',
-            delta: '−${-g.kcalDelta} kcal',
             tagline: 'kcal a day, to lose about 0.5 kg a week',
           ),
         Goal.maintain => (
             row: 'Maintenance',
-            delta: '0 kcal',
             tagline: 'kcal a day, to hold your weight',
           ),
         Goal.gain => (
             row: 'Surplus for gaining',
-            delta: '+${g.kcalDelta} kcal',
             tagline: 'kcal a day, to gain about 0.4 kg a week',
           ),
       };
@@ -55,11 +51,26 @@ class DailyTargetScreen extends StatelessWidget {
         final target = draft.target;
         final macros = draft.macros;
         final goal = _goalCopy(draft.goal);
-        final deltaColor = switch (draft.goal) {
-          Goal.lose => c.annatto,
-          Goal.maintain => c.ink,
-          Goal.gain => c.green,
-        };
+        // The change from maintenance the math actually produced. Raised to
+        // the safe floor, it is smaller than the goal's, or even a surplus,
+        // so the screen states it and drops the weekly-rate claim.
+        final maintenance = target.tdee.round();
+        final delta = target.targetCalories - maintenance;
+        final clamped = target.clampedToFloor;
+        final deltaText = delta < 0
+            ? '−${formatThousands(-delta)} kcal'
+            : delta > 0
+                ? '+${formatThousands(delta)} kcal'
+                : '0 kcal';
+        final deltaRow = clamped && delta > 0 ? 'Above maintenance' : goal.row;
+        final tagline =
+            clamped ? 'kcal a day, the safe minimum for you' : goal.tagline;
+        final deltaColor = delta < 0
+            ? c.annatto
+            : delta > 0
+                ? c.green
+                : c.ink;
+        final floor = formatThousands(target.targetCalories);
         return MpPage(
           content: [
             const MpProgressSegments(step: 2),
@@ -104,7 +115,7 @@ class DailyTargetScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 9),
                         Text(
-                          goal.tagline,
+                          tagline,
                           style: MpTypography.small().copyWith(
                             fontSize: 12.5,
                             color: c.heroMuted,
@@ -116,12 +127,16 @@ class DailyTargetScreen extends StatelessWidget {
                 ],
               ),
             ),
-            if (target.clampedToFloor) ...[
+            if (clamped) ...[
               const SizedBox(height: 10),
               Text(
-                'Raised to the safe minimum of '
-                '${formatThousands(target.targetCalories)} kcal. A steeper '
-                'deficit needs a doctor in the loop.',
+                delta < 0
+                    ? 'Raised to the safe minimum of $floor kcal. A steeper '
+                        'deficit needs a doctor in the loop.'
+                    : 'Raised to the safe minimum of $floor kcal, which is '
+                        'above your maintenance of '
+                        '${formatThousands(maintenance)} kcal. Talk to a '
+                        'doctor before trying to lose weight.',
                 style: MpTypography.small().copyWith(color: c.annattoDeep),
               ),
             ],
@@ -160,11 +175,11 @@ class DailyTargetScreen extends StatelessWidget {
                   _BreakdownRow(
                     label:
                         'Activity ×${draft.activity.factor} (${_activityName(draft.activity)})',
-                    value: '${formatThousands(target.tdee.round())} kcal',
+                    value: '${formatThousands(maintenance)} kcal',
                   ),
                   _BreakdownRow(
-                    label: goal.row,
-                    value: goal.delta,
+                    label: deltaRow,
+                    value: deltaText,
                     valueColor: deltaColor,
                     last: true,
                   ),

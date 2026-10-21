@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/screens/where_you_shop_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';
@@ -97,5 +99,20 @@ void main() {
     await tester.tap(find.text('Build my plan (1)'));
     await tester.pumpAndSettle();
     expect(nexts, 1);
+  });
+
+  testWidgets('decrease budget is disabled at the ₱500 floor', (tester) async {
+    await pump(tester);
+    final down = find.bySemanticsLabel('Decrease budget');
+    while (draft.weeklyBudgetPhp > PlanDraft.budgetFloorPhp) {
+      await tester.tap(down);
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('₱500'), findsOneWidget);
+    expect(tester.getSemantics(down).flagsCollection.isEnabled, Tristate.isFalse);
+    await tester.tap(find.bySemanticsLabel('Increase budget'));
+    await tester.pumpAndSettle();
+    expect(tester.getSemantics(down).flagsCollection.isEnabled, Tristate.isTrue);
   });
 }

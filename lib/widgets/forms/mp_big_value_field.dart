@@ -20,7 +20,9 @@ class MpBigValueField extends StatefulWidget {
   });
 
   final String label;
-  final int value;
+
+  /// Null shows the field empty.
+  final int? value;
   final String unit;
   final ValueChanged<int?> onChanged;
 
@@ -37,7 +39,7 @@ class MpBigValueField extends StatefulWidget {
 
 class _MpBigValueFieldState extends State<MpBigValueField> {
   late final TextEditingController _controller =
-      TextEditingController(text: '${widget.value}');
+      TextEditingController(text: widget.value?.toString() ?? '');
 
   @override
   void dispose() {

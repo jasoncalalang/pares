@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/app.dart';
 
@@ -63,5 +64,31 @@ void main() {
     await tester.tap(find.text('STORES'));
     await tester.pumpAndSettle();
     expect(find.text('Where do you shop?'), findsOneWidget);
+  });
+
+  testWidgets('an emptied field stays empty after going back and returning',
+      (tester) async {
+    await phone(tester);
+    await tester.pumpWidget(const MealPalApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Find my calorie target'));
+    await tester.pumpAndSettle();
+
+    // Backspacing 74 a digit at a time writes 7, then empties the field.
+    const weight = ValueKey('field-weight');
+    await tester.enterText(find.byKey(weight), '7');
+    await tester.enterText(find.byKey(weight), '');
+    await tester.pump();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Find my calorie target'), findsOneWidget);
+
+    await tester.tap(find.text('Find my calorie target'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.byKey(weight)).controller!.text, '');
+    expect(find.text('Fill in age, height and weight to continue.'), findsOneWidget);
+    await tester.tap(find.text('Compute my target'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your daily target'), findsNothing);
   });
 }
