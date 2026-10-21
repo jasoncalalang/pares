@@ -27,7 +27,7 @@ void main() {
   testWidgets('states the job over the plate collage, with one primary action',
       (tester) async {
     await pump(tester);
-    expect(find.text('MealPal '), findsNothing, reason: 'wordmark is one rich text');
+    expect(find.text('MealPal PH'), findsOneWidget, reason: 'wordmark is one rich text');
     expect(find.text(_headline), findsOneWidget);
     expect(
       find.text('Your stats become a daily target. Your target becomes a week '
@@ -82,6 +82,18 @@ void main() {
     await tester.tapAt(const Offset(195, 80));
     await tester.pumpAndSettle();
     expect(find.text(_sheetBody), findsNothing);
+  });
+
+  testWidgets('Close holds focus when the sheet opens, so Enter closes it',
+      (tester) async {
+    await pump(tester);
+    await tester.tap(find.bySemanticsLabel('Continue with Google'));
+    await tester.pumpAndSettle();
+    expect(find.text(_sheetBody), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(find.text(_sheetBody), findsNothing,
+        reason: 'Close takes focus as the sheet opens');
   });
 
   testWidgets('on a small phone the content scrolls and the actions stay put',

@@ -20,16 +20,10 @@ void main() {
     expect(next.slot, MealSlot.breakfast);
     expect(next.name, 'Daingsilog: fried milkfish, garlic rice and egg');
 
-    var cursor = next;
-    final seen = <String>{breakfast.name, next.name};
-    for (var i = 0; i < 4; i++) {
-      cursor = nextAlternative(cursor);
-      expect(cursor.slot, MealSlot.breakfast);
-      seen.add(cursor.name);
-    }
-    // Every breakfast in the bank comes round, then it wraps to the start.
-    expect(seen.length, 3);
-    expect(cursor.name, isIn(seen));
+    final third = nextAlternative(next);
+    expect(third.name, 'Lugaw with egg and toasted garlic');
+    // Past the last breakfast in the bank it wraps to the first.
+    expect(nextAlternative(third).name, breakfast.name);
   });
 
   test('every slot has at least two options to swap between', () {

@@ -71,6 +71,9 @@ void main() {
       );
       expect(focusRing(), findsNothing);
       node.requestFocus();
+      await tester.pump();
+      expect(node.hasFocus, isTrue);
+      expect(focusRing(), findsNothing, reason: 'touch focus shows no ring');
       // A key press is what flips Flutter into keyboard-highlight mode.
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       node.requestFocus();
@@ -78,32 +81,67 @@ void main() {
       expect(focusRing(), findsOneWidget);
     });
 
-    testWidgets('a disabled press is announced as disabled and ignores taps',
+    testWidgets('autofocus takes primary focus on the first frame',
         (tester) async {
+      final node = FocusNode();
+      addTearDown(node.dispose);
       await tester.pumpWidget(
-        host(const MpPress(onTap: null, child: Text('nope'))),
+        host(MpPress(
+          onTap: () {},
+          focusNode: node,
+          autofocus: true,
+          child: const Text('go'),
+        )),
       );
-      await tester.tap(find.text('nope'));
       await tester.pump();
+      expect(node.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('a disabled press is announced as disabled and skipped by '
+        'keyboard focus', (tester) async {
+      final first = FocusNode();
+      final off = FocusNode();
+      final last = FocusNode();
+      addTearDown(first.dispose);
+      addTearDown(off.dispose);
+      addTearDown(last.dispose);
+      await tester.pumpWidget(
+        host(Column(children: [
+          MpPress(onTap: () {}, focusNode: first, child: const Text('first')),
+          MpPress(onTap: null, focusNode: off, child: const Text('nope')),
+          MpPress(onTap: () {}, focusNode: last, child: const Text('last')),
+        ])),
+      );
       final semantics = tester.getSemantics(find.text('nope'));
       expect(semantics.flagsCollection.isEnabled, Tristate.isFalse);
+      first.requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(off.hasFocus, isFalse);
+      expect(last.hasFocus, isTrue);
     });
   });
 
   group('MpCta', () {
-    testWidgets('a disabled CTA does not fire and loses the accent fill',
+    testWidgets('a disabled CTA loses the accent fill and takes no focus',
         (tester) async {
-      var presses = 0;
+      final before = FocusNode();
+      addTearDown(before.dispose);
       await tester.pumpWidget(
         host(Column(children: [
-          MpCta(label: 'Go on', onPressed: () => presses++),
+          MpPress(onTap: () {}, focusNode: before, child: const Text('before')),
           const MpCta(label: 'Wait', onPressed: null),
         ])),
       );
-      await tester.tap(find.text('Wait'));
-      await tester.tap(find.text('Go on'));
+      before.requestFocus();
       await tester.pump();
-      expect(presses, 1);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(
+        find.descendant(of: find.widgetWithText(MpCta, 'Wait'), matching: focusRing()),
+        findsNothing,
+      );
       final disabled = tester.widget<Container>(
         find.ancestor(of: find.text('Wait'), matching: find.byType(Container)).first,
       );

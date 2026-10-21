@@ -79,6 +79,37 @@ void main() {
     expect(find.text('Tapsilog: beef tapa, garlic rice and egg'), findsOneWidget);
   });
 
+  testWidgets('swapping again moves on from the meal now showing',
+      (tester) async {
+    await pump(tester);
+    final swap = find.bySemanticsLabel('Swap meal').first;
+    await tester.tap(swap);
+    await tester.pumpAndSettle();
+    expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
+        findsOneWidget);
+    await tester.tap(swap);
+    await tester.pumpAndSettle();
+    expect(find.text('Lugaw with egg and toasted garlic'), findsOneWidget);
+    expect(find.text('Monday · 1,947 kcal · ₱190'), findsOneWidget);
+    await tester.tap(swap);
+    await tester.pumpAndSettle();
+    expect(find.text('Tapsilog: beef tapa, garlic rice and egg'), findsOneWidget);
+    expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
+  });
+
+  testWidgets('a swap survives visiting another day', (tester) async {
+    await pump(tester);
+    await tester.tap(find.bySemanticsLabel('Swap meal').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TUE'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('MON'));
+    await tester.pumpAndSettle();
+    expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
+        findsOneWidget);
+    expect(find.text('Monday · 2,067 kcal · ₱235'), findsOneWidget);
+  });
+
   testWidgets('both grocery entry points fire the callback', (tester) async {
     await pump(tester);
     await tester.tap(find.text('Grocery list'));
