@@ -1,0 +1,36 @@
+name: mealpal-price-checker
+description: Sandbox for the MealPal price checker. Reaches only public Philippine price sources and package registries.
+config:
+  type: cloud
+  networking:
+    type: limited
+    # pip, for reading the DA's PDF price bulletins.
+    allow_package_managers: true
+    # Kept in step with web_search and web_fetch in agents/price-checker.md.
+    allowed_hosts:
+      - da.gov.ph
+      - "*.da.gov.ph"
+      - psa.gov.ph
+      - "*.psa.gov.ph"
+      - dti.gov.ph
+      - "*.dti.gov.ph"
+      - pna.gov.ph
+      - "*.pna.gov.ph"
+      - lazada.com.ph
+      - "*.lazada.com.ph"
+      - smmarkets.ph
+      - "*.smmarkets.ph"
+      - puregold.com.ph
+      - "*.puregold.com.ph"
+      - robinsonssupermarket.com.ph
+      - "*.robinsonssupermarket.com.ph"
+      - landers.ph
+      - "*.landers.ph"
+      - snrshopping.com
+      - "*.snrshopping.com"
+      - metromart.com
+      - "*.metromart.com"
+      - waltermartdelivery.com.ph
+      - "*.waltermartdelivery.com.ph"
+      - pushkart.ph
+      - "*.pushkart.ph"

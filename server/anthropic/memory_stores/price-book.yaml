@@ -1,0 +1,6 @@
+name: mealpal-price-book
+description: >-
+  Current Philippine grocery prices for the ingredients of the MealPal meal
+  bank, with where and when each price was seen. README.md explains the
+  files; ingredients.json holds observed prices, dishes.json the cost of one
+  serving of each bank dish, sources.md which sites worked.
