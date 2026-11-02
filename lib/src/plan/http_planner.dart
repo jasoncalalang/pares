@@ -81,7 +81,9 @@ class HttpPlanner implements Planner {
       response = await (() async {
         return http.Response.fromStream(await _client.send(request));
       })().timeout(requestTimeout);
-    } catch (_) {
+    } on Exception {
+      // Timeouts, socket and client failures are Exceptions. An Error is a
+      // bug in this code, not a bad connection, so it propagates.
       throw const PlannerException(
         PlannerErrorKind.network,
         message: 'The server did not answer.',

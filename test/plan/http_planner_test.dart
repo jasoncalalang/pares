@@ -372,6 +372,14 @@ void main() {
       );
     });
 
+    test('a programming error is not reported as a network error', () async {
+      final rig = Rig((_) async => throw ArgumentError('bad'));
+      await expectLater(
+        rig.planner.start(brief),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
     test('a client exception is a network error', () async {
       final rig = Rig(
         (_) async => throw http.ClientException('connection reset'),
