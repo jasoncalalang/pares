@@ -25,6 +25,26 @@ void main() {
       expect(d.macros.proteinG, 157);
     });
 
+    test('brief carries target, budget, goal and stores', () {
+      final d = PlanDraft();
+      expect(
+        d.brief,
+        PlanBrief(
+          targetKcal: 2087,
+          budgetPhp: 2500,
+          goal: Goal.lose,
+          storeIds: ['palengke', 'puregold'],
+        ),
+      );
+      d.budgetUp();
+      d.toggleStore('sari-sari');
+      d.goal = Goal.gain;
+      expect(d.brief.budgetPhp, 2600);
+      expect(d.brief.goal, Goal.gain);
+      expect(d.brief.storeIds, ['palengke', 'puregold', 'sari-sari']);
+      expect(d.brief.targetKcal, d.target.targetCalories);
+    });
+
     test('ring fraction is target over maintenance, capped at 1', () {
       final d = PlanDraft();
       expect(d.targetFraction, closeTo(2087 / d.target.tdee, 1e-6));

@@ -76,6 +76,14 @@ class PlanDraft extends ChangeNotifier {
         goal: _goal,
       );
 
+  /// What a planner builds the week from.
+  PlanBrief get brief => PlanBrief(
+        targetKcal: target.targetCalories,
+        budgetPhp: _weeklyBudgetPhp,
+        goal: _goal,
+        storeIds: _selectedStoreIds,
+      );
+
   MacroSplit get macros => macroSplit(target.targetCalories);
 
   /// Target as a share of maintenance (TDEE): what the calorie ring draws.
