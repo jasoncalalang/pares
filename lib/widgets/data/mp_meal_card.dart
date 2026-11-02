@@ -9,17 +9,27 @@ import '../core/mp_press.dart';
 /// One meal in the day's plan: 54px photo thumbnail (or a tinted initial
 /// when the bank has no photo), uppercase slot label, dish name, "kcal · ₱",
 /// and a square swap button that spins half a turn when pressed.
+///
+/// While [swapping] the card keeps showing the current dish, says "Swapping
+/// this meal" in place of the kcal line (announced to screen readers) and
+/// shows a spinner in the button. A null [onSwap] disables the button.
 class MpMealCard extends StatefulWidget {
-  const MpMealCard({super.key, required this.meal, required this.onSwap});
+  const MpMealCard({
+    super.key,
+    required this.meal,
+    required this.onSwap,
+    this.swapping = false,
+  });
 
   final PlannedMeal meal;
-  final VoidCallback onSwap;
+  final VoidCallback? onSwap;
+  final bool swapping;
 
   static MpAccent accentFor(MealSlot slot) => switch (slot) {
-        MealSlot.breakfast => MpAccent.annatto,
-        MealSlot.lunch || MealSlot.dinner => MpAccent.green,
-        MealSlot.snack => MpAccent.amber,
-      };
+    MealSlot.breakfast => MpAccent.annatto,
+    MealSlot.lunch || MealSlot.dinner => MpAccent.green,
+    MealSlot.snack => MpAccent.amber,
+  };
 
   @override
   State<MpMealCard> createState() => _MpMealCardState();
@@ -30,7 +40,7 @@ class _MpMealCardState extends State<MpMealCard> {
 
   void _swap() {
     setState(() => _spins++);
-    widget.onSwap();
+    widget.onSwap?.call();
   }
 
   @override
@@ -84,16 +94,24 @@ class _MpMealCardState extends State<MpMealCard> {
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(
-                  '${meal.kcal} kcal · ${formatPeso(meal.pricePhp, decimals: 0)}',
-                  style: MpTypography.smallStrong().copyWith(color: c.faint),
+                Semantics(
+                  liveRegion: widget.swapping,
+                  child: Text(
+                    widget.swapping
+                        ? 'Swapping this meal'
+                        : '${meal.kcal} kcal · '
+                              '${formatPeso(meal.pricePhp, decimals: 0)}',
+                    style: MpTypography.smallStrong().copyWith(
+                      color: widget.swapping ? c.annattoDeep : c.faint,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 10),
           MpPress(
-            onTap: _swap,
+            onTap: widget.onSwap == null || widget.swapping ? null : _swap,
             semanticLabel: 'Swap ${meal.slot.label.toLowerCase()}',
             focusRadius: MpRadius.swap,
             child: Container(
@@ -104,12 +122,22 @@ class _MpMealCardState extends State<MpMealCard> {
                 borderRadius: BorderRadius.circular(MpRadius.swap),
                 border: Border.all(color: c.outline),
               ),
-              child: AnimatedRotation(
-                turns: _spins / 2,
-                duration: MpMotion.of(context, MpMotion.slide),
-                curve: MpMotion.ease,
-                child: Icon(LucideIcons.repeat, size: 18, color: c.muted),
-              ),
+              alignment: Alignment.center,
+              child: widget.swapping
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: c.annatto,
+                      ),
+                    )
+                  : AnimatedRotation(
+                      turns: _spins / 2,
+                      duration: MpMotion.of(context, MpMotion.slide),
+                      curve: MpMotion.ease,
+                      child: Icon(LucideIcons.repeat, size: 18, color: c.muted),
+                    ),
             ),
           ),
         ],
@@ -182,13 +210,17 @@ class MpDayStrip extends StatelessWidget {
                         // The label above says the day once, in full.
                         child: ExcludeSemantics(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: _height),
+                            constraints: const BoxConstraints(
+                              minHeight: _height,
+                            ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 AnimatedDefaultTextStyle(
-                                  duration:
-                                      MpMotion.of(context, MpMotion.select),
+                                  duration: MpMotion.of(
+                                    context,
+                                    MpMotion.select,
+                                  ),
                                   style: MpTypography.dayName().copyWith(
                                     // faint, not dimmed muted: 10px names
                                     // need 4.5:1 on cream.
@@ -203,8 +235,10 @@ class MpDayStrip extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 3),
                                 AnimatedDefaultTextStyle(
-                                  duration:
-                                      MpMotion.of(context, MpMotion.select),
+                                  duration: MpMotion.of(
+                                    context,
+                                    MpMotion.select,
+                                  ),
                                   style: MpTypography.dayNumber().copyWith(
                                     color: i == selected ? c.heroText : c.muted,
                                   ),
