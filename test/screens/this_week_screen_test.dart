@@ -56,7 +56,11 @@ void main() {
   late WeekPlanController controller;
   var groceries = 0;
 
-  Future<void> show(WidgetTester tester, WeekPlanController c) async {
+  Future<void> show(
+    WidgetTester tester,
+    WeekPlanController c, {
+    VoidCallback? onBack,
+  }) async {
     await phone(tester);
     draft = PlanDraft();
     controller = c;
@@ -69,6 +73,7 @@ void main() {
           draft: draft,
           controller: controller,
           onGrocery: () => groceries++,
+          onBack: onBack,
         ),
       ),
     );
@@ -355,6 +360,91 @@ void main() {
       isSemantics(isLiveRegion: true),
     );
     handle.dispose();
+  });
+
+
+  testWidgets('a rejected brief offers Go back, not a Try again that cannot '
+      'work', (tester) async {
+    final planner = _ScriptedPlanner();
+    var backs = 0;
+    await show(
+      tester,
+      WeekPlanController(planner, wait: (_) => Future.value()),
+      onBack: () => backs++,
+    );
+    planner.startReply.completeError(
+      const PlannerException(
+        PlannerErrorKind.rejected,
+        problems: ['budgetPhp must be at least 500.'],
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Try again'), findsNothing);
+    expect(find.textContaining('budgetPhp'), findsNothing);
+    await tester.tap(find.text('Go back').last);
+    expect(backs, 1);
+  });
+
+  testWidgets('the building and failed cards are live regions, read once', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    final planner = _ScriptedPlanner();
+    await show(
+      tester,
+      WeekPlanController(planner, wait: (_) => Future.value()),
+    );
+    expect(find.bySemanticsLabel(RegExp('Building your week')), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Building your week')),
+      isSemantics(isLiveRegion: true),
+    );
+    planner.startReply.complete(
+      PlanSnapshot(id: 'p1', status: PlanStatus.failed, message: 'No.'),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      tester.getSemantics(find.text("We couldn't build your week.")),
+      isSemantics(isLiveRegion: true),
+    );
+    handle.dispose();
+  });
+
+  testWidgets('Enter on a swap button keeps focus on it while it builds', (
+    tester,
+  ) async {
+    await pumpScripted(tester);
+    String? focused() {
+      final at = FocusManager.instance.primaryFocus?.context;
+      return at?.findAncestorWidgetOfExactType<MpPress>()?.semanticLabel;
+    }
+
+    for (var i = 0; i < 20 && focused() != 'Swap lunch'; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+    expect(focused(), 'Swap lunch');
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(find.text('Swapping this meal'), findsOneWidget);
+    expect(focused(), 'Swap lunch');
+  });
+
+  testWidgets('another day says why its swaps are off while one runs', (
+    tester,
+  ) async {
+    await pumpScripted(tester);
+    await tester.tap(find.bySemanticsLabel('Swap lunch'));
+    await tester.pump();
+    await tester.tap(find.bySemanticsLabel(RegExp('^Tuesday')));
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      find.text("Swapping Monday's lunch. Swaps on other meals wait until it "
+          'is done.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets(

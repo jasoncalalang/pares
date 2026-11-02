@@ -110,7 +110,8 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                 target: target,
                 budget: budget,
                 failure: plan.failure,
-                onRetry: plan.retry,
+                onRetry: plan.canRetry ? plan.retry : null,
+                onBack: widget.onBack,
               )
             else ...[
               MpDayStrip(
@@ -136,13 +137,25 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                 _Notice(plan.notice!),
                 const SizedBox(height: MpSpacing.cardGap),
               ],
+              if (swapping != null && swapping.$1 != day.weekday) ...[
+                _Notice(
+                  "Swapping ${swapping.$1.label}'s "
+                  '${swapping.$2.label.toLowerCase()}. Swaps on other meals '
+                  'wait until it is done.',
+                ),
+                const SizedBox(height: MpSpacing.cardGap),
+              ],
               for (final (i, meal) in day.meals.indexed) ...[
                 if (i > 0) const SizedBox(height: MpSpacing.cardGap),
                 MpMealCard(
                   key: ValueKey('${day.weekday.name}-${meal.slot.name}'),
                   meal: meal,
                   swapping: swapping == (day.weekday, meal.slot),
-                  onSwap: swapping != null
+                  // The card in flight keeps a live button so keyboard focus
+                  // stays on it; the controller ignores a second swap.
+                  onSwap:
+                      swapping != null &&
+                          swapping != (day.weekday, meal.slot)
                       ? null
                       : () => plan.swap(day.weekday, meal.slot),
                 ),
@@ -167,6 +180,7 @@ class _PlanStateCard extends StatelessWidget {
     required this.budget,
     required this.failure,
     required this.onRetry,
+    this.onBack,
   });
 
   final PlanStatus status;
@@ -176,6 +190,9 @@ class _PlanStateCard extends StatelessWidget {
   /// What went wrong, in words fit to show; null falls back to a general line.
   final String? failure;
   final VoidCallback? onRetry;
+
+  /// Offered instead of Try again when a retry cannot help.
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -196,25 +213,34 @@ class _PlanStateCard extends StatelessWidget {
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
                 color: c.annatto,
-                semanticsLabel: 'Building your week',
               ),
             ),
           const SizedBox(height: 14),
-          Text(
-            failed ? "We couldn't build your week." : 'Building your week',
-            style: MpTypography.rowTitle().copyWith(color: c.ink),
+          // A live region, so the change from building to failed is spoken.
+          Semantics(
+            liveRegion: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  failed ? "We couldn't build your week." : 'Building your week',
+                  style: MpTypography.rowTitle().copyWith(color: c.ink),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  failed
+                      ? failure ??
+                            'Your stats and stores are still here. Check your '
+                                'connection and try again.'
+                      : 'Matching meals to your $target kcal target and '
+                            '$budget weekly budget from the stores you '
+                            'picked.',
+                  style: MpTypography.body().copyWith(color: c.muted),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            failed
-                ? failure ??
-                      'Your stats and stores are still here. Check your '
-                          'connection and try again.'
-                : 'Matching meals to your $target kcal target and $budget '
-                      'weekly budget from the stores you picked.',
-            style: MpTypography.body().copyWith(color: c.muted),
-          ),
-          if (failed) ...[
+          if (failed && onRetry != null) ...[
             const SizedBox(height: 16),
             MpCta(
               label: 'Try again',
@@ -222,6 +248,9 @@ class _PlanStateCard extends StatelessWidget {
               iconLeading: true,
               onPressed: onRetry,
             ),
+          ] else if (failed && onBack != null) ...[
+            const SizedBox(height: 16),
+            MpCta(label: 'Go back', onPressed: onBack),
           ],
         ],
       ),

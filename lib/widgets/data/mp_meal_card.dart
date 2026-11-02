@@ -120,7 +120,12 @@ class _MpMealCardState extends State<MpMealCard> {
           ),
           const SizedBox(width: 10),
           MpPress(
-            onTap: widget.onSwap == null || widget.swapping ? null : _swap,
+            // A card in flight keeps a live (inert) button so focus stays on it.
+            onTap: widget.onSwap == null
+                ? null
+                : widget.swapping
+                ? () {}
+                : _swap,
             semanticLabel: 'Swap ${meal.slot.label.toLowerCase()}',
             focusRadius: MpRadius.swap,
             child: Container(
