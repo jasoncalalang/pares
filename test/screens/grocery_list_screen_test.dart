@@ -50,6 +50,11 @@ void main() {
       (tester) async {
     await pump(tester);
     expect(find.text(sampleListNote), findsOneWidget);
+    // The sample ignores the picked stores as well as the planned meals.
+    expect(
+      sampleListNote,
+      'Sample list: it does not follow your meals or stores yet.',
+    );
     expect(find.text('Grouped by where to buy it.'), findsOneWidget);
     expect(find.textContaining('Everything for this week'), findsNothing);
   });

@@ -8,7 +8,7 @@ import '../widgets/widgets.dart';
 /// Shown in every mode: the list is still the sample one, which does not
 /// follow the planned meals.
 const String sampleListNote =
-    'Sample list: it does not follow your planned meals yet.';
+    'Sample list: it does not follow your meals or stores yet.';
 
 /// The grocery list: estimated total against budget, then one collapsible
 /// section per store with check-off rows. With no plan yet it says so.
