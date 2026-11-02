@@ -123,6 +123,8 @@ The design is filtered with the antislop rules; keep it that way:
   bank holds placeholder numbers). Remove it only with the
   `TODO(meal-bank)` once the FNRI-based bank supplies checked numbers. A
   target capped for the planner reads "(planner max)" in its pill.
+  Owner override (2026-11-02): the Welcome collage keeps its 560 kcal and
+  ₱95 stickers unlabelled; they illustrate the example day, not a claim.
 - One grocery CTA on This week: the pinned "See grocery list" footer. Do
   not bring back a second entry (the old title-row pill).
 - The calorie ring's centre shows the target as a share of maintenance
