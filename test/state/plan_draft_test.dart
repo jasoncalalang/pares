@@ -25,6 +25,19 @@ void main() {
       expect(d.macros.proteinG, 157);
     });
 
+    test('a target above what the planner takes is capped in the brief', () {
+      final d = PlanDraft()
+        ..weightKg = 150
+        ..heightCm = 190
+        ..age = 20
+        ..activity = ActivityLevel.active
+        ..goal = Goal.gain;
+      expect(d.target.targetCalories, greaterThan(4500));
+      expect(d.brief.targetKcal, 4500);
+      expect(d.targetCappedForPlanner, isTrue);
+      expect(PlanDraft().targetCappedForPlanner, isFalse);
+    });
+
     test('brief carries target, budget, goal and stores', () {
       final d = PlanDraft();
       expect(

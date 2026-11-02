@@ -12,6 +12,9 @@ class PlanDraft extends ChangeNotifier {
   static const int budgetStepPhp = 100;
   static const int budgetFloorPhp = 500;
 
+  /// The most kcal a day the planner accepts (the server rejects more).
+  static const int plannerMaxKcal = 4500;
+
   BiologicalSex _sex = BiologicalSex.male;
   int _age = 29;
   int _heightCm = 171;
@@ -76,9 +79,15 @@ class PlanDraft extends ChangeNotifier {
         goal: _goal,
       );
 
+  /// True when the computed target is above what the planner can build, so
+  /// the brief carries [plannerMaxKcal] instead.
+  bool get targetCappedForPlanner => target.targetCalories > plannerMaxKcal;
+
   /// What a planner builds the week from.
   PlanBrief get brief => PlanBrief(
-        targetKcal: target.targetCalories,
+        targetKcal: targetCappedForPlanner
+            ? plannerMaxKcal
+            : target.targetCalories,
         budgetPhp: _weeklyBudgetPhp,
         goal: _goal,
         storeIds: _selectedStoreIds,

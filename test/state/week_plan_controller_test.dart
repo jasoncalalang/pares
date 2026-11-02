@@ -71,6 +71,30 @@ class FakePlanner implements Planner {
   }
 }
 
+PlannerException network() => err(PlannerErrorKind.network);
+
+/// Answers building after [latency] each time.
+class _SlowPlanner implements Planner {
+  _SlowPlanner(this.async, this.latency);
+  final FakeAsync async;
+  final Duration latency;
+  int fetches = 0;
+
+  @override
+  Future<PlanSnapshot> start(PlanBrief b) async => building();
+
+  @override
+  Future<PlanSnapshot> fetch(String id) async {
+    fetches++;
+    await Future<void>.delayed(latency);
+    return building();
+  }
+
+  @override
+  Future<PlanSnapshot> swap(String id, Weekday d, MealSlot s, {String? note}) =>
+      throw UnimplementedError();
+}
+
 const two = Duration(seconds: 2);
 
 void main() {
@@ -199,7 +223,7 @@ void main() {
       });
     }
     expect(copies[PlannerErrorKind.network], contains('connection'));
-    expect(copies[PlannerErrorKind.rejected], contains('budgetPhp too low'));
+    expect(copies[PlannerErrorKind.rejected], isNot(contains('budgetPhp')));
     expect(copies[PlannerErrorKind.unauthorized], contains('app'));
     expect(copies.values.toSet(), hasLength(PlannerErrorKind.values.length));
     for (final c in copies.values) {
@@ -221,6 +245,70 @@ void main() {
       final polls = planner.fetches.length;
       async.elapse(const Duration(minutes: 5));
       expect(planner.fetches.length, polls);
+      c.dispose();
+    });
+  });
+
+
+  test('a rejected brief shows plain words, no field names, and no retry', () {
+    fakeAsync((async) {
+      planner.startReplies.add(
+        err(
+          PlannerErrorKind.rejected,
+          problems: [
+            'targetKcal must be between 1,200 and 4,500.',
+            'budgetPhp must be at least \u20b1500.',
+          ],
+        ),
+      );
+      final c = WeekPlanController(planner)..build(brief());
+      async.flushMicrotasks();
+      expect(c.status, PlanStatus.failed);
+      expect(c.failure, isNot(contains('targetKcal')));
+      expect(c.failure, isNot(contains('budgetPhp')));
+      expect(c.failure, isNot(contains('..')));
+      expect(c.failure, isNot(contains('.;')));
+      expect(c.canRetry, isFalse);
+      c.retry();
+      async.flushMicrotasks();
+      expect(planner.starts, hasLength(1));
+      c.dispose();
+    });
+  });
+
+  test('other failures can be retried', () {
+    fakeAsync((async) {
+      planner.startReplies.add(err(PlannerErrorKind.unavailable));
+      final c = WeekPlanController(planner)..build(brief());
+      async.flushMicrotasks();
+      expect(c.canRetry, isTrue);
+      c.dispose();
+    });
+  });
+
+  test('one 5xx between two polls does not kill the plan', () {
+    fakeAsync((async) {
+      planner.startReplies.add(building());
+      planner.fetchReplies.addAll([
+        err(PlannerErrorKind.unavailable),
+        network(),
+        ready(),
+      ]);
+      final c = WeekPlanController(planner)..build(brief());
+      async.elapse(two * 3);
+      expect(c.status, PlanStatus.ready);
+      c.dispose();
+    });
+  });
+
+  test('gives up by elapsed time even when each poll is slow', () {
+    fakeAsync((async) {
+      final slow = _SlowPlanner(async, const Duration(seconds: 3));
+      final c = WeekPlanController(slow)..build(brief());
+      async.elapse(const Duration(minutes: 3, seconds: 7));
+      expect(c.status, PlanStatus.failed);
+      expect(c.failure, contains('3 minutes'));
+      expect(slow.fetches, lessThan(45));
       c.dispose();
     });
   });
@@ -457,6 +545,7 @@ void main() {
           final week = c.week;
           c.swap(Weekday.mon, MealSlot.lunch);
           async.flushMicrotasks();
+          if (kind == PlannerErrorKind.notFound) return;
           expect(c.status, PlanStatus.ready, reason: kind.name);
           expect(c.week, same(week), reason: kind.name);
           expect(c.notice, isNotEmpty, reason: kind.name);
@@ -481,6 +570,79 @@ void main() {
         expect(c.notice, contains('3 minutes'));
         expect(c.week, same(week));
         expect(c.status, PlanStatus.ready);
+        c.dispose();
+      });
+    });
+
+
+    test('a 404 on a swap fails the plan so Try again appears', () {
+      fakeAsync((async) {
+        planner.startReplies.add(ready());
+        planner.swapReplies.add(err(PlannerErrorKind.notFound));
+        final c = WeekPlanController(planner)..build(brief());
+        async.flushMicrotasks();
+        c.swap(Weekday.mon, MealSlot.lunch);
+        async.flushMicrotasks();
+        expect(c.status, PlanStatus.failed);
+        expect(c.canRetry, isTrue);
+        expect(c.swapping, isNull);
+        planner.startReplies.add(ready(id: 'p2'));
+        c.retry();
+        async.flushMicrotasks();
+        expect(c.status, PlanStatus.ready);
+        c.dispose();
+      });
+    });
+
+    test('an unclear swap failure does not claim the week is unchanged', () {
+      fakeAsync((async) {
+        planner.startReplies.add(ready());
+        planner.swapReplies.add(err(PlannerErrorKind.network));
+        final c = WeekPlanController(planner)..build(brief());
+        async.flushMicrotasks();
+        c.swap(Weekday.mon, MealSlot.lunch);
+        async.flushMicrotasks();
+        expect(c.notice, isNot(contains('unchanged')));
+        expect(c.notice, contains('may'));
+        c.dispose();
+      });
+      fakeAsync((async) {
+        final p = FakePlanner()
+          ..startReplies.add(ready())
+          ..swapReplies.add(building())
+          ..fetchReplies.add(err(PlannerErrorKind.badResponse));
+        final c = WeekPlanController(p)..build(brief());
+        async.flushMicrotasks();
+        c.swap(Weekday.mon, MealSlot.lunch);
+        async.elapse(two);
+        expect(c.notice, isNot(contains('unchanged')));
+        c.dispose();
+      });
+    });
+
+    test('a swap that never finishes does not claim the week is unchanged', () {
+      fakeAsync((async) {
+        planner.startReplies.add(ready());
+        planner.swapReplies.add(building());
+        planner.fetchReplies.addAll(List.generate(200, (_) => building()));
+        final c = WeekPlanController(planner)..build(brief());
+        async.flushMicrotasks();
+        c.swap(Weekday.mon, MealSlot.lunch);
+        async.elapse(const Duration(minutes: 4));
+        expect(c.notice, isNot(contains('unchanged')));
+        c.dispose();
+      });
+    });
+
+    test('a 400 on a swap is proof the week is unchanged', () {
+      fakeAsync((async) {
+        planner.startReplies.add(ready());
+        planner.swapReplies.add(err(PlannerErrorKind.rejected));
+        final c = WeekPlanController(planner)..build(brief());
+        async.flushMicrotasks();
+        c.swap(Weekday.mon, MealSlot.lunch);
+        async.flushMicrotasks();
+        expect(c.notice, contains('unchanged'));
         c.dispose();
       });
     });

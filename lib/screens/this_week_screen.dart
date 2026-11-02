@@ -56,7 +56,7 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
         final week = plan.week;
         final ready = plan.status == PlanStatus.ready && week != null;
         final swapping = plan.swapping;
-        final target = formatThousands(widget.draft.target.targetCalories);
+        final target = formatThousands(widget.draft.brief.targetKcal);
         final budget = formatPeso(widget.draft.weeklyBudgetPhp, decimals: 0);
         final day = ready ? week[_day.clamp(0, week.length - 1)] : null;
         return MpPage(

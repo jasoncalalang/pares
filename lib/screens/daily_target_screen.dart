@@ -146,6 +146,16 @@ class DailyTargetScreen extends StatelessWidget {
                 style: MpTypography.small().copyWith(color: c.annattoDeep),
               ),
             ],
+            if (draft.targetCappedForPlanner) ...[
+              const SizedBox(height: 10),
+              Text(
+                'The planner builds weeks of up to '
+                '${formatThousands(PlanDraft.plannerMaxKcal)} kcal a day, so '
+                'your week will be planned for '
+                '${formatThousands(PlanDraft.plannerMaxKcal)}.',
+                style: MpTypography.small().copyWith(color: c.annattoDeep),
+              ),
+            ],
             const SizedBox(height: 20),
             Text('Goal', style: MpTypography.label().copyWith(color: c.ink)),
             const SizedBox(height: 10),

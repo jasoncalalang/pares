@@ -69,6 +69,23 @@ void main() {
     expect(nexts, 1);
   });
 
+  testWidgets('a target past the planner limit says the week uses the limit',
+      (tester) async {
+    await pump(tester);
+    draft
+      ..weightKg = 150
+      ..heightCm = 190
+      ..age = 20
+      ..activity = ActivityLevel.active
+      ..goal = Goal.gain;
+    await tester.pumpAndSettle();
+    expect(
+      find.text('The planner builds weeks of up to 4,500 kcal a day, so your '
+          'week will be planned for 4,500.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a target raised past maintenance says so, not a deficit',
       (tester) async {
     await pump(tester);
