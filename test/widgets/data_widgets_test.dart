@@ -11,13 +11,25 @@ void main() {
   group('MpCalorieRing', () {
     testWidgets('counts up to its value', (tester) async {
       await tester.pumpWidget(
-        host(const MpCalorieRing(value: 2087, fraction: 0.8)),
+        host(const MpCalorieRing(percent: 81, fraction: 0.81)),
       );
       await tester.pump();
-      expect(find.text('2,087'), findsNothing);
+      expect(find.text('81%'), findsNothing);
       await tester.pumpAndSettle();
-      expect(find.text('2,087'), findsOneWidget);
-      expect(find.text('KCAL/DAY'), findsOneWidget);
+      expect(find.text('81%'), findsOneWidget);
+      expect(find.text('OF MAINTENANCE'), findsOneWidget);
+    });
+
+    testWidgets('says its centre once, as a sentence', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        host(const MpCalorieRing(percent: 81, fraction: 0.81)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('81% of maintenance'), findsOneWidget);
+      expect(find.bySemanticsLabel('81%'), findsNothing);
+      expect(find.bySemanticsLabel('OF MAINTENANCE'), findsNothing);
+      handle.dispose();
     });
 
     testWidgets('shows the final value at once under reduced motion',
@@ -25,11 +37,11 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: host(const MpCalorieRing(value: 2087, fraction: 0.8)),
+          child: host(const MpCalorieRing(percent: 81, fraction: 0.81)),
         ),
       );
       await tester.pump();
-      expect(find.text('2,087'), findsOneWidget);
+      expect(find.text('81%'), findsOneWidget);
     });
   });
 

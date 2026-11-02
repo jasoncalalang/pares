@@ -79,9 +79,26 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       final numbers = find.text('2,087');
-      expect(numbers, findsNWidgets(2));
-      for (var i = 0; i < 2; i++) {
-        expect(lines(tester, numbers.at(i)), 1, reason: 'number $i');
+      expect(numbers, findsOneWidget);
+      expect(lines(tester, numbers), 1);
+    });
+
+    testWidgets('Daily target ring centre fits its ring at ${scale}x', (
+      tester,
+    ) async {
+      await pumpAt(
+        tester,
+        DailyTargetScreen(draft: PlanDraft(), onNext: () {}),
+        scale: scale,
+      );
+      expect(tester.takeException(), isNull);
+      final ring = tester.getRect(find.byType(MpCalorieRing));
+      for (final f in [find.text('81%'), find.text('OF MAINTENANCE')]) {
+        expect(lines(tester, f), 1);
+        expectWholeWords(tester, f);
+        final r = tester.getRect(f);
+        expect(ring.contains(r.topLeft), isTrue, reason: '$f top left');
+        expect(ring.contains(r.bottomRight), isTrue, reason: '$f bottom right');
       }
     });
   }

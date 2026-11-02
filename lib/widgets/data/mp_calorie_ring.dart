@@ -3,21 +3,24 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
-import '../../mealpal_ph.dart';
 
-/// 118px calorie ring for the dark hero card: an annatto arc draws from
-/// zero to [fraction] while the number inside counts up to [value]. Replays
+/// 118px ring for the dark hero card: an annatto arc draws from zero to
+/// [fraction] while the figure inside counts up to [percent], the target as
+/// a share of maintenance (what the arc shows; the hero number beside the
+/// ring already states the target itself). Replays
 /// whenever either changes (goal switch). Under reduced motion it shows the
 /// final state at once.
 class MpCalorieRing extends StatefulWidget {
   const MpCalorieRing({
     super.key,
-    required this.value,
+    required this.percent,
     required this.fraction,
     this.size = MpSize.ring,
   });
 
-  final int value;
+  /// Target as a whole percent of maintenance. Not clamped: a gain goal
+  /// reads above 100 while the arc stops at full.
+  final int percent;
 
   /// 0 to 1 share of the ring to fill.
   final double fraction;
@@ -29,8 +32,7 @@ class MpCalorieRing extends StatefulWidget {
 
 class _MpCalorieRingState extends State<MpCalorieRing>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this);
+  late final AnimationController _controller = AnimationController(vsync: this);
   late Animation<double> _t = _controller;
   bool _started = false;
 
@@ -45,7 +47,7 @@ class _MpCalorieRingState extends State<MpCalorieRing>
   @override
   void didUpdateWidget(MpCalorieRing old) {
     super.didUpdateWidget(old);
-    if (old.value != widget.value || old.fraction != widget.fraction) {
+    if (old.percent != widget.percent || old.fraction != widget.fraction) {
       _play(withDelay: false);
     }
   }
@@ -82,44 +84,52 @@ class _MpCalorieRingState extends State<MpCalorieRing>
   @override
   Widget build(BuildContext context) {
     final c = context.mp;
-    return SizedBox(
-      width: widget.size,
-      height: widget.size,
-      child: AnimatedBuilder(
-        animation: _t,
-        builder: (context, _) {
-          final t = _t.value;
-          return CustomPaint(
-            painter: _RingPainter(
-              fraction: widget.fraction * t,
-              track: c.heroTrack,
-              arc: c.annatto,
-              stroke: MpSize.ringStroke,
-            ),
-            // Inside the stroke, shrinking at large text sizes.
-            child: Padding(
-              padding: const EdgeInsets.all(MpSize.ringStroke),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      formatThousands((widget.value * t).round()),
-                      style: MpTypography.ringNumber().copyWith(color: c.heroText),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'KCAL/DAY',
-                      style:
-                          MpTypography.ringCaption().copyWith(color: c.heroMuted),
-                    ),
-                  ],
+    return Semantics(
+      label: '${widget.percent}% of maintenance',
+      child: ExcludeSemantics(
+        child: SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: AnimatedBuilder(
+            animation: _t,
+            builder: (context, _) {
+              final t = _t.value;
+              return CustomPaint(
+                painter: _RingPainter(
+                  fraction: widget.fraction * t,
+                  track: c.heroTrack,
+                  arc: c.annatto,
+                  stroke: MpSize.ringStroke,
                 ),
-              ),
-            ),
-          );
-        },
+                // Inside the stroke, shrinking at large text sizes.
+                child: Padding(
+                  padding: const EdgeInsets.all(MpSize.ringStroke),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${(widget.percent * t).round()}%',
+                          style: MpTypography.ringNumber().copyWith(
+                            color: c.heroText,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'OF MAINTENANCE',
+                          style: MpTypography.ringCaption().copyWith(
+                            color: c.heroMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

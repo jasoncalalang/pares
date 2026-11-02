@@ -33,43 +33,54 @@ class MpMacroCard extends StatelessWidget {
     final reveal = MpMotion.of(context, MpMotion.reveal);
     final delay = MpMotion.of(context, MpMotion.revealDelay + this.delay);
     final total = reveal + delay;
-    return MpCard(
-      radius: MpRadius.button,
-      padding: const EdgeInsets.fromLTRB(10, 14, 10, 14),
-      child: Column(
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: fraction),
-            duration: total,
-            curve: total == Duration.zero
-                ? Curves.linear
-                : Interval(
-                    delay.inMicroseconds / total.inMicroseconds,
-                    1,
-                    curve: MpMotion.ease,
+    // One node, "Protein, 157 grams": the gauge is drawing only, and the
+    // value and label would otherwise be read apart, sorted by position.
+    return Semantics(
+      container: true,
+      label: '$label, $grams grams',
+      child: ExcludeSemantics(
+        child: MpCard(
+          radius: MpRadius.button,
+          padding: const EdgeInsets.fromLTRB(10, 14, 10, 14),
+          child: Column(
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: fraction),
+                duration: total,
+                curve: total == Duration.zero
+                    ? Curves.linear
+                    : Interval(
+                        delay.inMicroseconds / total.inMicroseconds,
+                        1,
+                        curve: MpMotion.ease,
+                      ),
+                builder: (context, f, _) => CustomPaint(
+                  size: const Size(MpSize.gaugeWidth, MpSize.gaugeHeight),
+                  painter: _GaugePainter(
+                    fraction: f,
+                    track: accent.tint(c),
+                    fill: accent.main(c),
+                    stroke: MpSize.gaugeStroke,
                   ),
-            builder: (context, f, _) => CustomPaint(
-              size: const Size(MpSize.gaugeWidth, MpSize.gaugeHeight),
-              painter: _GaugePainter(
-                fraction: f,
-                track: accent.tint(c),
-                fill: accent.main(c),
-                stroke: MpSize.gaugeStroke,
+                ),
               ),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                '${grams}g',
+                style: MpTypography.macroValue().copyWith(color: c.ink),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: MpTypography.smallStrong().copyWith(
+                  color: c.muted,
+                  fontSize: 11,
+                  height: 1.2,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text('${grams}g', style: MpTypography.macroValue().copyWith(color: c.ink)),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: MpTypography.smallStrong().copyWith(
-              color: c.muted,
-              fontSize: 11,
-              height: 1.2,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -101,7 +112,13 @@ class _GaugePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     canvas.drawArc(rect, math.pi, math.pi, false, base..color = track);
     if (fraction <= 0) return;
-    canvas.drawArc(rect, math.pi, math.pi * fraction, false, base..color = fill);
+    canvas.drawArc(
+      rect,
+      math.pi,
+      math.pi * fraction,
+      false,
+      base..color = fill,
+    );
   }
 
   @override

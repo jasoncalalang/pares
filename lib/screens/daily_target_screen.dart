@@ -91,7 +91,8 @@ class DailyTargetScreen extends StatelessWidget {
               child: Row(
                 children: [
                   MpCalorieRing(
-                    value: target.targetCalories,
+                    percent: (target.targetCalories / target.tdee * 100)
+                        .round(),
                     fraction: draft.targetFraction,
                   ),
                   const SizedBox(width: 18),

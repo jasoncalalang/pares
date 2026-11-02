@@ -24,9 +24,11 @@ void main() {
     expect(find.text('STEP 2 OF 4'), findsOneWidget);
     expect(find.text('Your daily target'), findsOneWidget);
     expect(find.text('DAILY ENERGY'), findsOneWidget);
-    // Hero number and the number inside the ring (after its count-up).
-    expect(find.text('2,087'), findsNWidgets(2));
-    expect(find.text('KCAL/DAY'), findsOneWidget);
+    // The hero number appears once; the ring shows the share of maintenance.
+    expect(find.text('2,087'), findsOneWidget);
+    expect(find.text('81%'), findsOneWidget);
+    expect(find.text('OF MAINTENANCE'), findsOneWidget);
+    expect(find.text('KCAL/DAY'), findsNothing);
     expect(find.textContaining('to lose about 0.5 kg a week'), findsOneWidget);
 
     expect(find.text('BMR (at rest)'), findsOneWidget);
@@ -50,16 +52,33 @@ void main() {
     await tester.tap(find.text('Maintain'));
     await tester.pumpAndSettle();
     expect(draft.goal, Goal.maintain);
-    expect(find.text('2,587'), findsNWidgets(2));
+    expect(find.text('2,587'), findsOneWidget);
+    expect(find.text('100%'), findsOneWidget);
     expect(find.text('Maintenance'), findsOneWidget);
     expect(find.text('0 kcal'), findsOneWidget);
     expect(find.textContaining('to hold your weight'), findsOneWidget);
 
     await tester.tap(find.text('Gain'));
     await tester.pumpAndSettle();
-    expect(find.text('2,987'), findsNWidgets(2));
+    // The number is the math's; only the ring fill stops at full.
+    expect(find.text('2,987'), findsOneWidget);
+    expect(find.text('115%'), findsOneWidget);
     expect(find.text('Surplus for gaining'), findsOneWidget);
     expect(find.text('+400 kcal'), findsOneWidget);
+  });
+
+  testWidgets('a screen reader hears the ring centre and each macro once', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await pump(tester);
+    expect(find.bySemanticsLabel('81% of maintenance'), findsOneWidget);
+    expect(find.bySemanticsLabel('Protein, 157 grams'), findsOneWidget);
+    expect(find.bySemanticsLabel('Carbs, 235 grams'), findsOneWidget);
+    expect(find.bySemanticsLabel('Fat, 58 grams'), findsOneWidget);
+    expect(find.bySemanticsLabel('157g'), findsNothing);
+    expect(find.bySemanticsLabel('Protein'), findsNothing);
+    handle.dispose();
   });
 
   testWidgets('the CTA advances', (tester) async {
