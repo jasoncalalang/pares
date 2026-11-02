@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
@@ -8,6 +10,48 @@ import '../helpers.dart';
 
 /// What a screen reader is told about each control.
 void main() {
+  testWidgets('the step header back link says Back and the step is heard once',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(host(Column(children: [
+      const MpProgressSegments(step: 2),
+      MpStepHeader(step: 2, onBack: () {}),
+    ])));
+    await tester.pumpAndSettle();
+    expect(tester.getSemantics(find.byType(MpPress)).label, 'Back');
+    expect(find.bySemanticsLabel('Step 2 of 4'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('STEP 2 OF 4')), findsNothing);
+    handle.dispose();
+  });
+
+  testWidgets('the step header draws the back arrow only when it goes back',
+      (tester) async {
+    await tester.pumpWidget(host(MpStepHeader(step: 2, onBack: () {})));
+    final arrow = find.descendant(
+      of: find.byType(MpPress),
+      matching: find.byIcon(LucideIcons.arrowLeft),
+    );
+    expect(arrow, findsOneWidget);
+    expect(tester.widget<Icon>(arrow).size, 16);
+    expect(tester.widget<Icon>(arrow).color, MpColors.light.annatto);
+    await tester.pumpWidget(host(const MpStepHeader(step: 1)));
+    expect(find.byIcon(LucideIcons.arrowLeft), findsNothing);
+    expect(find.text('STEP 1 OF 4'), findsOneWidget);
+  });
+
+  testWidgets('a back header says where it goes back to, once', (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(host(Column(children: [
+      MpBackHeader(label: 'STORES', onBack: () {}),
+      MpBackHeader(label: 'THIS WEEK', onBack: () {}),
+    ])));
+    expect(find.bySemanticsLabel('Back to stores'), findsOneWidget);
+    expect(find.bySemanticsLabel('Back to this week'), findsOneWidget);
+    expect(find.bySemanticsLabel('STORES'), findsNothing);
+    expect(find.bySemanticsLabel('THIS WEEK'), findsNothing);
+    handle.dispose();
+  });
+
   testWidgets('a choice says whether it is the selected one of its group',
       (tester) async {
     final handle = tester.ensureSemantics();

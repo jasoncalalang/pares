@@ -104,9 +104,13 @@ class MpStepHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.mp;
-    final eyebrow = Text(
-      'STEP $step OF $of',
-      style: MpTypography.eyebrow().copyWith(color: c.annatto),
+    // The progress segments above say "Step n of m" to a screen reader, so
+    // this text is not read a second time.
+    final eyebrow = ExcludeSemantics(
+      child: Text(
+        'STEP $step OF $of',
+        style: MpTypography.eyebrow().copyWith(color: c.annatto),
+      ),
     );
     return _TapBand(
       child: Row(
@@ -118,7 +122,20 @@ class MpStepHeader extends StatelessWidget {
                 : MpPress(
                     onTap: onBack,
                     semanticLabel: 'Back',
-                    child: _TapBand(child: eyebrow),
+                    child: _TapBand(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.arrowLeft,
+                            size: 16,
+                            color: c.annatto,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(child: eyebrow),
+                        ],
+                      ),
+                    ),
                   ),
           ),
           const MpWordmark(),
@@ -166,22 +183,26 @@ class MpBackHeader extends StatelessWidget {
         Flexible(
           child: MpPress(
             onTap: onBack,
-            child: _TapBand(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(LucideIcons.arrowLeft, size: 16, color: c.annatto),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: MpTypography.eyebrow().copyWith(
-                        color: c.annatto,
-                        letterSpacing: 12 * 0.10,
+            // "Back to this week": the visible label alone names no action.
+            semanticLabel: 'Back to ${label.toLowerCase()}',
+            child: ExcludeSemantics(
+              child: _TapBand(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(LucideIcons.arrowLeft, size: 16, color: c.annatto),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: MpTypography.eyebrow().copyWith(
+                          color: c.annatto,
+                          letterSpacing: 12 * 0.10,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

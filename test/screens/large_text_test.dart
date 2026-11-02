@@ -103,6 +103,19 @@ void main() {
     });
   }
 
+  testWidgets('step header with its back arrow keeps its words whole at 2x', (
+    tester,
+  ) async {
+    await pumpAt(
+      tester,
+      WhereYouShopScreen(draft: PlanDraft(), onNext: () {}, onBack: () {}),
+      scale: 2.0,
+      size: const Size(360, 844),
+    );
+    expect(tester.takeException(), isNull);
+    expectWholeWords(tester, find.text('STEP 3 OF 4'));
+  });
+
   testWidgets('Daily target goal buttons hold their labels at 2x on 360dp', (
     tester,
   ) async {
