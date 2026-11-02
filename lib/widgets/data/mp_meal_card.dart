@@ -44,6 +44,19 @@ String _servingsPrefix(double servings) {
   return '$n servings · ';
 }
 
+/// What a screen reader says for the card: "Breakfast, Tapsilog, 560 kcal,
+/// ₱95", with the servings before the numbers, or "Swapping this meal" in
+/// their place while a swap builds.
+String _spoken(PlannedMeal meal, {required bool swapping}) {
+  final head = '${meal.slot.label}, ${meal.name}';
+  if (swapping) return '$head, Swapping this meal';
+  final servings = meal.servings == 1
+      ? ''
+      : '${_servingsPrefix(meal.servings).replaceAll(' · ', '')}, ';
+  return '$head, $servings${meal.kcal} kcal, '
+      '${formatPeso(meal.pricePhp, decimals: 0)}';
+}
+
 class _MpMealCardState extends State<MpMealCard> {
   int _spins = 0;
 
@@ -69,11 +82,14 @@ class _MpMealCardState extends State<MpMealCard> {
               color: accent.tint(c),
               alignment: Alignment.center,
               child: meal.image == null
-                  ? Text(
-                      meal.name.substring(0, 1),
-                      style: MpTypography.monogram().copyWith(
-                        fontSize: 20,
-                        color: accent.deep(c),
+                  // Decorative: the dish name is read in full beside it.
+                  ? ExcludeSemantics(
+                      child: Text(
+                        meal.name.substring(0, 1),
+                        style: MpTypography.monogram().copyWith(
+                          fontSize: 20,
+                          color: accent.deep(c),
+                        ),
                       ),
                     )
                   : Image.asset(
@@ -86,36 +102,42 @@ class _MpMealCardState extends State<MpMealCard> {
           ),
           const SizedBox(width: 13),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  meal.slot.label.toUpperCase(),
-                  style: MpTypography.slotLabel().copyWith(color: c.annatto),
-                ),
-                const SizedBox(height: 2),
-                // A live region, so a swap reads out the new dish.
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    meal.name,
-                    style: MpTypography.bodyStrong().copyWith(color: c.ink),
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Semantics(
-                  liveRegion: widget.swapping,
-                  child: Text(
-                    widget.swapping
-                        ? 'Swapping this meal'
-                        : '${_servingsPrefix(meal.servings)}${meal.kcal} kcal · '
-                              '${formatPeso(meal.pricePhp, decimals: 0)}',
-                    style: MpTypography.smallStrong().copyWith(
-                      color: widget.swapping ? c.annattoDeep : c.faint,
+            // One node for slot, dish and numbers, so they are read together
+            // rather than as three fragments sorted by position. A live
+            // region, so a swap reads out the new dish.
+            child: Semantics(
+              container: true,
+              liveRegion: true,
+              label: _spoken(meal, swapping: widget.swapping),
+              child: ExcludeSemantics(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      meal.slot.label.toUpperCase(),
+                      style: MpTypography.slotLabel().copyWith(
+                        color: c.annatto,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 2),
+                    Text(
+                      meal.name,
+                      style: MpTypography.bodyStrong().copyWith(color: c.ink),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      widget.swapping
+                          ? 'Swapping this meal'
+                          : '${_servingsPrefix(meal.servings)}${meal.kcal} '
+                                'kcal · '
+                                '${formatPeso(meal.pricePhp, decimals: 0)}',
+                      style: MpTypography.smallStrong().copyWith(
+                        color: widget.swapping ? c.annattoDeep : c.faint,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -239,7 +261,7 @@ class MpDayStrip extends StatelessWidget {
                                     // faint, not dimmed muted: 10px names
                                     // need 4.5:1 on cream.
                                     color: i == selected
-                                        ? c.heroText.withValues(alpha: 0.7)
+                                        ? c.heroMuted
                                         : c.faint,
                                   ),
                                   child: FittedBox(

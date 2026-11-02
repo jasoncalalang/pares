@@ -81,4 +81,67 @@ void main() {
     await pump(tester, MpMealCard(meal: meal, onSwap: () {}));
     expect(find.textContaining('serving'), findsNothing);
   });
+
+  group('screen reader', () {
+    testWidgets('slot, dish and numbers are one live node; swap stays apart', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester, MpMealCard(meal: meal, onSwap: () {}));
+      final card = find.bySemanticsLabel(
+        'Breakfast, Tapsilog: beef tapa, garlic rice and egg, 560 kcal, ₱95',
+      );
+      expect(card, findsOneWidget);
+      expect(
+        tester.getSemantics(card),
+        isSemantics(
+          label:
+              'Breakfast, Tapsilog: beef tapa, garlic rice and egg, 560 kcal, ₱95',
+          isLiveRegion: true,
+        ),
+      );
+      expect(find.bySemanticsLabel('Swap breakfast'), findsOneWidget);
+      expect(find.bySemanticsLabel('BREAKFAST'), findsNothing);
+      expect(find.bySemanticsLabel('560 kcal · ₱95'), findsNothing);
+      handle.dispose();
+    });
+
+    testWidgets('servings and swapping are spoken in the same node', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      const two = PlannedMeal(
+        slot: MealSlot.lunch,
+        name: 'Tinola',
+        kcal: 1120,
+        pricePhp: 190,
+        servings: 2,
+      );
+      await pump(tester, MpMealCard(meal: two, onSwap: () {}));
+      expect(
+        find.bySemanticsLabel('Lunch, Tinola, 2 servings, 1120 kcal, ₱190'),
+        findsOneWidget,
+      );
+      await pump(tester, MpMealCard(meal: two, swapping: true, onSwap: () {}));
+      expect(
+        find.bySemanticsLabel('Lunch, Tinola, Swapping this meal'),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('the monogram of a photoless meal is not read', (tester) async {
+      final handle = tester.ensureSemantics();
+      const adobo = PlannedMeal(
+        slot: MealSlot.dinner,
+        name: 'Chicken adobo',
+        kcal: 500,
+        pricePhp: 80,
+      );
+      await pump(tester, MpMealCard(meal: adobo, onSwap: () {}));
+      expect(find.text('C'), findsOneWidget);
+      expect(find.bySemanticsLabel('C'), findsNothing);
+      handle.dispose();
+    });
+  });
 }

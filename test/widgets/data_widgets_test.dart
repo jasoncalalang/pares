@@ -71,6 +71,23 @@ void main() {
       expect(stack.clipBehavior, Clip.none);
     });
 
+    testWidgets('the selected day name uses heroMuted, not dimmed heroText',
+        (tester) async {
+      await phone(tester);
+      await tester.pumpWidget(host(MpDayStrip(
+        days: Weekday.values,
+        dayNumbers: const [20, 21, 22, 23, 24, 25, 26],
+        selected: 3,
+        onSelect: (_) {},
+      )));
+      await tester.pumpAndSettle();
+      final color = paintedColor(tester, find.text('THU'));
+      expect(color, MpColors.light.heroMuted);
+      expect(color.a, 1.0);
+      expect(contrast(color, MpColors.light.heroSurface),
+          greaterThanOrEqualTo(4.5));
+    });
+
     testWidgets('unselected day names clear 4.5:1 on cream', (tester) async {
       await phone(tester);
       await tester.pumpWidget(host(MpDayStrip(
