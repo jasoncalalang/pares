@@ -32,6 +32,7 @@ class PlannedMeal {
     required this.kcal,
     required this.pricePhp,
     this.image,
+    this.id,
   });
 
   final MealSlot slot;
@@ -43,6 +44,9 @@ class PlannedMeal {
   /// Null when the bank has no photo yet; the card falls back to a tinted
   /// initial.
   final String? image;
+
+  /// The meal bank's id, when the plan came from the server.
+  final String? id;
 }
 
 class DayPlan {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
+import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/screens/this_week_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';

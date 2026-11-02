@@ -7,10 +7,6 @@ import '../mealpal_ph.dart';
 import '../state/plan_draft.dart';
 import '../widgets/widgets.dart';
 
-/// Where the week's plan is in its life: being built by the recommender,
-/// ready to show, or failed.
-enum PlanStatus { ready, building, failed }
-
 /// The weekly plan: target + budget pills, day strip, the selected day's
 /// four meal cards (each swappable for the next option in its slot), and
 /// the way into the grocery list. While the plan is [PlanStatus.building]
