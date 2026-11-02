@@ -28,9 +28,19 @@ MealPal PH.
 - `lib/screens/`: the six screens (Welcome, then the four steps, then the
   grocery list). Every screen has an on-screen way back: the fade routes
   have no iOS edge swipe.
-- `lib/state/plan_draft.dart`: one `ChangeNotifier` for the whole flow.
+- `lib/src/plan/planner.dart`: the `Planner` interface, `PlanBrief`,
+  `PlanSnapshot`, `PlanStatus` and `PlannerException`. `plan_json.dart` reads
+  the server's plan record; `http_planner.dart` is the `Planner` over the
+  server's HTTP API (package:http, tested with `MockClient`).
+- `lib/state/plan_draft.dart`: one `ChangeNotifier` for the whole flow;
+  `brief` is what the planner is asked for. `week_plan_controller.dart`
+  drives a `Planner`: builds, polls, swaps, retries. The This week screen
+  only reads it.
 - `lib/data/`: sample week / grocery list / store tiles (stand-ins for the
-  meal bank + AI recommender). `nextAlternative` drives the meal swap.
+  meal bank). `nextAlternative` drives the offline meal swap.
+  `sample_planner.dart` is the `Planner` used when no server is configured.
+- `lib/app.dart` picks the planner (`plannerFor`) and owns the controller.
+  The grocery list and the Welcome collage stay on sample data.
 - `test/` mirrors `lib/`; `test/helpers.dart` has `host()`, `phone()`,
   `contrast()` and `paintedColor()`. `test/flutter_test_config.dart` loads
   the real Fraunces and Plus Jakarta Sans for every test, so widths and
@@ -109,6 +119,24 @@ The design is filtered with the antislop rules; keep it that way:
 - Uppercase kickers, Lucide glyphs, the selection halo and the two shadows
   are deliberate and written up in the design-system doc; do not add more
   decoration without writing the reason down.
+
+## Run against the server
+
+Without a server the app plans from the local sample bank, so tests, the web
+preview and the CI APK need nothing. To have the server build the week, start
+it as `server/README.md` says, then pass its URL (and the app key, if the
+server has one) at build time:
+
+```
+~/development/flutter/bin/flutter run \
+  --dart-define=MEALPAL_SERVER_URL=http://192.168.42.202:8090 \
+  --dart-define=MEALPAL_APP_KEY=<key>
+```
+
+Android: the main manifest has INTERNET; only the debug manifest allows
+cleartext http, so a release build needs an https URL (Cloud Run). iOS: an
+http LAN server would need an App Transport Security exception, which is
+not set up; use https there.
 
 ## Preview
 
