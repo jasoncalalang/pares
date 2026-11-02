@@ -106,7 +106,7 @@ void main() {
     expect(find.text('This week'), findsOneWidget);
     expect(find.text('2,087 kcal/day'), findsOneWidget);
     expect(find.text('≤ ₱2,500'), findsOneWidget);
-    expect(find.text('Grocery list'), findsOneWidget);
+    expect(find.text('Grocery list'), findsNothing);
     expect(find.text('New'), findsNothing);
     for (final d in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']) {
       expect(find.text(d), findsOneWidget, reason: d);
@@ -218,12 +218,52 @@ void main() {
     }
   });
 
-  testWidgets('both grocery entry points fire the callback', (tester) async {
+  testWidgets('the pinned footer is the one way to the grocery list', (
+    tester,
+  ) async {
     await pump(tester);
-    await tester.tap(find.text('Grocery list'));
+    expect(find.byType(MpPillButton), findsNothing);
     await tester.tap(find.text('See grocery list'));
     await tester.pumpAndSettle();
-    expect(groceries, 2);
+    expect(groceries, 1);
+  });
+
+  testWidgets('says the meal numbers are rough estimates under the day line', (
+    tester,
+  ) async {
+    await pump(tester);
+    final note = find.text('Calories and prices are rough estimates for now.');
+    expect(note, findsOneWidget);
+    final line = find.text('Monday · 2,087 kcal · ₱250');
+    expect(
+      tester.getTopLeft(note).dy,
+      greaterThan(tester.getBottomLeft(line).dy - 1),
+    );
+    expect(paintedColor(tester, note), paintedColor(tester, line));
+  });
+
+  testWidgets('no estimates line while the plan is building', (tester) async {
+    await show(tester, WeekPlanController(_ScriptedPlanner()));
+    expect(
+      find.text('Calories and prices are rough estimates for now.'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('the target pill says when the planner capped it', (
+    tester,
+  ) async {
+    await show(tester, WeekPlanController(SamplePlanner()));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('planner max'), findsNothing);
+    draft
+      ..weightKg = 150
+      ..heightCm = 190
+      ..age = 20
+      ..activity = ActivityLevel.active
+      ..goal = Goal.gain;
+    await tester.pumpAndSettle();
+    expect(find.text('4,500 kcal/day (planner max)'), findsOneWidget);
   });
 
   testWidgets('while the plan is building it says so and hides the meals', (
@@ -467,9 +507,9 @@ void main() {
                 .data!;
       }
 
-      // Grocery list, seven days, four swaps and the CTA: one full pass.
+      // Seven days, four swaps and the CTA: one full pass.
       final stops = <String>[];
-      for (var i = 0; i < 13; i++) {
+      for (var i = 0; i < 12; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pumpAndSettle();
         stops.add(focused());

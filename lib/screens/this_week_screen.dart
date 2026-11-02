@@ -85,7 +85,9 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                         runSpacing: 7,
                         children: [
                           MpPill(
-                            label: '$target kcal/day',
+                            label: widget.draft.targetCappedForPlanner
+                                ? '$target kcal/day (planner max)'
+                                : '$target kcal/day',
                             accent: MpAccent.annatto,
                           ),
                           MpPill(label: '≤ $budget', accent: MpAccent.green),
@@ -94,13 +96,6 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                     ],
                   ),
                 ),
-                if (ready)
-                  MpPillButton(
-                    label: 'Grocery list',
-                    icon: LucideIcons.shoppingCart,
-                    accent: MpAccent.annatto,
-                    onTap: widget.onGrocery,
-                  ),
               ],
             ),
             const SizedBox(height: 20),
@@ -127,6 +122,16 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
               Text(
                 '${day.weekday.label} · ${formatThousands(day.kcal)} kcal · '
                 '${formatPeso(day.pricePhp, decimals: 0)}',
+                style: MpTypography.label().copyWith(
+                  color: c.faint,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 3),
+              // TODO(meal-bank): drop this line once the FNRI-based bank
+              // supplies checked numbers.
+              Text(
+                'Calories and prices are rough estimates for now.',
                 style: MpTypography.label().copyWith(
                   color: c.faint,
                   fontWeight: FontWeight.w500,

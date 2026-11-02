@@ -118,6 +118,32 @@ void main() {
     }
   });
 
+  testWidgets('This week capped target pill and estimates line fit at 2x', (
+    tester,
+  ) async {
+    final plan = WeekPlanController(SamplePlanner());
+    addTearDown(plan.dispose);
+    final draft = PlanDraft()
+      ..weightKg = 150
+      ..heightCm = 190
+      ..age = 20
+      ..activity = ActivityLevel.active
+      ..goal = Goal.gain;
+    plan.build(draft.brief);
+    await pumpAt(
+      tester,
+      ThisWeekScreen(draft: draft, controller: plan, onGrocery: () {}),
+      scale: 2.0,
+      size: const Size(360, 844),
+    );
+    expect(tester.takeException(), isNull);
+    expectWholeWords(tester, find.text('4,500 kcal/day (planner max)'));
+    expectWholeWords(
+      tester,
+      find.text('Calories and prices are rough estimates for now.'),
+    );
+  });
+
   group('This week states at 2x text on 360dp', () {
     final planner = _ThisWeekPlanner();
     late WeekPlanController plan;
