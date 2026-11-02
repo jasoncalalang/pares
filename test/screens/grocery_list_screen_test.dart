@@ -46,6 +46,14 @@ void main() {
     expect(find.text('₱180'), findsOneWidget);
   });
 
+  testWidgets('says the list is a sample and keeps the subtitle short',
+      (tester) async {
+    await pump(tester);
+    expect(find.text(sampleListNote), findsOneWidget);
+    expect(find.text('Grouped by where to buy it.'), findsOneWidget);
+    expect(find.textContaining('Everything for this week'), findsNothing);
+  });
+
   testWidgets('the delivery handoff is an honest coming-soon note, not a button',
       (tester) async {
     await pump(tester);

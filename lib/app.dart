@@ -133,8 +133,8 @@ class _FlowState extends State<_Flow> {
   Widget _groceries(BuildContext context) => GroceryListScreen(
     list: sampleGroceryList(budgetPhp: _draft.weeklyBudgetPhp),
     // TODO(grocery): build the list from the planned meals once the bank
-    // has ingredients; until then a server week gets a sample list.
-    sampleNote: widget.planner is! SamplePlanner,
+    // has ingredients; until then the list is a sample in every mode, since
+    // swaps do not change it either.
     onBack: () => Navigator.of(context).pop(),
   );
 

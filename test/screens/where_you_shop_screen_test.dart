@@ -1,6 +1,7 @@
 import 'dart:ui' show Tristate;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mealpal_ph/data/store_tiles.dart';
 import 'package:mealpal_ph/screens/where_you_shop_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';
 
@@ -40,11 +41,30 @@ void main() {
       // "S&R" is also its own monogram, so it legitimately appears twice.
       expect(find.text(s), findsAtLeastNWidgets(1), reason: s);
     }
-    expect(find.text('LOCAL TO THE PHILIPPINES'), findsOneWidget);
-    expect(find.text('Pick the ones you actually use'), findsOneWidget);
+    expect(find.text('NEIGHBORHOOD STORES'), findsOneWidget);
+    expect(find.text('LOCAL TO THE PHILIPPINES'), findsNothing);
+    expect(find.text('Pick the ones you actually use'), findsNothing);
     expect(find.text('Wet market'), findsOneWidget);
     expect(find.text('Corner store'), findsOneWidget);
     expect(find.text('Build my plan (2)'), findsOneWidget);
+  });
+
+  testWidgets('the build button tells a screen reader how many stores',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await pump(tester);
+    expect(find.bySemanticsLabel('Build my plan from 2 stores'),
+        findsOneWidget);
+    expect(find.bySemanticsLabel('Build my plan (2)'), findsNothing);
+    for (final t in [...chainTiles, ...localTiles]) {
+      if (draft.selectedStoreCount > 1 && draft.isStoreSelected(t.id)) {
+        draft.toggleStore(t.id);
+      }
+    }
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Build my plan from 1 store'),
+        findsOneWidget);
+    handle.dispose();
   });
 
   testWidgets('steppers move the budget by ₱100', (tester) async {

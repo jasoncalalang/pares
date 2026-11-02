@@ -38,9 +38,8 @@ void main() {
     expect(find.text('MealPal PH'), findsOneWidget, reason: 'wordmark is one rich text');
     expect(find.text(_headline), findsOneWidget);
     expect(
-      find.text('Your stats become a daily target. Your target becomes a week '
-          'of real meals from the stores near you, with the grocery list to '
-          'match.'),
+      find.text('Your stats become a daily target, and your target becomes a '
+          'week of real meals from the stores you pick.'),
       findsOneWidget,
     );
     expect(find.byType(Image), findsNWidgets(4));

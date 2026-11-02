@@ -41,7 +41,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Grocery list'), findsOneWidget);
-    expect(find.text(sampleListNote), findsNothing);
+    expect(find.text(sampleListNote), findsOneWidget);
     expect(find.text(' / ₱2,600'), findsOneWidget);
     await tester.tap(find.text('THIS WEEK'));
     await tester.pumpAndSettle();

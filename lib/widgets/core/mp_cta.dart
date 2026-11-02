@@ -18,9 +18,14 @@ class MpCta extends StatelessWidget {
     required this.onPressed,
     this.icon = LucideIcons.arrowRight,
     this.iconLeading = false,
+    this.semanticLabel,
   });
 
   final String label;
+
+  /// What a screen reader says in place of the visible [label], which is
+  /// then not read a second time.
+  final String? semanticLabel;
   final VoidCallback? onPressed;
   final IconData icon;
   final bool iconLeading;
@@ -33,29 +38,33 @@ class MpCta extends StatelessWidget {
     final glyph = Icon(icon, size: 19, color: fg);
     return MpPress(
       onTap: onPressed,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: MpSize.cta),
-        padding: const EdgeInsets.symmetric(
-          horizontal: MpSpacing.lg,
-          vertical: MpSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: enabled ? c.annatto : c.hairline,
-          borderRadius: BorderRadius.circular(MpRadius.button),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (iconLeading) ...[glyph, const SizedBox(width: 9)],
-            Flexible(
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: MpTypography.button().copyWith(color: fg),
+      semanticLabel: semanticLabel,
+      child: ExcludeSemantics(
+        excluding: semanticLabel != null,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: MpSize.cta),
+          padding: const EdgeInsets.symmetric(
+            horizontal: MpSpacing.lg,
+            vertical: MpSpacing.md,
+          ),
+          decoration: BoxDecoration(
+            color: enabled ? c.annatto : c.hairline,
+            borderRadius: BorderRadius.circular(MpRadius.button),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (iconLeading) ...[glyph, const SizedBox(width: 9)],
+              Flexible(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: MpTypography.button().copyWith(color: fg),
+                ),
               ),
-            ),
-            if (!iconLeading) ...[const SizedBox(width: 8), glyph],
-          ],
+              if (!iconLeading) ...[const SizedBox(width: 8), glyph],
+            ],
+          ),
         ),
       ),
     );

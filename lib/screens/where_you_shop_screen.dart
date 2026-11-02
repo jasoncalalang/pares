@@ -118,13 +118,8 @@ class WhereYouShopScreen extends StatelessWidget {
                   ]),
                   const SizedBox(height: 24),
                   Text(
-                    'LOCAL TO THE PHILIPPINES',
+                    'NEIGHBORHOOD STORES',
                     style: MpTypography.sectionEyebrow().copyWith(color: c.green),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Pick the ones you actually use',
-                    style: MpTypography.small().copyWith(color: c.faint),
                   ),
                   const SizedBox(height: 12),
                   MpGrid2(columns: fit.columns, children: [
@@ -146,6 +141,8 @@ class WhereYouShopScreen extends StatelessWidget {
             children: [
               MpCta(
                 label: 'Build my plan ($count)',
+                semanticLabel:
+                    'Build my plan from $count ${count == 1 ? 'store' : 'stores'}',
                 onPressed: count > 0 ? onNext : null,
               ),
               if (count == 0)

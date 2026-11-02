@@ -38,9 +38,8 @@ class WelcomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          'Your stats become a daily target. Your target becomes a week of '
-          'real meals from the stores near you, with the grocery list to '
-          'match.',
+          'Your stats become a daily target, and your target becomes a week '
+          'of real meals from the stores you pick.',
           style: MpTypography.body().copyWith(color: c.muted, height: 1.45),
         ),
       ],
