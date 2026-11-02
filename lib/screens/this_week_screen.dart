@@ -1,38 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-import '../data/sample_week.dart';
 import '../design_system/design_system.dart';
 import '../mealpal_ph.dart';
 import '../state/plan_draft.dart';
+import '../state/week_plan_controller.dart';
 import '../widgets/widgets.dart';
 
 /// The weekly plan: target + budget pills, day strip, the selected day's
-/// four meal cards (each swappable for the next option in its slot), and
-/// the way into the grocery list. While the plan is [PlanStatus.building]
-/// or [PlanStatus.failed] the screen says so instead of showing meals.
+/// four meal cards (each swappable through the planner), and the way into
+/// the grocery list. It draws whatever [controller] holds: the building
+/// card while the plan builds, the failed card with Try again when it
+/// fails, and the week when it is ready. A swap keeps the week on screen.
 class ThisWeekScreen extends StatefulWidget {
   const ThisWeekScreen({
     super.key,
     required this.draft,
-    required this.week,
+    required this.controller,
     required this.onGrocery,
     this.onBack,
-    this.status = PlanStatus.ready,
-    this.onRetry,
     this.weekStart,
   });
 
   final PlanDraft draft;
-  final List<DayPlan> week;
+  final WeekPlanController controller;
   final VoidCallback onGrocery;
 
   /// Back to the stores and budget.
   final VoidCallback? onBack;
-  final PlanStatus status;
-
-  /// Rebuilds the plan after a failure.
-  final VoidCallback? onRetry;
 
   /// The Monday the strip's dates count from; defaults to this week.
   final DateTime? weekStart;
@@ -44,45 +39,26 @@ class ThisWeekScreen extends StatefulWidget {
 class _ThisWeekScreenState extends State<ThisWeekScreen> {
   int _day = 0;
 
-  /// Meals the user swapped in, keyed by day and slot.
-  final Map<String, PlannedMeal> _swapped = {};
-
   DateTime get _monday {
     if (widget.weekStart != null) return widget.weekStart!;
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day - (now.weekday - 1));
   }
 
-  String _key(Weekday day, MealSlot slot) => '${day.name}-${slot.name}';
-
-  /// The selected day with any swaps applied.
-  DayPlan get _dayPlan {
-    final base = widget.week[_day];
-    return DayPlan(
-      weekday: base.weekday,
-      meals: [
-        for (final m in base.meals) _swapped[_key(base.weekday, m.slot)] ?? m,
-      ],
-    );
-  }
-
-  void _swap(Weekday day, PlannedMeal current) {
-    setState(() {
-      _swapped[_key(day, current.slot)] = nextAlternative(current);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final c = context.mp;
-    final ready = widget.status == PlanStatus.ready;
     final monday = _monday;
     return ListenableBuilder(
-      listenable: widget.draft,
+      listenable: Listenable.merge([widget.draft, widget.controller]),
       builder: (context, _) {
+        final plan = widget.controller;
+        final week = plan.week;
+        final ready = plan.status == PlanStatus.ready && week != null;
+        final swapping = plan.swapping;
         final target = formatThousands(widget.draft.target.targetCalories);
         final budget = formatPeso(widget.draft.weeklyBudgetPhp, decimals: 0);
-        final day = ready ? _dayPlan : null;
+        final day = ready ? week[_day.clamp(0, week.length - 1)] : null;
         return MpPage(
           content: [
             if (widget.onBack != null) ...[
@@ -98,14 +74,20 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                     children: [
                       Text(
                         'This week',
-                        style: MpTypography.h1().copyWith(color: c.ink, height: 1.05),
+                        style: MpTypography.h1().copyWith(
+                          color: c.ink,
+                          height: 1.05,
+                        ),
                       ),
                       const SizedBox(height: 11),
                       Wrap(
                         spacing: 7,
                         runSpacing: 7,
                         children: [
-                          MpPill(label: '$target kcal/day', accent: MpAccent.annatto),
+                          MpPill(
+                            label: '$target kcal/day',
+                            accent: MpAccent.annatto,
+                          ),
                           MpPill(label: '≤ $budget', accent: MpAccent.green),
                         ],
                       ),
@@ -124,16 +106,17 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
             const SizedBox(height: 20),
             if (day == null)
               _PlanStateCard(
-                status: widget.status,
+                status: plan.status,
                 target: target,
                 budget: budget,
-                onRetry: widget.onRetry,
+                failure: plan.failure,
+                onRetry: plan.retry,
               )
             else ...[
               MpDayStrip(
-                days: [for (final d in widget.week) d.weekday],
+                days: [for (final d in week!) d.weekday],
                 dayNumbers: [
-                  for (var i = 0; i < widget.week.length; i++)
+                  for (var i = 0; i < week.length; i++)
                     monday.add(Duration(days: i)).day,
                 ],
                 selected: _day,
@@ -149,12 +132,19 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                 ),
               ),
               const SizedBox(height: 14),
+              if (plan.notice != null) ...[
+                _Notice(plan.notice!),
+                const SizedBox(height: MpSpacing.cardGap),
+              ],
               for (final (i, meal) in day.meals.indexed) ...[
                 if (i > 0) const SizedBox(height: MpSpacing.cardGap),
                 MpMealCard(
                   key: ValueKey('${day.weekday.name}-${meal.slot.name}'),
                   meal: meal,
-                  onSwap: () => _swap(day.weekday, meal),
+                  swapping: swapping == (day.weekday, meal.slot),
+                  onSwap: swapping != null
+                      ? null
+                      : () => plan.swap(day.weekday, meal.slot),
                 ),
               ],
             ],
@@ -175,12 +165,16 @@ class _PlanStateCard extends StatelessWidget {
     required this.status,
     required this.target,
     required this.budget,
+    required this.failure,
     required this.onRetry,
   });
 
   final PlanStatus status;
   final String target;
   final String budget;
+
+  /// What went wrong, in words fit to show; null falls back to a general line.
+  final String? failure;
   final VoidCallback? onRetry;
 
   @override
@@ -213,10 +207,11 @@ class _PlanStateCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             failed
-                ? 'Your stats and stores are still here. Check your connection '
-                    'and try again.'
+                ? failure ??
+                      'Your stats and stores are still here. Check your '
+                          'connection and try again.'
                 : 'Matching meals to your $target kcal target and $budget '
-                    'weekly budget from the stores you picked.',
+                      'weekly budget from the stores you picked.',
             style: MpTypography.body().copyWith(color: c.muted),
           ),
           if (failed) ...[
@@ -228,6 +223,37 @@ class _PlanStateCard extends StatelessWidget {
               onPressed: onRetry,
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A line above the meals: why a swap changed nothing or did not go through.
+class _Notice extends StatelessWidget {
+  const _Notice(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.mp;
+    return Semantics(
+      liveRegion: true,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(LucideIcons.info, size: 16, color: c.annattoDeep),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: MpTypography.body().copyWith(color: c.ink),
+            ),
+          ),
         ],
       ),
     );

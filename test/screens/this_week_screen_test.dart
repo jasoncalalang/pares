@@ -1,47 +1,102 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mealpal_ph/data/sample_planner.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/screens/this_week_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';
+import 'package:mealpal_ph/state/week_plan_controller.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
 
-void main() {
-  late PlanDraft draft;
-  var groceries = 0;
-  var retries = 0;
+/// A planner the test steers by hand: start and swap answer when their
+/// completer does, fetch answers with [fetchReply].
+class _ScriptedPlanner implements Planner {
+  Completer<PlanSnapshot> startReply = Completer();
+  Completer<PlanSnapshot> swapReply = Completer();
+  PlanSnapshot Function() fetchReply = () => throw StateError('no fetch');
+  int starts = 0;
+  final swaps = <(Weekday, MealSlot)>[];
 
-  Future<void> pump(
-    WidgetTester tester, {
-    PlanStatus status = PlanStatus.ready,
-  }) async {
-    await phone(tester);
-    draft = PlanDraft();
-    groceries = 0;
-    retries = 0;
-    await tester.pumpWidget(
-      host(ThisWeekScreen(
-        draft: draft,
-        week: sampleWeek(),
-        status: status,
-        onGrocery: () => groceries++,
-        onRetry: () => retries++,
-      )),
-    );
-    // The building state spins forever, so it can never settle.
-    if (status == PlanStatus.building) {
-      await tester.pump(const Duration(seconds: 1));
-    } else {
-      await tester.pumpAndSettle();
-    }
+  @override
+  Future<PlanSnapshot> start(PlanBrief brief) {
+    starts++;
+    return startReply.future;
   }
 
-  testWidgets('shows the header pills, day strip and Monday meals',
-      (tester) async {
+  @override
+  Future<PlanSnapshot> fetch(String id) async => fetchReply();
+
+  @override
+  Future<PlanSnapshot> swap(
+    String id,
+    Weekday day,
+    MealSlot slot, {
+    String? note,
+  }) {
+    swaps.add((day, slot));
+    return swapReply.future;
+  }
+}
+
+PlanSnapshot _ready({String? message, List<DayPlan>? week}) => PlanSnapshot(
+  id: 'p1',
+  status: PlanStatus.ready,
+  week: week ?? sampleWeek(),
+  message: message,
+);
+
+void main() {
+  late PlanDraft draft;
+  late WeekPlanController controller;
+  var groceries = 0;
+
+  Future<void> show(WidgetTester tester, WeekPlanController c) async {
+    await phone(tester);
+    draft = PlanDraft();
+    controller = c;
+    addTearDown(controller.dispose);
+    groceries = 0;
+    controller.build(draft.brief);
+    await tester.pumpWidget(
+      host(
+        ThisWeekScreen(
+          draft: draft,
+          controller: controller,
+          onGrocery: () => groceries++,
+        ),
+      ),
+    );
+    // Building and swapping spin forever, so they can never settle.
+    await tester.pump(const Duration(seconds: 1));
+  }
+
+  Future<void> pump(WidgetTester tester) async {
+    await show(tester, WeekPlanController(SamplePlanner()));
+    await tester.pumpAndSettle();
+  }
+
+  /// A ready plan on a planner the test can steer.
+  Future<_ScriptedPlanner> pumpScripted(WidgetTester tester) async {
+    final planner = _ScriptedPlanner();
+    await show(
+      tester,
+      WeekPlanController(planner, wait: (_) => Future.value()),
+    );
+    planner.startReply.complete(_ready());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    return planner;
+  }
+
+  testWidgets('shows the header pills, day strip and Monday meals', (
+    tester,
+  ) async {
     await pump(tester);
     expect(find.text('This week'), findsOneWidget);
     expect(find.text('2,087 kcal/day'), findsOneWidget);
@@ -53,7 +108,10 @@ void main() {
     }
     expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
     expect(find.text('BREAKFAST'), findsOneWidget);
-    expect(find.text('Tapsilog: beef tapa, garlic rice and egg'), findsOneWidget);
+    expect(
+      find.text('Tapsilog: beef tapa, garlic rice and egg'),
+      findsOneWidget,
+    );
     expect(find.text('560 kcal · ₱95'), findsOneWidget);
     expect(find.text('LUNCH'), findsOneWidget);
     expect(find.text('DINNER'), findsOneWidget);
@@ -69,36 +127,48 @@ void main() {
     expect(find.text('Monday · 2,087 kcal · ₱250'), findsNothing);
   });
 
-  testWidgets('swapping a meal replaces it and re-totals the day',
-      (tester) async {
+  testWidgets('swapping a meal replaces it and re-totals the day', (
+    tester,
+  ) async {
     await pump(tester);
     await tester.tap(find.bySemanticsLabel('Swap breakfast'));
     await tester.pumpAndSettle();
-    expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
-        findsOneWidget);
+    expect(
+      find.text('Daingsilog: fried milkfish, garlic rice and egg'),
+      findsOneWidget,
+    );
     expect(find.text('Tapsilog: beef tapa, garlic rice and egg'), findsNothing);
     expect(find.text('Monday · 2,067 kcal · ₱235'), findsOneWidget);
     // The swap belongs to Monday only.
     await tester.tap(find.text('THU'));
     await tester.pumpAndSettle();
-    expect(find.text('Tapsilog: beef tapa, garlic rice and egg'), findsOneWidget);
+    expect(
+      find.text('Tapsilog: beef tapa, garlic rice and egg'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('swapping again moves on from the meal now showing',
-      (tester) async {
+  testWidgets('swapping again moves on from the meal now showing', (
+    tester,
+  ) async {
     await pump(tester);
     final swap = find.bySemanticsLabel('Swap breakfast');
     await tester.tap(swap);
     await tester.pumpAndSettle();
-    expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
-        findsOneWidget);
+    expect(
+      find.text('Daingsilog: fried milkfish, garlic rice and egg'),
+      findsOneWidget,
+    );
     await tester.tap(swap);
     await tester.pumpAndSettle();
     expect(find.text('Lugaw with egg and toasted garlic'), findsOneWidget);
     expect(find.text('Monday · 1,947 kcal · ₱190'), findsOneWidget);
     await tester.tap(swap);
     await tester.pumpAndSettle();
-    expect(find.text('Tapsilog: beef tapa, garlic rice and egg'), findsOneWidget);
+    expect(
+      find.text('Tapsilog: beef tapa, garlic rice and egg'),
+      findsOneWidget,
+    );
     expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
   });
 
@@ -110,24 +180,31 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('MON'));
     await tester.pumpAndSettle();
-    expect(find.text('Daingsilog: fried milkfish, garlic rice and egg'),
-        findsOneWidget);
+    expect(
+      find.text('Daingsilog: fried milkfish, garlic rice and egg'),
+      findsOneWidget,
+    );
     expect(find.text('Monday · 2,067 kcal · ₱235'), findsOneWidget);
   });
 
-  testWidgets('day buttons stay full tap targets on a 360dp phone',
-      (tester) async {
+  testWidgets('day buttons stay full tap targets on a 360dp phone', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(360, 640);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(host(ThisWeekScreen(
-      draft: PlanDraft(),
-      week: sampleWeek(),
-      onGrocery: () {},
-    )));
+    final c = WeekPlanController(SamplePlanner());
+    addTearDown(c.dispose);
+    final d = PlanDraft();
+    c.build(d.brief);
+    await tester.pumpWidget(
+      host(ThisWeekScreen(draft: d, controller: c, onGrocery: () {})),
+    );
     await tester.pumpAndSettle();
     final days = find.descendant(
-        of: find.byType(MpDayStrip), matching: find.byType(MpPress));
+      of: find.byType(MpDayStrip),
+      matching: find.byType(MpPress),
+    );
     expect(days, findsNWidgets(7));
     for (var i = 0; i < 7; i++) {
       final size = tester.getSize(days.at(i));
@@ -144,13 +221,16 @@ void main() {
     expect(groceries, 2);
   });
 
-  testWidgets('while the plan is building it says so and hides the meals',
-      (tester) async {
-    await pump(tester, status: PlanStatus.building);
+  testWidgets('while the plan is building it says so and hides the meals', (
+    tester,
+  ) async {
+    await show(tester, WeekPlanController(_ScriptedPlanner()));
     expect(find.text('Building your week'), findsOneWidget);
     expect(
-      find.text('Matching meals to your 2,087 kcal target and ₱2,500 weekly '
-          'budget from the stores you picked.'),
+      find.text(
+        'Matching meals to your 2,087 kcal target and ₱2,500 weekly '
+        'budget from the stores you picked.',
+      ),
       findsOneWidget,
     );
     expect(find.text('BREAKFAST'), findsNothing);
@@ -158,45 +238,162 @@ void main() {
     expect(find.text('Grocery list'), findsNothing);
   });
 
-  testWidgets('a failed build explains itself and can be retried',
-      (tester) async {
-    await pump(tester, status: PlanStatus.failed);
-    expect(find.text("We couldn't build your week."), findsOneWidget);
-    expect(
-      find.text('Your stats and stores are still here. Check your connection '
-          'and try again.'),
-      findsOneWidget,
+  testWidgets('the week appears when the planner finishes', (tester) async {
+    final planner = await pumpScripted(tester);
+    expect(planner.starts, 1);
+    expect(find.text('Building your week'), findsNothing);
+    expect(find.text('BREAKFAST'), findsOneWidget);
+  });
+
+  testWidgets('a failed build shows the planner message and can be retried', (
+    tester,
+  ) async {
+    final planner = _ScriptedPlanner();
+    await show(
+      tester,
+      WeekPlanController(planner, wait: (_) => Future.value()),
     );
+    planner.startReply.complete(
+      PlanSnapshot(
+        id: 'p1',
+        status: PlanStatus.failed,
+        message: 'The price checker was not reachable.',
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text("We couldn't build your week."), findsOneWidget);
+    expect(find.text('The price checker was not reachable.'), findsOneWidget);
     expect(find.text('BREAKFAST'), findsNothing);
+
+    planner.startReply = Completer();
     await tester.tap(find.text('Try again'));
-    await tester.pumpAndSettle();
-    expect(retries, 1);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(planner.starts, 2);
+    expect(find.text('Building your week'), findsOneWidget);
+    planner.startReply.complete(_ready());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('BREAKFAST'), findsOneWidget);
   });
 
-  testWidgets('Tab reaches every meal before the pinned CTA, and the CTA once',
-      (tester) async {
-    await pump(tester);
-    String focused() {
-      final at = FocusManager.instance.primaryFocus!.context!;
-      final press = at.findAncestorWidgetOfExactType<MpPress>()!;
-      return press.semanticLabel ??
-          tester
-              .widget<Text>(find
-                  .descendant(of: find.byWidget(press), matching: find.byType(Text))
-                  .first)
-              .data!;
-    }
+  testWidgets('a swap keeps the week on screen and marks only its own card', (
+    tester,
+  ) async {
+    final planner = await pumpScripted(tester);
+    await tester.tap(find.bySemanticsLabel('Swap lunch'));
+    await tester.pump();
+    expect(planner.swaps, [(Weekday.mon, MealSlot.lunch)]);
+    expect(find.text('Swapping this meal'), findsOneWidget);
+    expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
+    expect(find.text('BREAKFAST'), findsOneWidget);
+    // Other swap buttons are off while one swap is in flight.
+    await tester.tap(find.bySemanticsLabel('Swap dinner'));
+    await tester.pump();
+    expect(planner.swaps, hasLength(1));
 
-    // Grocery list, seven days, four swaps and the CTA: one full pass.
-    final stops = <String>[];
-    for (var i = 0; i < 13; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pumpAndSettle();
-      stops.add(focused());
-    }
-    expect(stops.where((s) => s == 'See grocery list'), hasLength(1),
-        reason: stops.join(', '));
-    expect(stops.last, 'See grocery list', reason: stops.join(', '));
-    expect(stops.indexOf('Swap snack'), lessThan(stops.indexOf('See grocery list')));
+    final swapped = sampleWeek();
+    planner.swapReply.complete(
+      _ready(
+        week: [
+          for (final d in swapped)
+            if (d.weekday != Weekday.mon)
+              d
+            else
+              DayPlan(
+                weekday: d.weekday,
+                meals: [
+                  for (final m in d.meals)
+                    m.slot == MealSlot.lunch ? nextAlternative(m) : m,
+                ],
+              ),
+        ],
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Swapping this meal'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('Swap dinner'));
+    await tester.pump();
+    expect(planner.swaps, hasLength(2));
   });
+
+  testWidgets('a swap that changed nothing shows its message above the meals', (
+    tester,
+  ) async {
+    final planner = await pumpScripted(tester);
+    await tester.tap(find.bySemanticsLabel('Swap lunch'));
+    await tester.pump();
+    planner.swapReply.complete(
+      _ready(message: 'No other lunch fits your budget today.'),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    final notice = find.text('No other lunch fits your budget today.');
+    expect(notice, findsOneWidget);
+    expect(
+      tester.getTopLeft(notice).dy,
+      lessThan(tester.getTopLeft(find.text('BREAKFAST')).dy),
+    );
+    expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
+
+    // The next action clears it.
+    planner.swapReply = Completer();
+    await tester.tap(find.bySemanticsLabel('Swap snack'));
+    await tester.pump();
+    expect(notice, findsNothing);
+  });
+
+  testWidgets('a swapping card is announced to screen readers', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpScripted(tester);
+    await tester.tap(find.bySemanticsLabel('Swap lunch'));
+    await tester.pump();
+    expect(
+      tester.getSemantics(find.text('Swapping this meal')),
+      isSemantics(isLiveRegion: true),
+    );
+    handle.dispose();
+  });
+
+  testWidgets(
+    'Tab reaches every meal before the pinned CTA, and the CTA once',
+    (tester) async {
+      await pump(tester);
+      String focused() {
+        final at = FocusManager.instance.primaryFocus!.context!;
+        final press = at.findAncestorWidgetOfExactType<MpPress>()!;
+        return press.semanticLabel ??
+            tester
+                .widget<Text>(
+                  find
+                      .descendant(
+                        of: find.byWidget(press),
+                        matching: find.byType(Text),
+                      )
+                      .first,
+                )
+                .data!;
+      }
+
+      // Grocery list, seven days, four swaps and the CTA: one full pass.
+      final stops = <String>[];
+      for (var i = 0; i < 13; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+        stops.add(focused());
+      }
+      expect(
+        stops.where((s) => s == 'See grocery list'),
+        hasLength(1),
+        reason: stops.join(', '),
+      );
+      expect(stops.last, 'See grocery list', reason: stops.join(', '));
+      expect(
+        stops.indexOf('Swap snack'),
+        lessThan(stops.indexOf('See grocery list')),
+      );
+    },
+  );
 }
