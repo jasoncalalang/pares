@@ -57,8 +57,24 @@ void main() {
       expect(first.kcal, 560);
       expect(first.pricePhp, 95);
       expect(first.image, 'tapsilog');
+      expect(first.servings, 1.5);
       expect(week.first.meals[1].image, isNull);
       expect(week.first.kcal, 2240);
+    });
+
+    test('servings may arrive as a whole number', () {
+      final r = record();
+      final d = ((r['week'] as Map)['days'] as List).first as Map;
+      ((d['meals'] as List).first as Map)['servings'] = 2;
+      final meal = planSnapshotFromJson(r).week!.first.meals.first;
+      expect(meal.servings, 2.0);
+    });
+
+    test('a meal with no servings counts as one', () {
+      final r = record();
+      final d = ((r['week'] as Map)['days'] as List).first as Map;
+      ((d['meals'] as List).first as Map).remove('servings');
+      expect(planSnapshotFromJson(r).week!.first.meals.first.servings, 1.0);
     });
 
     test('a first plan in progress has no week', () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
+import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
@@ -51,5 +52,33 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Swap breakfast'));
     await tester.pump();
     expect(swaps, 1);
+  });
+
+  testWidgets('a meal with other than one serving says how many', (
+    tester,
+  ) async {
+    const two = PlannedMeal(
+      slot: MealSlot.lunch,
+      name: 'Tapsilog',
+      kcal: 1120,
+      pricePhp: 190,
+      servings: 2,
+    );
+    await pump(tester, MpMealCard(meal: two, onSwap: () {}));
+    expect(find.text('2 servings · 1120 kcal · ₱190'), findsOneWidget);
+    const half = PlannedMeal(
+      slot: MealSlot.lunch,
+      name: 'Tapsilog',
+      kcal: 280,
+      pricePhp: 48,
+      servings: 0.5,
+    );
+    await pump(tester, MpMealCard(meal: half, onSwap: () {}));
+    expect(find.text('0.5 servings · 280 kcal · ₱48'), findsOneWidget);
+  });
+
+  testWidgets('one serving stays unsaid', (tester) async {
+    await pump(tester, MpMealCard(meal: meal, onSwap: () {}));
+    expect(find.textContaining('serving'), findsNothing);
   });
 }

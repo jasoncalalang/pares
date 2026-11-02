@@ -35,6 +35,15 @@ class MpMealCard extends StatefulWidget {
   State<MpMealCard> createState() => _MpMealCardState();
 }
 
+/// "2 servings · " when the numbers cover other than one portion.
+String _servingsPrefix(double servings) {
+  if (servings == 1) return '';
+  final n = servings == servings.roundToDouble()
+      ? servings.round().toString()
+      : servings.toString();
+  return '$n servings · ';
+}
+
 class _MpMealCardState extends State<MpMealCard> {
   int _spins = 0;
 
@@ -99,7 +108,7 @@ class _MpMealCardState extends State<MpMealCard> {
                   child: Text(
                     widget.swapping
                         ? 'Swapping this meal'
-                        : '${meal.kcal} kcal · '
+                        : '${_servingsPrefix(meal.servings)}${meal.kcal} kcal · '
                               '${formatPeso(meal.pricePhp, decimals: 0)}',
                     style: MpTypography.smallStrong().copyWith(
                       color: widget.swapping ? c.annattoDeep : c.faint,

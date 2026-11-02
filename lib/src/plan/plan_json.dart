@@ -64,6 +64,7 @@ PlannedMeal _meal(Object? json) {
     kcal: _int(meal['kcal'], 'kcal'),
     pricePhp: _int(meal['pricePhp'], 'pricePhp'),
     image: _optionalString(meal['image'], 'image'),
+    servings: _servings(meal['servings']),
   );
 }
 
@@ -82,6 +83,12 @@ String? _optionalString(Object? v, String what) {
   if (v == null) return null;
   if (v is String) return v;
   throw _bad('$what is not text');
+}
+
+double _servings(Object? v) {
+  if (v == null) return 1;
+  if (v is num && v > 0) return v.toDouble();
+  throw _bad('servings is not a positive number');
 }
 
 int _int(Object? v, String what) {

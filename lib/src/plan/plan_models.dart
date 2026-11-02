@@ -33,6 +33,7 @@ class PlannedMeal {
     required this.pricePhp,
     this.image,
     this.id,
+    this.servings = 1,
   });
 
   final MealSlot slot;
@@ -47,6 +48,10 @@ class PlannedMeal {
 
   /// The meal bank's id, when the plan came from the server.
   final String? id;
+
+  /// How many portions [kcal] and [pricePhp] already cover (0.5 to 2 from
+  /// the server; 1 for the sample bank).
+  final double servings;
 }
 
 class DayPlan {
