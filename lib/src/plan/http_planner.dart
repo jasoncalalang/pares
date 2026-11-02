@@ -77,9 +77,10 @@ class HttpPlanner implements Planner {
 
     final http.Response response;
     try {
-      response = await http.Response.fromStream(
-        await _client.send(request).timeout(requestTimeout),
-      ).timeout(requestTimeout);
+      // One budget for the whole exchange: sending and reading the body.
+      response = await (() async {
+        return http.Response.fromStream(await _client.send(request));
+      })().timeout(requestTimeout);
     } catch (_) {
       throw const PlannerException(
         PlannerErrorKind.network,

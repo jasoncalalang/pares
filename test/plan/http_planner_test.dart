@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
@@ -84,6 +85,21 @@ Rig answering(
   String base = 'http://host:8090',
   String? key,
 }) => Rig((_) async => r, base: base, key: key);
+
+/// Answers after [each] to send and again after [each] to the body.
+class _SlowClient extends http.BaseClient {
+  _SlowClient(this.each);
+  final Duration each;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    await Future<void>.delayed(each);
+    final body = Stream<List<int>>.fromFuture(
+      Future<List<int>>.delayed(each, () => utf8.encode('{}')),
+    );
+    return http.StreamedResponse(body, 200);
+  }
+}
 
 Matcher plannerError(PlannerErrorKind kind) =>
     throwsA(isA<PlannerException>().having((e) => e.kind, 'kind', kind));
@@ -326,6 +342,26 @@ void main() {
         rig.planner.fetch('p1'),
         plannerError(PlannerErrorKind.network),
       );
+    });
+
+    test('the timeout covers the whole request, not each half', () {
+      fakeAsync((async) {
+        final planner = HttpPlanner(
+          Uri.parse('http://host:8090'),
+          client: _SlowClient(const Duration(seconds: 15)),
+        );
+        Object? error;
+        planner.fetch('p1').then<void>((_) {}, onError: (Object e) => error = e);
+        async.elapse(const Duration(seconds: 21));
+        expect(
+          error,
+          isA<PlannerException>().having(
+            (e) => e.kind,
+            'kind',
+            PlannerErrorKind.network,
+          ),
+        );
+      });
     });
 
     test('a socket error is a network error', () async {
