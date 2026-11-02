@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The This week plan is built by the MealPal server over https. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="MealPal PH"
         android:name="${applicationName}"

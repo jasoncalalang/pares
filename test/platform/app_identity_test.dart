@@ -22,4 +22,29 @@ void main() {
   test('no em dash ships in the package description', () {
     expect(File('pubspec.yaml').readAsStringSync(), isNot(contains('—')));
   });
+
+  group('network access', () {
+    String manifest(String flavour) =>
+        File('android/app/src/$flavour/AndroidManifest.xml').readAsStringSync();
+
+    test('the main manifest asks for INTERNET so a release build can reach '
+        'the server', () {
+      expect(
+        manifest('main'),
+        contains('<uses-permission android:name="android.permission.INTERNET"'),
+      );
+    });
+
+    test('release stays https only', () {
+      expect(manifest('main'), isNot(contains('usesCleartextTraffic')));
+      expect(manifest('profile'), isNot(contains('usesCleartextTraffic')));
+    });
+
+    test('debug allows cleartext so an http LAN dev server works', () {
+      expect(
+        manifest('debug'),
+        contains('android:usesCleartextTraffic="true"'),
+      );
+    });
+  });
 }
