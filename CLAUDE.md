@@ -41,7 +41,8 @@ MealPal PH.
   `sample_planner.dart` is the `Planner` used when no server is configured.
 - `lib/app.dart` picks the planner (`plannerFor`, https-only in release) and
   owns the controller.
-  The grocery list and the Welcome collage stay on sample data.
+  The grocery list and the Welcome collage stay on sample data; the grocery
+  list says so in every mode, since swaps never change it.
 - `test/` mirrors `lib/`; `test/helpers.dart` has `host()`, `phone()`,
   `contrast()` and `paintedColor()`. `test/flutter_test_config.dart` loads
   the real Fraunces and Plus Jakarta Sans for every test, so widths and
@@ -117,6 +118,31 @@ The design is filtered with the antislop rules; keep it that way:
 - Numbers on screen are the math's, not the goal's: when the target is
   raised to the safe floor, Daily target shows the real change from
   maintenance and drops the weekly-rate claim.
+- This week labels its numbers: "Calories and prices are rough estimates
+  for now." sits under the day line in sample and server mode alike (the
+  bank holds placeholder numbers). Remove it only with the
+  `TODO(meal-bank)` once the FNRI-based bank supplies checked numbers. A
+  target capped for the planner reads "(planner max)" in its pill.
+- One grocery CTA on This week: the pinned "See grocery list" footer. Do
+  not bring back a second entry (the old title-row pill).
+- The calorie ring's centre shows the target as a share of maintenance
+  (`81%` over `OF MAINTENANCE`, the math's real ratio, not clamped; only
+  the arc fill is clamped). It must not repeat the target, which the hero
+  number beside it already states: the target appears once on Daily target.
+- Step eyebrows carry the same left arrow as `MpBackHeader` when they go
+  back, so the link looks tappable. The button announces "Back"; the step
+  is heard once, from the progress segments. Back headers announce "Back to
+  <label>".
+- The grocery list says it is a sample in every mode (`sampleListNote`),
+  until it is built from the planned meals (`TODO(grocery)`).
+- Screen-reader merges: a meal card is one live node ("Breakfast, Tapsilog,
+  560 kcal, ₱95"; the swap button stays its own), a macro card is one node
+  ("Protein, 157 grams") with its gauge excluded, and the ring centre is
+  one sentence. `MpCta` takes a `semanticLabel` when the visible text is
+  not the spoken one ("Build my plan from 2 stores").
+- The selected day name uses the `heroMuted` token, never opacity.
+- `HttpPlanner` maps only `Exception`s to a network error; an `Error` is a
+  bug and propagates.
 - Uppercase kickers, Lucide glyphs, the selection halo and the two shadows
   are deliberate and written up in the design-system doc; do not add more
   decoration without writing the reason down.
