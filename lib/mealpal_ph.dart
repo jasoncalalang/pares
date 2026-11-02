@@ -9,6 +9,7 @@ export 'src/locale/currency.dart';
 export 'src/nutrition/calorie_target.dart';
 export 'src/nutrition/macro_split.dart';
 export 'src/plan/plan_models.dart';
+export 'src/plan/http_planner.dart';
 export 'src/plan/plan_json.dart';
 export 'src/plan/planner.dart';
 export 'src/stores/catalog.dart';

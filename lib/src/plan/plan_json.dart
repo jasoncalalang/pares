@@ -22,8 +22,9 @@ PlanSnapshot planSnapshotFromJson(Object? json) {
 
 /// The `message` of an error body, or null when there is none.
 String? errorMessageFromJson(Object? json) {
-  if (json is Map && json['message'] is String)
+  if (json is Map && json['message'] is String) {
     return json['message'] as String;
+  }
   return null;
 }
 
