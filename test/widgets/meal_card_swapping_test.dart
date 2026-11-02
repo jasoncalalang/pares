@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
-import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
