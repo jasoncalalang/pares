@@ -35,16 +35,11 @@ void main() {
       );
     });
 
-    test('release stays https only', () {
-      expect(manifest('main'), isNot(contains('usesCleartextTraffic')));
-      expect(manifest('profile'), isNot(contains('usesCleartextTraffic')));
-    });
-
-    test('debug allows cleartext so an http LAN dev server works', () {
-      expect(
-        manifest('debug'),
-        contains('android:usesCleartextTraffic="true"'),
-      );
+    test('no manifest sets usesCleartextTraffic: it would not gate this '
+        "app's dart:io traffic, so it must not look like a guard", () {
+      for (final flavour in ['main', 'profile', 'debug']) {
+        expect(manifest(flavour), isNot(contains('usesCleartextTraffic')));
+      }
     });
   });
 }

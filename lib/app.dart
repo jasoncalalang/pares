@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'data/sample_planner.dart';
@@ -16,8 +17,23 @@ import 'state/week_plan_controller.dart';
 /// The planner the app was built for: the MealPal server when
 /// `--dart-define=MEALPAL_SERVER_URL=...` was given (with an optional
 /// `MEALPAL_APP_KEY`), else the local sample bank, which needs no server.
-Planner plannerFor({required String serverUrl, String appKey = ''}) {
+///
+/// A release build refuses a URL that is not https: the app's HTTP goes
+/// through dart:io sockets, which neither Android's cleartext setting nor
+/// iOS App Transport Security gate, so this check is the only guard.
+Planner plannerFor({
+  required String serverUrl,
+  String appKey = '',
+  bool release = kReleaseMode,
+}) {
   if (serverUrl.isEmpty) return SamplePlanner();
+  if (release && Uri.parse(serverUrl).scheme != 'https') {
+    throw ArgumentError.value(
+      serverUrl,
+      'MEALPAL_SERVER_URL',
+      'a release build needs an https URL',
+    );
+  }
   return HttpPlanner(Uri.parse(serverUrl), appKey: appKey);
 }
 
@@ -116,6 +132,9 @@ class _FlowState extends State<_Flow> {
 
   Widget _groceries(BuildContext context) => GroceryListScreen(
     list: sampleGroceryList(budgetPhp: _draft.weeklyBudgetPhp),
+    // TODO(grocery): build the list from the planned meals once the bank
+    // has ingredients; until then a server week gets a sample list.
+    sampleNote: widget.planner is! SamplePlanner,
     onBack: () => Navigator.of(context).pop(),
   );
 

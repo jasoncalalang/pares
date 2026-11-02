@@ -39,7 +39,8 @@ MealPal PH.
 - `lib/data/`: sample week / grocery list / store tiles (stand-ins for the
   meal bank). `nextAlternative` drives the offline meal swap.
   `sample_planner.dart` is the `Planner` used when no server is configured.
-- `lib/app.dart` picks the planner (`plannerFor`) and owns the controller.
+- `lib/app.dart` picks the planner (`plannerFor`, https-only in release) and
+  owns the controller.
   The grocery list and the Welcome collage stay on sample data.
 - `test/` mirrors `lib/`; `test/helpers.dart` has `host()`, `phone()`,
   `contrast()` and `paintedColor()`. `test/flutter_test_config.dart` loads
@@ -133,10 +134,12 @@ server has one) at build time:
   --dart-define=MEALPAL_APP_KEY=<key>
 ```
 
-Android: the main manifest has INTERNET; only the debug manifest allows
-cleartext http, so a release build needs an https URL (Cloud Run). iOS: an
-http LAN server would need an App Transport Security exception, which is
-not set up; use https there.
+Android: the main manifest has INTERNET. The app's HTTP goes through dart:io
+sockets, which Android's `usesCleartextTraffic` and iOS App Transport
+Security do not gate, so neither is set. The only guard is `plannerFor` in
+`lib/app.dart`: a release build throws on a server URL that is not https
+(Cloud Run). Debug and profile builds accept an http LAN URL on both
+platforms.
 
 ## Preview
 

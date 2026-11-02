@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/app.dart';
+import 'package:mealpal_ph/screens/grocery_list_screen.dart';
 import 'package:mealpal_ph/data/sample_planner.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
 
@@ -40,6 +41,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Grocery list'), findsOneWidget);
+    expect(find.text(sampleListNote), findsNothing);
     expect(find.text(' / ₱2,600'), findsOneWidget);
     await tester.tap(find.text('THIS WEEK'));
     await tester.pumpAndSettle();
@@ -102,6 +104,26 @@ void main() {
   });
 
   group('planner choice', () {
+    test('a release build refuses a server URL that is not https', () {
+      expect(
+        () => plannerFor(
+          serverUrl: 'http://192.168.42.202:8090',
+          appKey: 'k',
+          release: true,
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        plannerFor(serverUrl: 'https://x.run.app', release: true),
+        isA<HttpPlanner>(),
+      );
+      expect(plannerFor(serverUrl: '', release: true), isA<SamplePlanner>());
+      expect(
+        plannerFor(serverUrl: 'http://192.168.42.202:8090', release: false),
+        isA<HttpPlanner>(),
+      );
+    });
+
     test('no server URL means the local sample bank', () {
       expect(plannerFor(serverUrl: ''), isA<SamplePlanner>());
     });
@@ -147,6 +169,17 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('BREAKFAST'), findsOneWidget);
+    });
+
+    testWidgets('a server plan says the grocery list is still a sample', (
+      tester,
+    ) async {
+      await toStores(tester);
+      await tester.tap(find.text('Build my plan (2)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('See grocery list'));
+      await tester.pumpAndSettle();
+      expect(find.text(sampleListNote), findsOneWidget);
     });
 
     testWidgets('going back and forward with the same choices keeps the plan', (

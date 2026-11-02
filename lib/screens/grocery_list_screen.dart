@@ -5,6 +5,11 @@ import '../design_system/design_system.dart';
 import '../mealpal_ph.dart';
 import '../widgets/widgets.dart';
 
+/// Shown when the week came from the server but the list is still the
+/// sample one, which does not follow the planned meals.
+const String sampleListNote =
+    'Sample list: it does not follow your planned meals yet.';
+
 /// The grocery list: estimated total against budget, then one collapsible
 /// section per store with check-off rows. With no plan yet it says so.
 class GroceryListScreen extends StatefulWidget {
@@ -12,7 +17,11 @@ class GroceryListScreen extends StatefulWidget {
     super.key,
     required this.list,
     required this.onBack,
+    this.sampleNote = false,
   });
+
+  /// Say that the list is a sample, not built from the planned meals.
+  final bool sampleNote;
 
   final GroceryList list;
   final VoidCallback onBack;
@@ -56,6 +65,13 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
           title: 'Grocery list',
           subtitle: 'Everything for this week, grouped by where to buy it.',
         ),
+        if (widget.sampleNote) ...[
+          const SizedBox(height: 10),
+          Text(
+            sampleListNote,
+            style: MpTypography.small().copyWith(color: c.annattoDeep),
+          ),
+        ],
         const SizedBox(height: 20),
         if (empty)
           MpCard(
