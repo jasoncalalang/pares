@@ -101,28 +101,34 @@ class _MpCalorieRingState extends State<MpCalorieRing>
                   arc: c.annatto,
                   stroke: MpSize.ringStroke,
                 ),
-                // Inside the stroke, shrinking at large text sizes.
-                child: Padding(
-                  padding: const EdgeInsets.all(MpSize.ringStroke),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${(widget.percent * t).round()}%',
-                          style: MpTypography.ringNumber().copyWith(
-                            color: c.heroText,
+                // Inside the inner circle, clear of the stroke, shrinking at
+                // large text sizes. The box is the 2:1 rectangle inscribed in
+                // that circle: the centre reads wide (number over caption), so
+                // a square box would shrink it more than the circle needs.
+                child: Center(
+                  child: SizedBox(
+                    width: _innerRadius(widget.size) * 4 / math.sqrt(5),
+                    height: _innerRadius(widget.size) * 2 / math.sqrt(5),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${(widget.percent * t).round()}%',
+                            style: MpTypography.ringNumber().copyWith(
+                              color: c.heroText,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'OF MAINTENANCE',
-                          style: MpTypography.ringCaption().copyWith(
-                            color: c.heroMuted,
+                          const SizedBox(height: 3),
+                          Text(
+                            'OF MAINTENANCE',
+                            style: MpTypography.ringCaption().copyWith(
+                              color: c.heroMuted,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -134,6 +140,11 @@ class _MpCalorieRingState extends State<MpCalorieRing>
     );
   }
 }
+
+/// Radius the centre text must stay within: inside the stroke, with half a
+/// stroke of air so no letter touches the arc.
+double _innerRadius(double size) =>
+    size / 2 - MpSize.ringStroke - MpSize.ringStroke / 2;
 
 class _RingPainter extends CustomPainter {
   const _RingPainter({

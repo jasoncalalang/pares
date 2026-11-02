@@ -7,6 +7,7 @@ import 'package:mealpal_ph/data/sample_planner.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/data/store_tiles.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/screens/daily_target_screen.dart';
 import 'package:mealpal_ph/screens/this_week_screen.dart';
 import 'package:mealpal_ph/screens/welcome_screen.dart';
@@ -82,8 +83,13 @@ void main() {
       expect(numbers, findsOneWidget);
       expect(lines(tester, numbers), 1);
     });
+  }
 
-    testWidgets('Daily target ring centre fits its ring at ${scale}x', (
+  // The centre text must clear the stroke: every corner of each line sits
+  // inside the ring's inner circle with a little air, not merely inside the
+  // ring's square bounding box (a wide caption there touches the stroke).
+  for (final scale in [1.0, 1.5, 2.0]) {
+    testWidgets('Daily target ring centre clears the stroke at ${scale}x', (
       tester,
     ) async {
       await pumpAt(
@@ -93,12 +99,23 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       final ring = tester.getRect(find.byType(MpCalorieRing));
+      final inner = ring.width / 2 - MpSize.ringStroke - MpSize.ringStroke / 2;
       for (final f in [find.text('81%'), find.text('OF MAINTENANCE')]) {
         expect(lines(tester, f), 1);
         expectWholeWords(tester, f);
         final r = tester.getRect(f);
-        expect(ring.contains(r.topLeft), isTrue, reason: '$f top left');
-        expect(ring.contains(r.bottomRight), isTrue, reason: '$f bottom right');
+        for (final corner in [
+          r.topLeft,
+          r.topRight,
+          r.bottomLeft,
+          r.bottomRight,
+        ]) {
+          expect(
+            (corner - ring.center).distance,
+            lessThanOrEqualTo(inner),
+            reason: '$f corner $corner',
+          );
+        }
       }
     });
   }
