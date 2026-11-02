@@ -23,11 +23,11 @@ class PlanBrief {
 
   /// The body of the server's `POST /plans`.
   Map<String, Object?> toJson() => {
-        'targetKcal': targetKcal,
-        'budgetPhp': budgetPhp,
-        'goal': goal.name,
-        'storeIds': storeIds,
-      };
+    'targetKcal': targetKcal,
+    'budgetPhp': budgetPhp,
+    'goal': goal.name,
+    'storeIds': storeIds,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -113,11 +113,7 @@ enum PlannerErrorKind {
 }
 
 class PlannerException implements Exception {
-  const PlannerException(
-    this.kind, {
-    this.message,
-    this.problems = const [],
-  });
+  const PlannerException(this.kind, {this.message, this.problems = const []});
 
   final PlannerErrorKind kind;
 
@@ -128,6 +124,7 @@ class PlannerException implements Exception {
   final List<String> problems;
 
   @override
-  String toString() => 'PlannerException(${kind.name}'
+  String toString() =>
+      'PlannerException(${kind.name}'
       '${message == null ? '' : ': $message'})';
 }

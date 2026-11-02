@@ -16,18 +16,24 @@ void main() {
 
     test('has value equality regardless of store order', () {
       PlanBrief make(List<String> stores) => PlanBrief(
-            targetKcal: 1800,
-            budgetPhp: 2500,
-            goal: Goal.gain,
-            storeIds: stores,
-          );
+        targetKcal: 1800,
+        budgetPhp: 2500,
+        goal: Goal.gain,
+        storeIds: stores,
+      );
       expect(make(['a', 'b']), make(['b', 'a']));
       expect(make(['a', 'b']).hashCode, make(['b', 'a']).hashCode);
       expect(make(['a']), isNot(make(['b'])));
       expect(
         make(['a']),
-        isNot(PlanBrief(
-            targetKcal: 1801, budgetPhp: 2500, goal: Goal.gain, storeIds: ['a'])),
+        isNot(
+          PlanBrief(
+            targetKcal: 1801,
+            budgetPhp: 2500,
+            goal: Goal.gain,
+            storeIds: ['a'],
+          ),
+        ),
       );
     });
 
@@ -50,9 +56,18 @@ void main() {
   group('PlannedMeal', () {
     test('carries an optional bank id', () {
       const withId = PlannedMeal(
-          slot: MealSlot.lunch, name: 'Adobo', kcal: 1, pricePhp: 1, id: 'adobo');
-      const without =
-          PlannedMeal(slot: MealSlot.lunch, name: 'Adobo', kcal: 1, pricePhp: 1);
+        slot: MealSlot.lunch,
+        name: 'Adobo',
+        kcal: 1,
+        pricePhp: 1,
+        id: 'adobo',
+      );
+      const without = PlannedMeal(
+        slot: MealSlot.lunch,
+        name: 'Adobo',
+        kcal: 1,
+        pricePhp: 1,
+      );
       expect(withId.id, 'adobo');
       expect(without.id, isNull);
     });
@@ -60,7 +75,10 @@ void main() {
 
   group('PlannerException', () {
     test('describes itself with kind and message', () {
-      const e = PlannerException(PlannerErrorKind.busy, message: 'Still building.');
+      const e = PlannerException(
+        PlannerErrorKind.busy,
+        message: 'Still building.',
+      );
       expect(e.kind, PlannerErrorKind.busy);
       expect(e.message, 'Still building.');
       expect(e.problems, isEmpty);

@@ -54,7 +54,11 @@ void main() {
       local: true,
       items: [
         GroceryItem(name: 'Beef tapa cut', quantity: '400 g', pricePhp: 180),
-        GroceryItem(name: 'Chicken', quantity: 'Tinola cut · 500 g', pricePhp: 140),
+        GroceryItem(
+          name: 'Chicken',
+          quantity: 'Tinola cut · 500 g',
+          pricePhp: 140,
+        ),
       ],
     );
 
