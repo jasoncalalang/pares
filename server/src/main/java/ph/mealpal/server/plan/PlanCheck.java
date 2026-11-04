@@ -61,7 +61,7 @@ public final class PlanCheck {
 
         int low = lowestKcal(request.targetKcal());
         int high = highestKcal(request.targetKcal());
-        int weekPrice = 0;
+        Map<String, BigDecimal> lines = new java.util.LinkedHashMap<>();
         for (SubmittedDay day : plan.days()) {
             String label = day.weekday().label();
             boolean known = true;
@@ -85,7 +85,9 @@ public final class PlanCheck {
                     continue;
                 }
                 kcal += scaled(meal.kcal(), sm.servings());
-                weekPrice += scaled(meal.pricePhp(), sm.servings());
+                for (PlannedIngredient i : ingredientsFor(meal, sm.servings())) {
+                    lines.merge(i.id(), BigDecimal.valueOf(i.pricePhp()), BigDecimal::add);
+                }
             }
             Set<Slot> slots = day.meals().stream().map(SubmittedMeal::slot).collect(Collectors.toSet());
             if (day.meals().size() != Slot.values().length || slots.size() != Slot.values().length) {
@@ -97,6 +99,9 @@ public final class PlanCheck {
                         + Format.thousands(request.targetKcal()) + ").");
             }
         }
+        // The grocery list's total: each ingredient's week cost rounded once, then added.
+        int weekPrice = lines.values().stream()
+                .mapToInt(v -> v.setScale(0, RoundingMode.HALF_UP).intValue()).sum();
         if (weekPrice > request.budgetPhp()) {
             problems.add("The week costs " + Format.peso(weekPrice) + "; the budget is "
                     + Format.peso(request.budgetPhp()) + ".");
@@ -119,7 +124,7 @@ public final class PlanCheck {
     private PlannedMeal planned(SubmittedMeal sm) {
         Meal meal = bank.find(sm.mealId()).orElseThrow();
         return new PlannedMeal(sm.slot(), meal.id(), meal.name(), scaled(meal.kcal(), sm.servings()),
-                scaled(meal.pricePhp(), sm.servings()), meal.image(), sm.servings(),
+                mealPrice(meal, sm.servings()), meal.image(), sm.servings(),
                 ingredientsFor(meal, sm.servings()));
     }
 
@@ -131,6 +136,16 @@ public final class PlanCheck {
             return new PlannedIngredient(ingredient.id(), ingredient.name(), ingredient.kind(), ingredient.unit(),
                     twoDecimals(qty), twoDecimals(price));
         }).toList();
+    }
+
+    /** The meal's scaled ingredient cost, rounded once to whole pesos. */
+    private int mealPrice(Meal meal, double servings) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (var ref : meal.ingredients()) {
+            BigDecimal qty = BigDecimal.valueOf(ref.qty()).multiply(BigDecimal.valueOf(servings));
+            total = total.add(qty.multiply(BigDecimal.valueOf(bank.ingredient(ref.id()).orElseThrow().pricePhpPerUnit())));
+        }
+        return total.setScale(0, RoundingMode.HALF_UP).intValue();
     }
 
     private static double twoDecimals(BigDecimal value) {

@@ -69,10 +69,10 @@ The agent and environment ids come from `anthropic/claude-lock.json`, so run
 
 A plan is `{id, status: building | ready | failed, week, message}`. `week.days`
 run Monday first; each meal carries the bank's name, image key, kcal and
-pricePhp already multiplied by its servings, plus its `ingredients`:
+kcal multiplied by its servings, its pricePhp (the scaled ingredient cost, rounded once), plus its `ingredients`:
 
 ```json
-{"slot": "breakfast", "id": "tapsilog", "name": "Tapsilog: ...", "kcal": 840, "pricePhp": 126,
+{"slot": "breakfast", "id": "tapsilog", "name": "Tapsilog: ...", "kcal": 840, "pricePhp": 127,
  "image": "tapsilog", "servings": 1.5,
  "ingredients": [{"id": "beef-tapa", "name": "Beef tapa cut", "kind": "meat", "unit": "g",
                   "qty": 225, "pricePhp": 101.25}]}
@@ -82,6 +82,9 @@ pricePhp already multiplied by its servings, plus its `ingredients`:
 `ml` or `pc`); `pricePhp` is `qty` times the ingredient's unit price. Both are
 rounded to two decimals. `kind` is one of meat, poultry, fish, produce, fruit,
 aromatics, grain, egg, legume, oil, condiment, spice, pantry.
+
+The budget check uses the figure the app's grocery list shows: each
+ingredient's cost over the whole week, rounded once per ingredient, then added.
 
 The planner agent never sees ingredients: the bank it reads is still id,
 slots, name, kcal and pricePhp. The server does the arithmetic from

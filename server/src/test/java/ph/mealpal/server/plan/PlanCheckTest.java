@@ -119,7 +119,7 @@ class PlanCheckTest {
     @Test
     void aWeekOverBudgetIsRejected() {
         List<String> problems = check.problems(request(2087, 1300), everyDay(MONDAY));
-        assertEquals(List.of("The week costs ₱1,365; the budget is ₱1,300."), problems);
+        assertEquals(List.of("The week costs ₱1,371; the budget is ₱1,300."), problems);
     }
 
     @Test
@@ -135,11 +135,11 @@ class PlanCheckTest {
         assertEquals(Slot.BREAKFAST, breakfast.slot());
         assertEquals("Tapsilog: beef tapa, garlic rice and egg", breakfast.name());
         assertEquals(840, breakfast.kcal());
-        assertEquals(126, breakfast.pricePhp());
+        assertEquals(127, breakfast.pricePhp());
         assertEquals(1.5, breakfast.servings());
         assertEquals(2367, monday.kcal());
-        assertEquals(237, monday.pricePhp());
-        assertEquals(7 * 237, week.pricePhp());
+        assertEquals(238, monday.pricePhp());
+        assertEquals(7 * 238, week.pricePhp());
     }
 
     @Test
@@ -191,8 +191,24 @@ class PlanCheckTest {
     }
 
     @Test
-    void aMealsOwnPriceKeepsTheServingsArithmetic() {
-        // Not the sum of the rounded ingredient lines: round(84 * 1.5), as before.
-        assertEquals(126, planned("tapsilog", Slot.BREAKFAST, 1.5).pricePhp());
+    void aMealsPriceIsItsScaledIngredientsRoundedOnce() {
+        // 84.40 a serving, so 126.60 for one and a half: 127, not round(84 * 1.5).
+        assertEquals(127, planned("tapsilog", Slot.BREAKFAST, 1.5).pricePhp());
+        // kcal keeps the servings arithmetic.
+        assertEquals(840, planned("tapsilog", Slot.BREAKFAST, 1.5).kcal());
+    }
+
+    @Test
+    void theBudgetIsCheckedAgainstTheFigureTheGroceryListShows() {
+        List<SubmittedMeal> meals = List.of(
+                new SubmittedMeal(Slot.BREAKFAST, "tapsilog", 0.75),
+                new SubmittedMeal(Slot.LUNCH, "tinola", 1.0),
+                new SubmittedMeal(Slot.DINNER, "adobo", 1.25),
+                new SubmittedMeal(Slot.SNACK, "boiled-saba", 0.75));
+        // Summing rounded meal prices gives 1,400 and would accept this week;
+        // the list sums the exact ingredient costs per ingredient: 1,412.
+        List<String> problems = check.problems(request(2087, 1400), everyDay(meals));
+        assertEquals(List.of("The week costs ₱1,412; the budget is ₱1,400."), problems);
+        assertEquals(List.of(), check.problems(request(2087, 1500), everyDay(meals)));
     }
 }
