@@ -9,6 +9,11 @@ import '../widgets/widgets.dart';
 const String groceryListNote =
     'Amounts are what your meals use. Prices are rough estimates for now.';
 
+/// Shown when the plan has meals but the server sent no ingredients.
+const String groceryListNoIngredients =
+    "This week's meals came without ingredients, so there is no list yet. "
+    'Update the server, then build the plan again.';
+
 /// The grocery list: estimated total against budget, then one collapsible
 /// section per store with check-off rows. With no plan yet it says so.
 class GroceryListScreen extends StatefulWidget {
@@ -89,13 +94,17 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
                 Icon(LucideIcons.shoppingBasket, size: 22, color: c.green),
                 const SizedBox(height: 14),
                 Text(
-                  'Nothing to buy yet',
+                  list.mealsLackIngredients
+                      ? 'No ingredients for this plan'
+                      : 'Nothing to buy yet',
                   style: MpTypography.rowTitle().copyWith(color: c.ink),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  "Build this week's plan first. The list fills itself in, "
-                  'grouped by store.',
+                  list.mealsLackIngredients
+                      ? groceryListNoIngredients
+                      : "Build this week's plan first. The list fills itself "
+                          'in, grouped by store.',
                   style: MpTypography.body().copyWith(color: c.muted),
                 ),
               ],

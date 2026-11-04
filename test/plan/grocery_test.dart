@@ -396,6 +396,20 @@ void main() {
     });
   });
 
+  group('a week whose meals carry no ingredients', () {
+    test('is flagged, unlike an empty week', () {
+      final none = groceryListFor(
+        week: [day(Weekday.mon, [<MealIngredient>[]])],
+        stops: allStops,
+        budgetPhp: 2500,
+      );
+      expect(none.sections, isEmpty);
+      expect(none.mealsLackIngredients, isTrue);
+      final empty = groceryListFor(week: [], stops: allStops, budgetPhp: 2500);
+      expect(empty.mealsLackIngredients, isFalse);
+    });
+  });
+
   group('the sample week', () {
     test('its list total is within 2% of the sum of the day prices', () {
       final week = sampleWeek();

@@ -166,6 +166,8 @@ GroceryList groceryListFor({
 
   return GroceryList(
     budgetPhp: budgetPhp,
+    mealsLackIngredients:
+        lines.isEmpty && week.any((d) => d.meals.isNotEmpty),
     sections: [
       for (final s in picked)
         GrocerySection(

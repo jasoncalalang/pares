@@ -165,10 +165,18 @@ class GrocerySection {
 }
 
 class GroceryList {
-  const GroceryList({required this.budgetPhp, required this.sections});
+  const GroceryList({
+    required this.budgetPhp,
+    required this.sections,
+    this.mealsLackIngredients = false,
+  });
 
   final int budgetPhp;
   final List<GrocerySection> sections;
+
+  /// True when the week has meals but none carries ingredients (a server
+  /// older than the app), as opposed to no plan at all.
+  final bool mealsLackIngredients;
 
   int get totalPhp => sections.fold(0, (sum, s) => sum + s.subtotalPhp);
   int get remainingPhp => budgetPhp - totalPhp;

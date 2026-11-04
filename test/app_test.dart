@@ -220,12 +220,14 @@ void main() {
       expect(texts, contains('180 g'));
     });
 
-    testWidgets('an older server that sends no ingredients shows the empty '
-        'state', (tester) async {
+    testWidgets('an older server that sends no ingredients says so, not that '
+        'there is no plan', (tester) async {
       await toWeek(tester, _IngredientPlanner(withIngredients: false));
       await openList(tester);
       expect(find.text('Grocery list'), findsOneWidget);
-      expect(find.text('Nothing to buy yet'), findsOneWidget);
+      expect(find.text('Nothing to buy yet'), findsNothing);
+      expect(find.text('No ingredients for this plan'), findsOneWidget);
+      expect(find.textContaining('Update the server'), findsOneWidget);
     });
   });
 

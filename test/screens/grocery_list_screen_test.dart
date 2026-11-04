@@ -165,4 +165,19 @@ void main() {
     await show(listOf([('kangkong', 'Kangkong'), ('tomato', 'Tomato')]));
     expect(struck(tester, 'Tomato'), isFalse);
   });
+
+  testWidgets('meals without ingredients get their own honest state',
+      (tester) async {
+    await pump(
+      tester,
+      list: const GroceryList(
+        budgetPhp: 2500,
+        sections: [],
+        mealsLackIngredients: true,
+      ),
+    );
+    expect(find.text('Nothing to buy yet'), findsNothing);
+    expect(find.text('No ingredients for this plan'), findsOneWidget);
+    expect(find.text(groceryListNoIngredients), findsOneWidget);
+  });
 }
