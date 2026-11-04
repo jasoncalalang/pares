@@ -111,13 +111,13 @@ void main() {
     for (final d in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']) {
       expect(find.text(d), findsOneWidget, reason: d);
     }
-    expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
+    expect(find.text('Monday · 2,087 kcal · ₱195'), findsOneWidget);
     expect(find.text('BREAKFAST'), findsOneWidget);
     expect(
       find.text('Tapsilog: beef tapa, garlic rice and egg'),
       findsOneWidget,
     );
-    expect(find.text('560 kcal · ₱95'), findsOneWidget);
+    expect(find.text('560 kcal · ₱84'), findsOneWidget);
     expect(find.text('LUNCH'), findsOneWidget);
     expect(find.text('DINNER'), findsOneWidget);
     expect(find.text('SNACK'), findsOneWidget);
@@ -129,7 +129,7 @@ void main() {
     await tester.tap(find.text('TUE'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Tuesday · '), findsOneWidget);
-    expect(find.text('Monday · 2,087 kcal · ₱250'), findsNothing);
+    expect(find.text('Monday · 2,087 kcal · ₱195'), findsNothing);
   });
 
   testWidgets('swapping a meal replaces it and re-totals the day', (
@@ -143,7 +143,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Tapsilog: beef tapa, garlic rice and egg'), findsNothing);
-    expect(find.text('Monday · 2,067 kcal · ₱235'), findsOneWidget);
+    expect(find.text('Monday · 2,067 kcal · ₱164'), findsOneWidget);
     // The swap belongs to Monday only.
     await tester.tap(find.text('THU'));
     await tester.pumpAndSettle();
@@ -167,14 +167,14 @@ void main() {
     await tester.tap(swap);
     await tester.pumpAndSettle();
     expect(find.text('Lugaw with egg and toasted garlic'), findsOneWidget);
-    expect(find.text('Monday · 1,947 kcal · ₱190'), findsOneWidget);
+    expect(find.text('Monday · 1,947 kcal · ₱128'), findsOneWidget);
     await tester.tap(swap);
     await tester.pumpAndSettle();
     expect(
       find.text('Tapsilog: beef tapa, garlic rice and egg'),
       findsOneWidget,
     );
-    expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
+    expect(find.text('Monday · 2,087 kcal · ₱195'), findsOneWidget);
   });
 
   testWidgets('a swap survives visiting another day', (tester) async {
@@ -189,7 +189,7 @@ void main() {
       find.text('Daingsilog: fried milkfish, garlic rice and egg'),
       findsOneWidget,
     );
-    expect(find.text('Monday · 2,067 kcal · ₱235'), findsOneWidget);
+    expect(find.text('Monday · 2,067 kcal · ₱164'), findsOneWidget);
   });
 
   testWidgets('day buttons stay full tap targets on a 360dp phone', (
@@ -234,7 +234,7 @@ void main() {
     await pump(tester);
     final note = find.text('Calories and prices are rough estimates for now.');
     expect(note, findsOneWidget);
-    final line = find.text('Monday · 2,087 kcal · ₱250');
+    final line = find.text('Monday · 2,087 kcal · ₱195');
     expect(
       tester.getTopLeft(note).dy,
       greaterThan(tester.getBottomLeft(line).dy - 1),
@@ -331,7 +331,7 @@ void main() {
     await tester.pump();
     expect(planner.swaps, [(Weekday.mon, MealSlot.lunch)]);
     expect(find.text('Swapping this meal'), findsOneWidget);
-    expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
+    expect(find.text('Monday · 2,087 kcal · ₱195'), findsOneWidget);
     expect(find.text('BREAKFAST'), findsOneWidget);
     // Other swap buttons are off while one swap is in flight.
     await tester.tap(find.bySemanticsLabel('Swap dinner'));
@@ -381,7 +381,7 @@ void main() {
       tester.getTopLeft(notice).dy,
       lessThan(tester.getTopLeft(find.text('BREAKFAST')).dy),
     );
-    expect(find.text('Monday · 2,087 kcal · ₱250'), findsOneWidget);
+    expect(find.text('Monday · 2,087 kcal · ₱195'), findsOneWidget);
 
     // The next action clears it.
     planner.swapReply = Completer();

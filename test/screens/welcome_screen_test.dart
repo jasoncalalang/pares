@@ -45,7 +45,7 @@ void main() {
     expect(find.byType(Image), findsNWidgets(4));
     // Stickers come from the example day: its first plate and its total.
     expect(find.text('560 kcal'), findsOneWidget);
-    expect(find.text('₱95'), findsOneWidget);
+    expect(find.text('₱84'), findsOneWidget);
     expect(find.text('2,087 kcal / day'), findsOneWidget);
     expect(find.text('Find my calorie target'), findsOneWidget);
     expect(find.text('or continue with'), findsOneWidget);
@@ -60,7 +60,7 @@ void main() {
     await pump(tester);
     final lead = tester.getRect(_image('Tapsilog: beef tapa, garlic rice and egg'));
     final sticker = tester.getRect(
-        find.ancestor(of: find.text('₱95'), matching: find.byType(Container)).first);
+        find.ancestor(of: find.text('₱84'), matching: find.byType(Container)).first);
     expect(lead.contains(sticker.center), isTrue);
     for (final other in [
       'Chicken tinola with moringa and rice',

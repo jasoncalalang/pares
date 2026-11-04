@@ -32,4 +32,33 @@ void main() {
       expect(nextAlternative(first).name, isNot(first.name), reason: slot.name);
     }
   });
+
+  test('every sample meal carries its bank id and ingredients', () {
+    for (final day in sampleWeek()) {
+      for (final meal in day.meals) {
+        expect(meal.id, isNotNull, reason: meal.name);
+        expect(meal.ingredients, isNotEmpty, reason: meal.name);
+        expect(meal.servings, 1);
+      }
+    }
+    for (final meal in mealBank) {
+      expect(meal.id, isNotNull);
+      expect(meal.ingredients, isNotEmpty);
+    }
+  });
+
+  test('sample prices are the bank prices, Monday adds up to 195 and the week to 1268', () {
+    final monday = sampleWeek().first;
+    expect(monday.meals.map((m) => m.pricePhp), [84, 57, 32, 22]);
+    expect(monday.pricePhp, 195);
+    expect(sampleWeek().fold(0, (s, d) => s + d.pricePhp), 1268);
+  });
+
+  test('a swapped-in alternative carries its own ingredients', () {
+    final breakfast = sampleWeek().first.meal(MealSlot.breakfast)!;
+    final next = nextAlternative(breakfast);
+    expect(next.id, 'daingsilog');
+    expect(next.ingredients.map((i) => i.id), contains('daing-bangus'));
+    expect(next.ingredients.map((i) => i.id), isNot(contains('beef-tapa')));
+  });
 }

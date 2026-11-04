@@ -1,78 +1,31 @@
 import '../mealpal_ph.dart';
+import 'sample_bank.dart';
 
-/// Hand-written stand-in for the meal bank + AI selection. Monday is the
-/// approved mockup; the other days rotate a few alternates so the day strip
-/// has something to show. Replace with the real recommender later.
+/// Stand-in for the meal bank + AI selection. Every meal comes from
+/// [sampleBankMeals], so its price, kcal and ingredients are the bank's.
+/// Monday is the approved mockup; the other days rotate a few alternates so
+/// the day strip has something to show. Replace with the real recommender
+/// later.
 
-const _tapsilog = PlannedMeal(
-  slot: MealSlot.breakfast,
-  name: 'Tapsilog: beef tapa, garlic rice and egg',
-  kcal: 560,
-  pricePhp: 95,
-  image: 'tapsilog',
-);
-const _tinola = PlannedMeal(
-  slot: MealSlot.lunch,
-  name: 'Chicken tinola with moringa and rice',
-  kcal: 620,
-  pricePhp: 75,
-  image: 'tinola',
-);
-const _munggo = PlannedMeal(
-  slot: MealSlot.dinner,
-  name: 'Ginisang munggo with tofu, water spinach and rice',
-  kcal: 560,
-  pricePhp: 55,
-  image: 'munggo',
-);
-const _sabaPeanuts = PlannedMeal(
-  slot: MealSlot.snack,
-  name: 'Saba banana and peanuts',
-  kcal: 347,
-  pricePhp: 25,
-  image: 'saba-peanuts',
-);
+PlannedMeal _from(String id, MealSlot slot) => plannedMealFrom(
+      sampleBankMeals.firstWhere((m) => m.id == id),
+      slot,
+    );
 
-const _daingsilog = PlannedMeal(
-  slot: MealSlot.breakfast,
-  name: 'Daingsilog: fried milkfish, garlic rice and egg',
-  kcal: 540,
-  pricePhp: 80,
-);
-const _lugaw = PlannedMeal(
-  slot: MealSlot.breakfast,
-  name: 'Lugaw with egg and toasted garlic',
-  kcal: 420,
-  pricePhp: 35,
-);
-const _adobo = PlannedMeal(
-  slot: MealSlot.lunch,
-  name: 'Chicken adobo with rice',
-  kcal: 650,
-  pricePhp: 70,
-);
-const _sinigang = PlannedMeal(
-  slot: MealSlot.dinner,
-  name: 'Pork sinigang with rice',
-  kcal: 610,
-  pricePhp: 85,
-);
-const _pinakbet = PlannedMeal(
-  slot: MealSlot.dinner,
-  name: 'Pinakbet with rice',
-  kcal: 480,
-  pricePhp: 50,
-);
-const _boiledSaba = PlannedMeal(
-  slot: MealSlot.snack,
-  name: 'Boiled saba with grated coconut',
-  kcal: 300,
-  pricePhp: 20,
-);
+final _tapsilog = _from('tapsilog', MealSlot.breakfast);
+final _daingsilog = _from('daingsilog', MealSlot.breakfast);
+final _lugaw = _from('lugaw', MealSlot.breakfast);
+final _tinola = _from('tinola', MealSlot.lunch);
+final _adobo = _from('adobo', MealSlot.lunch);
+final _munggo = _from('munggo', MealSlot.dinner);
+final _sinigang = _from('sinigang', MealSlot.dinner);
+final _pinakbet = _from('pinakbet', MealSlot.dinner);
+final _sabaPeanuts = _from('saba-peanuts', MealSlot.snack);
+final _boiledSaba = _from('boiled-saba', MealSlot.snack);
 
 /// Every meal the stand-in bank knows, in slot order. Swapping a meal walks
 /// this list within the meal's slot.
-const List<PlannedMeal> mealBank = [
+final List<PlannedMeal> mealBank = [
   _tapsilog,
   _daingsilog,
   _lugaw,
@@ -94,7 +47,7 @@ PlannedMeal nextAlternative(PlannedMeal meal) {
   return options[(i + 1) % options.length];
 }
 
-List<DayPlan> sampleWeek() => const [
+List<DayPlan> sampleWeek() => [
       DayPlan(weekday: Weekday.mon, meals: [_tapsilog, _tinola, _munggo, _sabaPeanuts]),
       DayPlan(weekday: Weekday.tue, meals: [_daingsilog, _tinola, _sinigang, _sabaPeanuts]),
       DayPlan(weekday: Weekday.wed, meals: [_lugaw, _adobo, _munggo, _boiledSaba]),
