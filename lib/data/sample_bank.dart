@@ -113,12 +113,12 @@ const Map<String, BankIngredient> sampleIngredients = {
   'okra': BankIngredient('Okra', GroceryKind.produce, IngredientUnit.g, 0.07),
   'ampalaya': BankIngredient('Ampalaya', GroceryKind.produce, IngredientUnit.g, 0.07),
   'mung-beans': BankIngredient('Mung beans', GroceryKind.legume, IngredientUnit.g, 0.12),
-  'tofu': BankIngredient('Tofu', GroceryKind.legume, IngredientUnit.g, 0.1),
+  'tofu': BankIngredient('Tofu', GroceryKind.produce, IngredientUnit.g, 0.1),
   'bay-leaf': BankIngredient('Bay leaves', GroceryKind.spice, IngredientUnit.g, 1.0),
   'peppercorn': BankIngredient('Peppercorns', GroceryKind.spice, IngredientUnit.g, 0.8),
   'saba': BankIngredient('Saba banana', GroceryKind.fruit, IngredientUnit.pc, 8.0),
   'peanuts': BankIngredient('Roasted peanuts', GroceryKind.pantry, IngredientUnit.g, 0.2),
-  'grated-coconut': BankIngredient('Grated coconut', GroceryKind.pantry, IngredientUnit.g, 0.1),
+  'grated-coconut': BankIngredient('Grated coconut', GroceryKind.produce, IngredientUnit.g, 0.1),
 };
 
 const List<BankMeal> sampleBankMeals = [

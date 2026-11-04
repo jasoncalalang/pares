@@ -28,12 +28,12 @@
     "okra": {"name": "Okra", "kind": "produce", "unit": "g", "pricePhpPerUnit": 0.07},
     "ampalaya": {"name": "Ampalaya", "kind": "produce", "unit": "g", "pricePhpPerUnit": 0.07},
     "mung-beans": {"name": "Mung beans", "kind": "legume", "unit": "g", "pricePhpPerUnit": 0.12},
-    "tofu": {"name": "Tofu", "kind": "legume", "unit": "g", "pricePhpPerUnit": 0.1},
+    "tofu": {"name": "Tofu", "kind": "produce", "unit": "g", "pricePhpPerUnit": 0.1},
     "bay-leaf": {"name": "Bay leaves", "kind": "spice", "unit": "g", "pricePhpPerUnit": 1},
     "peppercorn": {"name": "Peppercorns", "kind": "spice", "unit": "g", "pricePhpPerUnit": 0.8},
     "saba": {"name": "Saba banana", "kind": "fruit", "unit": "pc", "pricePhpPerUnit": 8},
     "peanuts": {"name": "Roasted peanuts", "kind": "pantry", "unit": "g", "pricePhpPerUnit": 0.2},
-    "grated-coconut": {"name": "Grated coconut", "kind": "pantry", "unit": "g", "pricePhpPerUnit": 0.1}
+    "grated-coconut": {"name": "Grated coconut", "kind": "produce", "unit": "g", "pricePhpPerUnit": 0.1}
   },
   "meals": [
     {"id": "tapsilog", "slots": ["breakfast"], "name": "Tapsilog: beef tapa, garlic rice and egg", "kcal": 560, "pricePhp": 84, "image": "tapsilog",

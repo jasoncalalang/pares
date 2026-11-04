@@ -410,6 +410,31 @@ void main() {
     });
   });
 
+  group('fresh tofu and grated coconut', () {
+    test('are bought fresh: a corner store alone never gets them', () {
+      final list = groceryListFor(
+        week: sampleWeek(),
+        stops: [stop('sari-sari', StoreType.sariSari)],
+        budgetPhp: 2500,
+      );
+      final corner = section(list, 'sari-sari')!.items.map((i) => i.name);
+      expect(corner, isNot(contains('Tofu')));
+      expect(corner, isNot(contains('Grated coconut')));
+      final elsewhere = section(list, 'elsewhere')!.items.map((i) => i.name);
+      expect(elsewhere, containsAll(['Tofu', 'Grated coconut']));
+    });
+
+    test('go to the wet market ahead of a supermarket', () {
+      final list = groceryListFor(
+        week: sampleWeek(),
+        stops: allStops,
+        budgetPhp: 2500,
+      );
+      final wet = section(list, 'palengke')!.items.map((i) => i.name);
+      expect(wet, containsAll(['Tofu', 'Grated coconut']));
+    });
+  });
+
   group('the sample week', () {
     test('its list total is within 2% of the sum of the day prices', () {
       final week = sampleWeek();
