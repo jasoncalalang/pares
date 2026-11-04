@@ -41,7 +41,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Grocery list'), findsOneWidget);
-    expect(find.text(sampleListNote), findsOneWidget);
+    expect(find.text(groceryListNote), findsOneWidget);
     expect(find.text(' / ₱2,600'), findsOneWidget);
     await tester.tap(find.text('THIS WEEK'));
     await tester.pumpAndSettle();
@@ -179,7 +179,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('See grocery list'));
       await tester.pumpAndSettle();
-      expect(find.text(sampleListNote), findsOneWidget);
+      expect(find.text(groceryListNote), findsOneWidget);
     });
 
     testWidgets('going back and forward with the same choices keeps the plan', (

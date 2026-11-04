@@ -46,17 +46,23 @@ void main() {
     expect(find.text('₱180'), findsOneWidget);
   });
 
-  testWidgets('says the list is a sample and keeps the subtitle short',
+  testWidgets('says what the amounts and prices are and keeps the subtitle short',
       (tester) async {
     await pump(tester);
-    expect(find.text(sampleListNote), findsOneWidget);
-    // The sample ignores the picked stores as well as the planned meals.
+    expect(find.text(groceryListNote), findsOneWidget);
     expect(
-      sampleListNote,
-      'Sample list: it does not follow your meals or stores yet.',
+      groceryListNote,
+      'Amounts are what your meals use. Prices are rough estimates for now.',
     );
+    expect(find.textContaining('Sample list'), findsNothing);
     expect(find.text('Grouped by where to buy it.'), findsOneWidget);
     expect(find.textContaining('Everything for this week'), findsNothing);
+  });
+
+  testWidgets('the note shows with an empty list too', (tester) async {
+    await pump(tester, list: const GroceryList(budgetPhp: 2500, sections: []));
+    expect(find.text(groceryListNote), findsOneWidget);
+    expect(find.text('Nothing to buy yet'), findsOneWidget);
   });
 
   testWidgets('the delivery handoff is an honest coming-soon note, not a button',

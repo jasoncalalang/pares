@@ -5,10 +5,9 @@ import '../design_system/design_system.dart';
 import '../mealpal_ph.dart';
 import '../widgets/widgets.dart';
 
-/// Shown in every mode: the list is still the sample one, which does not
-/// follow the planned meals.
-const String sampleListNote =
-    'Sample list: it does not follow your meals or stores yet.';
+/// Shown in every mode: what the numbers on the list are.
+const String groceryListNote =
+    'Amounts are what your meals use. Prices are rough estimates for now.';
 
 /// The grocery list: estimated total against budget, then one collapsible
 /// section per store with check-off rows. With no plan yet it says so.
@@ -63,7 +62,7 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          sampleListNote,
+          groceryListNote,
           style: MpTypography.small().copyWith(color: c.annattoDeep),
         ),
         const SizedBox(height: 20),
