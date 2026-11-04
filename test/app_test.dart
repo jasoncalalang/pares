@@ -140,6 +140,95 @@ void main() {
     });
   });
 
+  group('the grocery list follows the planned week', () {
+    Future<void> toWeek(WidgetTester tester, Planner planner) async {
+      await phone(tester);
+      await tester.pumpWidget(MealPalApp(planner: planner));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Find my calorie target'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Compute my target'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Next: where you shop'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Build my plan (2)'));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> openList(WidgetTester tester) async {
+      await tester.tap(find.text('See grocery list'));
+      await tester.pumpAndSettle();
+    }
+
+    /// Every visible string on the list, scrolled or not.
+    Set<String> listTexts(WidgetTester tester) => {
+      for (final t in tester.widgetList<Text>(
+        find.byType(Text, skipOffstage: false),
+      ))
+        if (t.data != null) t.data!,
+    };
+
+    testWidgets('sample mode lists the planned meals under the picked stores', (
+      tester,
+    ) async {
+      await toWeek(tester, SamplePlanner());
+      await openList(tester);
+      expect(find.text('Grocery list'), findsOneWidget);
+      expect(find.text(groceryListNote), findsOneWidget);
+      // Puregold and the wet market are the default picks, in that order of
+      // type rank: wet market first.
+      final wet = tester.getTopLeft(find.text('Wet market')).dy;
+      final puregold = tester.getTopLeft(find.text('Puregold')).dy;
+      expect(wet, lessThan(puregold));
+      expect(find.text('Corner store'), findsNothing);
+      expect(find.text('Elsewhere'), findsNothing);
+      final texts = listTexts(tester);
+      expect(texts, contains('Beef tapa cut'));
+      expect(texts, contains('White rice'));
+      expect(find.text('Nothing to buy yet'), findsNothing);
+    });
+
+    testWidgets('swapping a meal changes the list the next time it opens', (
+      tester,
+    ) async {
+      await toWeek(tester, SamplePlanner());
+      await openList(tester);
+      final before = listTexts(tester);
+      await tester.tap(find.text('THIS WEEK'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.bySemanticsLabel('Swap breakfast'));
+      await tester.pumpAndSettle();
+      await openList(tester);
+      final after = listTexts(tester);
+      expect(after, isNot(equals(before)));
+    });
+
+    testWidgets('a server plan with ingredients drives the same list', (
+      tester,
+    ) async {
+      await toWeek(tester, _IngredientPlanner());
+      await openList(tester);
+      expect(find.text(groceryListNote), findsOneWidget);
+      expect(find.text('Wet market'), findsOneWidget);
+      expect(find.text('Puregold'), findsOneWidget);
+      final texts = listTexts(tester);
+      expect(texts, contains('Pork belly'));
+      expect(texts, contains('Jasmine rice'));
+      // 2 x 200 g of pork, 2 x 90 g of rice, both rounded up to 5 g.
+      expect(texts, contains('400 g'));
+      expect(texts, contains('180 g'));
+    });
+
+    testWidgets('an older server that sends no ingredients shows the empty '
+        'state', (tester) async {
+      await toWeek(tester, _IngredientPlanner(withIngredients: false));
+      await openList(tester);
+      expect(find.text('Grocery list'), findsOneWidget);
+      expect(find.text('Nothing to buy yet'), findsOneWidget);
+    });
+  });
+
   group('the plan follows the brief', () {
     Future<void> toStores(WidgetTester tester) async {
       await phone(tester);
@@ -171,7 +260,7 @@ void main() {
       expect(find.text('BREAKFAST'), findsOneWidget);
     });
 
-    testWidgets('a server plan says the grocery list is still a sample', (
+    testWidgets('a plan from the sample planner shows the grocery note', (
       tester,
     ) async {
       await toStores(tester);
@@ -245,4 +334,62 @@ class _CountingPlanner implements Planner {
     MealSlot slot, {
     String? note,
   }) => _inner.swap(id, day, slot, note: note);
+}
+
+/// A server-style plan: two days, each with the same two ingredients.
+class _IngredientPlanner implements Planner {
+  _IngredientPlanner({this.withIngredients = true});
+
+  final bool withIngredients;
+
+  static const _pork = MealIngredient(
+    id: 'pork',
+    name: 'Pork belly',
+    kind: GroceryKind.meat,
+    unit: IngredientUnit.g,
+    qty: 200,
+    pricePhp: 66,
+  );
+  static const _rice = MealIngredient(
+    id: 'rice',
+    name: 'Jasmine rice',
+    kind: GroceryKind.grain,
+    unit: IngredientUnit.g,
+    qty: 90,
+    pricePhp: 4.5,
+  );
+
+  PlanSnapshot _snapshot() => PlanSnapshot(
+    id: 'p1',
+    status: PlanStatus.ready,
+    week: [
+      for (final d in [Weekday.mon, Weekday.tue])
+        DayPlan(
+          weekday: d,
+          meals: [
+            PlannedMeal(
+              slot: MealSlot.lunch,
+              name: 'Pork and rice',
+              kcal: 700,
+              pricePhp: 71,
+              ingredients: withIngredients ? [_pork, _rice] : [],
+            ),
+          ],
+        ),
+    ],
+  );
+
+  @override
+  Future<PlanSnapshot> start(PlanBrief brief) async => _snapshot();
+
+  @override
+  Future<PlanSnapshot> fetch(String id) async => _snapshot();
+
+  @override
+  Future<PlanSnapshot> swap(
+    String id,
+    Weekday day,
+    MealSlot slot, {
+    String? note,
+  }) async => _snapshot();
 }

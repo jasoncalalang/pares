@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'data/sample_planner.dart';
 import 'data/sample_week.dart';
+import 'data/shopping_stops.dart';
 import 'design_system/design_system.dart';
 import 'screens/body_stats_screen.dart';
 import 'screens/daily_target_screen.dart';
@@ -42,7 +43,9 @@ Planner plannerFor({
 /// plain pushes and fade between each other the way the mockups' view
 /// transitions do. The week comes from a [Planner] through one
 /// [WeekPlanController]: the server when the app is built with a server
-/// URL, else the local sample bank. The grocery list stays on sample data.
+/// URL, else the local sample bank. The grocery list is built from the
+/// controller's current week and the draft's picked stores, so it follows
+/// every swap.
 class MealPalApp extends StatelessWidget {
   const MealPalApp({super.key, this.planner});
 
@@ -130,12 +133,16 @@ class _FlowState extends State<_Flow> {
     onGrocery: () => _push(context, Builder(builder: _groceries)),
   );
 
-  Widget _groceries(BuildContext context) => GroceryListScreen(
-    list: sampleGroceryList(budgetPhp: _draft.weeklyBudgetPhp),
-    // TODO(grocery): build the list from the planned meals once the bank
-    // has ingredients; until then the list is a sample in every mode, since
-    // swaps do not change it either.
-    onBack: () => Navigator.of(context).pop(),
+  Widget _groceries(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([_plan, _draft]),
+    builder: (context, _) => GroceryListScreen(
+      list: groceryListFor(
+        week: _plan.week ?? const [],
+        stops: shoppingStopsFor(_draft.selectedStoreIds),
+        budgetPhp: _draft.weeklyBudgetPhp,
+      ),
+      onBack: () => Navigator.of(context).pop(),
+    ),
   );
 
   @override

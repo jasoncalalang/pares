@@ -57,6 +57,8 @@ List<DayPlan> sampleWeek() => [
       DayPlan(weekday: Weekday.sun, meals: [_tapsilog, _tinola, _pinakbet, _boiledSaba]),
     ];
 
+/// A fixed list for widget tests. The app builds its list with
+/// [groceryListFor] and does not use this.
 GroceryList sampleGroceryList({required int budgetPhp}) => GroceryList(
       budgetPhp: budgetPhp,
       sections: const [
