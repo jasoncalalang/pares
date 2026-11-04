@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_planner.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
+import 'package:mealpal_ph/data/shopping_stops.dart';
 import 'package:mealpal_ph/data/store_tiles.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/screens/daily_target_screen.dart';
@@ -312,6 +313,41 @@ void main() {
     expectWholeWords(tester, find.text('(not sold at the stores you picked)'));
     expect(tester.takeException(), isNull);
   });
+
+  for (final scale in [1.5, 2.0]) {
+    testWidgets('every store header and item name stays whole at ${scale}x, '
+        '360dp', (tester) async {
+      final seen = <String>{};
+      final tiles = [...chainTiles, ...localTiles];
+      // One store at a time takes the whole week, so its subtotal is the
+      // widest it can be; a corner store alone sends the rest to Elsewhere.
+      for (final t in tiles) {
+        final list = groceryListFor(
+          week: sampleWeek(),
+          stops: shoppingStopsFor({t.id}),
+          budgetPhp: 2500,
+        );
+        await pumpAt(
+          tester,
+          GroceryListScreen(list: list, onBack: () {}),
+          scale: scale,
+          size: const Size(360, 844),
+        );
+        expect(tester.takeException(), isNull, reason: t.id);
+        for (final section in list.sections) {
+          final header = find.text(section.name).last;
+          await tester.ensureVisible(header);
+          expectWholeWords(tester, header, reason: '${t.id} header');
+          for (final item in section.items) {
+            if (!seen.add('${section.storeId}/${item.name}')) continue;
+            final f = find.text(item.name);
+            await tester.ensureVisible(f);
+            expectWholeWords(tester, f, reason: '${t.id} ${item.name}');
+          }
+        }
+      }
+    });
+  }
 
   for (final size in [const Size(390, 844), const Size(360, 844)]) {
     testWidgets('Welcome CTA names its action in full at 2x, ${size.width}dp', (

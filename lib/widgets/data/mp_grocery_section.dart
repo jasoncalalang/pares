@@ -32,6 +32,17 @@ class MpGrocerySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.mp;
     final accent = section.local ? MpAccent.green : MpAccent.annatto;
+    // At large text the subtotal drops under the name, so the name keeps the
+    // full width and no store name is broken in two.
+    final bigText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+    final count = Text(
+      '${section.items.length} items',
+      style: MpTypography.small().copyWith(color: c.faint),
+    );
+    final subtotal = Text(
+      formatPeso(section.subtotalPhp, decimals: 0),
+      style: MpTypography.rowTitle().copyWith(color: c.ink),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -70,18 +81,19 @@ class MpGrocerySection extends StatelessWidget {
                               ),
                           ],
                         ),
-                        Text(
-                          '${section.items.length} items',
-                          style: MpTypography.small().copyWith(color: c.faint),
-                        ),
+                        if (bigText)
+                          Wrap(
+                            spacing: 12,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [count, subtotal],
+                          )
+                        else
+                          count,
                       ],
                     ),
                   ),
-                  Text(
-                    formatPeso(section.subtotalPhp, decimals: 0),
-                    style: MpTypography.rowTitle().copyWith(color: c.ink),
-                  ),
-                  const SizedBox(width: 12),
+                  if (!bigText) ...[subtotal, const SizedBox(width: 12)],
+                  if (bigText) const SizedBox(width: 8),
                   AnimatedRotation(
                     turns: expanded ? 0 : -0.25,
                     duration: MpMotion.of(context, MpMotion.expand),
@@ -159,6 +171,10 @@ class _GroceryRow extends StatelessWidget {
     // The ingredient glyph is decoration; at large text the name gets its
     // room instead, so a word like "(tamarind)" is not cut.
     final bigText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+    final price = Text(
+      formatPeso(item.pricePhp, decimals: 0),
+      style: MpTypography.bodyStrong().copyWith(color: done ? c.faint : c.ink),
+    );
     return MpPress(
       onTap: onTap,
       scale: 1,
@@ -204,16 +220,14 @@ class _GroceryRow extends StatelessWidget {
                       item.quantity,
                       style: MpTypography.small().copyWith(color: c.faint),
                     ),
+                    // At large text the price sits under the amount so the
+                    // name keeps the row's width, hyphens and all.
+                    if (bigText) price,
                   ],
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                formatPeso(item.pricePhp, decimals: 0),
-                style: MpTypography.bodyStrong()
-                    .copyWith(color: done ? c.faint : c.ink),
-              ),
-              const SizedBox(width: 12),
+              if (!bigText) ...[price, const SizedBox(width: 12)],
               AnimatedContainer(
                 duration: select,
                 width: MpSize.checkbox,
