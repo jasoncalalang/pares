@@ -5,10 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
+import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/screens/welcome_screen.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
+
+/// The lead plate's price, read from the data like the sticker does.
+String get _stickerPrice =>
+    formatPeso(sampleWeek().first.meals.first.pricePhp, decimals: 0);
 
 const _headline = 'Filipino meals that fit your calorie goal and your weekly budget.';
 const _sheetBody = 'Sign-in is coming soon. For now no account is needed, and '
@@ -45,7 +50,7 @@ void main() {
     expect(find.byType(Image), findsNWidgets(4));
     // Stickers come from the example day: its first plate and its total.
     expect(find.text('560 kcal'), findsOneWidget);
-    expect(find.text('₱84'), findsOneWidget);
+    expect(find.text(_stickerPrice), findsOneWidget);
     expect(find.text('2,087 kcal / day'), findsOneWidget);
     expect(find.text('Find my calorie target'), findsOneWidget);
     expect(find.text('or continue with'), findsOneWidget);
@@ -60,7 +65,7 @@ void main() {
     await pump(tester);
     final lead = tester.getRect(_image('Tapsilog: beef tapa, garlic rice and egg'));
     final sticker = tester.getRect(
-        find.ancestor(of: find.text('₱84'), matching: find.byType(Container)).first);
+        find.ancestor(of: find.text(_stickerPrice), matching: find.byType(Container)).first);
     expect(lead.contains(sticker.center), isTrue);
     for (final other in [
       'Chicken tinola with moringa and rice',

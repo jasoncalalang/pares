@@ -158,7 +158,17 @@ The design is filtered with the antislop rules; keep it that way:
   longer lists). A type not in a kind's list never gets that kind, so a
   sari-sari store never gets fresh meat. Items no picked stop sells go to a
   last "Elsewhere" section ("(not sold at the stores you picked)"); that
-  is honest, never a guess.
+  is honest, never a guess. Fresh tofu and grated coconut are kind
+  `produce` for that reason.
+- One money story: a meal's price is its scaled ingredient cost rounded
+  once, and the server checks the budget against the grocery list's own
+  figure (each ingredient's week cost rounded once, then added), so a week
+  the server accepts never shows "over budget" on the list. Ticks and
+  collapsed sections on the list are keyed by store and ingredient id, not
+  position, because a swap can land while it is open. Meals that arrive
+  with no ingredients (an older server) get their own state, not "Nothing
+  to buy yet". At large text the store header and row prices move under
+  the name so no word breaks.
 - Screen-reader merges: a meal card is one live node ("Breakfast, Tapsilog,
   560 kcal, ₱84"; the swap button stays its own), a macro card is one node
   ("Protein, 157 grams") with its gauge excluded, and the ring centre is
