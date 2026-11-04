@@ -79,6 +79,12 @@ class PlanResourceTest {
                 .body("week.days[0].meals[0].slot", equalTo("breakfast"))
                 .body("week.days[0].meals[0].name", equalTo("Tapsilog: beef tapa, garlic rice and egg"))
                 .body("week.days[0].meals[0].image", equalTo("tapsilog"))
+                .body("week.days[0].meals[0].ingredients[0].id", equalTo("beef-tapa"))
+                .body("week.days[0].meals[0].ingredients[0].name", equalTo("Beef tapa cut"))
+                .body("week.days[0].meals[0].ingredients[0].kind", equalTo("meat"))
+                .body("week.days[0].meals[0].ingredients[0].unit", equalTo("g"))
+                .body("week.days[0].meals[0].ingredients[0].qty", equalTo(150.0f))
+                .body("week.days[0].meals[0].ingredients[0].pricePhp", equalTo(67.5f))
                 .body("week.pricePhp", equalTo(1365));
     }
 

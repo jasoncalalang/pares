@@ -150,4 +150,49 @@ class PlanCheckTest {
         assertEquals(Slot.BREAKFAST, week.days().getFirst().meals().getFirst().slot());
         assertEquals(Slot.SNACK, week.days().getFirst().meals().getLast().slot());
     }
+
+    private PlannedMeal planned(String mealId, Slot slot, double servings) {
+        return check.toWeek(everyDay(List.of(new SubmittedMeal(slot, mealId, servings))))
+                .days().getFirst().meals().getFirst();
+    }
+
+    private static PlannedIngredient line(PlannedMeal meal, String id) {
+        return meal.ingredients().stream().filter(i -> i.id().equals(id)).findFirst().orElseThrow();
+    }
+
+    @Test
+    void aPlannedMealCarriesItsIngredientsScaledByServings() {
+        PlannedMeal tapsilog = planned("tapsilog", Slot.BREAKFAST, 1.5);
+        assertEquals(7, tapsilog.ingredients().size());
+        PlannedIngredient tapa = tapsilog.ingredients().getFirst();
+        assertEquals("beef-tapa", tapa.id());
+        assertEquals("Beef tapa cut", tapa.name());
+        assertEquals("meat", tapa.kind().json());
+        assertEquals("g", tapa.unit().json());
+        assertEquals(225.0, tapa.qty());
+        assertEquals(101.25, tapa.pricePhp());
+        assertEquals(1.5, line(tapsilog, "egg").qty());
+        assertEquals(12.0, line(tapsilog, "egg").pricePhp());
+    }
+
+    @Test
+    void ingredientNumbersRoundToTwoDecimalsHalfUp() {
+        PlannedMeal tapsilog = planned("tapsilog", Slot.BREAKFAST, 1.5);
+        // 22.5 ml of oil at 0.11 a ml is 2.475.
+        assertEquals(22.5, line(tapsilog, "cooking-oil").qty());
+        assertEquals(2.48, line(tapsilog, "cooking-oil").pricePhp());
+        // 0.75 of 90 g rice is 67.5 g, costing 3.375.
+        PlannedMeal tinola = planned("tinola", Slot.LUNCH, 0.75);
+        assertEquals(67.5, line(tinola, "rice").qty());
+        assertEquals(3.38, line(tinola, "rice").pricePhp());
+        // 0.75 of 15 g malunggay is 11.25 g at 0.1 a g: 1.125.
+        assertEquals(11.25, line(tinola, "malunggay").qty());
+        assertEquals(1.13, line(tinola, "malunggay").pricePhp());
+    }
+
+    @Test
+    void aMealsOwnPriceKeepsTheServingsArithmetic() {
+        // Not the sum of the rounded ingredient lines: round(84 * 1.5), as before.
+        assertEquals(126, planned("tapsilog", Slot.BREAKFAST, 1.5).pricePhp());
+    }
 }

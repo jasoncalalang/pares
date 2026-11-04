@@ -1,5 +1,6 @@
 package ph.mealpal.server.bank;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Locale;
 
 /** One entry of the bank's ingredient catalog. The unit price is per unit: per g, per ml or per pc. */
@@ -9,6 +10,7 @@ public record Ingredient(String id, String name, Kind kind, Unit unit, double pr
     public enum Kind {
         MEAT, POULTRY, FISH, PRODUCE, FRUIT, AROMATICS, GRAIN, EGG, LEGUME, OIL, CONDIMENT, SPICE, PANTRY;
 
+        @JsonValue
         public String json() {
             return name().toLowerCase(Locale.ROOT);
         }
@@ -26,6 +28,7 @@ public record Ingredient(String id, String name, Kind kind, Unit unit, double pr
     public enum Unit {
         G, ML, PC;
 
+        @JsonValue
         public String json() {
             return name().toLowerCase(Locale.ROOT);
         }

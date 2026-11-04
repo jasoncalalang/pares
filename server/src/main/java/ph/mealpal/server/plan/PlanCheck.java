@@ -1,5 +1,7 @@
 package ph.mealpal.server.plan;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -8,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import ph.mealpal.server.bank.Ingredient;
 import ph.mealpal.server.bank.Meal;
 import ph.mealpal.server.bank.MealBank;
 import ph.mealpal.server.bank.Slot;
@@ -116,7 +119,22 @@ public final class PlanCheck {
     private PlannedMeal planned(SubmittedMeal sm) {
         Meal meal = bank.find(sm.mealId()).orElseThrow();
         return new PlannedMeal(sm.slot(), meal.id(), meal.name(), scaled(meal.kcal(), sm.servings()),
-                scaled(meal.pricePhp(), sm.servings()), meal.image(), sm.servings());
+                scaled(meal.pricePhp(), sm.servings()), meal.image(), sm.servings(),
+                ingredientsFor(meal, sm.servings()));
+    }
+
+    private List<PlannedIngredient> ingredientsFor(Meal meal, double servings) {
+        return meal.ingredients().stream().map(ref -> {
+            Ingredient ingredient = bank.ingredient(ref.id()).orElseThrow();
+            BigDecimal qty = BigDecimal.valueOf(ref.qty()).multiply(BigDecimal.valueOf(servings));
+            BigDecimal price = qty.multiply(BigDecimal.valueOf(ingredient.pricePhpPerUnit()));
+            return new PlannedIngredient(ingredient.id(), ingredient.name(), ingredient.kind(), ingredient.unit(),
+                    twoDecimals(qty), twoDecimals(price));
+        }).toList();
+    }
+
+    private static double twoDecimals(BigDecimal value) {
+        return value.setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     private static int scaled(int perServing, double servings) {

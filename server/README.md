@@ -69,7 +69,27 @@ The agent and environment ids come from `anthropic/claude-lock.json`, so run
 
 A plan is `{id, status: building | ready | failed, week, message}`. `week.days`
 run Monday first; each meal carries the bank's name, image key, kcal and
-pricePhp already multiplied by its servings.
+pricePhp already multiplied by its servings, plus its `ingredients`:
+
+```json
+{"slot": "breakfast", "id": "tapsilog", "name": "Tapsilog: ...", "kcal": 840, "pricePhp": 126,
+ "image": "tapsilog", "servings": 1.5,
+ "ingredients": [{"id": "beef-tapa", "name": "Beef tapa cut", "kind": "meat", "unit": "g",
+                  "qty": 225, "pricePhp": 101.25}]}
+```
+
+`qty` is the bank's quantity per serving times the servings, in `unit` (`g`,
+`ml` or `pc`); `pricePhp` is `qty` times the ingredient's unit price. Both are
+rounded to two decimals. `kind` is one of meat, poultry, fish, produce, fruit,
+aromatics, grain, egg, legume, oil, condiment, spice, pantry.
+
+The planner agent never sees ingredients: the bank it reads is still id,
+slots, name, kcal and pricePhp. The server does the arithmetic from
+`src/main/resources/meal-bank.json`, which holds an `ingredients` catalog
+(name, kind, unit, `pricePhpPerUnit`) and, per meal, the quantity per serving
+of each ingredient. A meal's `pricePhp` must equal the rounded cost of its
+ingredients; the bank refuses to load otherwise. Quantities and unit prices
+are placeholder estimates until the price checker's price book exists.
 
 ## Tests
 
