@@ -26,19 +26,32 @@ class GroceryListScreen extends StatefulWidget {
 }
 
 class _GroceryListScreenState extends State<GroceryListScreen> {
-  final Set<int> _collapsed = {};
-  final Map<int, Set<int>> _checked = {};
+  // Keyed by store id and item key, not by position: a swap can land while
+  // the list is open and move rows around.
+  final Set<String> _collapsed = {};
+  final Set<(String, String)> _checked = {};
 
-  void _toggleSection(int i) {
+  @override
+  void didUpdateWidget(GroceryListScreen old) {
+    super.didUpdateWidget(old);
+    // Ticks for items that left the list are dropped, not carried over.
+    final present = {
+      for (final s in widget.list.sections)
+        for (final i in s.items) (s.storeId, i.key),
+    };
+    _checked.removeWhere((k) => !present.contains(k));
+  }
+
+  void _toggleSection(String storeId) {
     setState(() {
-      if (!_collapsed.remove(i)) _collapsed.add(i);
+      if (!_collapsed.remove(storeId)) _collapsed.add(storeId);
     });
   }
 
-  void _check(int section, int item) {
+  void _check(GrocerySection section, int item) {
+    final key = (section.storeId, section.items[item].key);
     setState(() {
-      final set = _checked.putIfAbsent(section, () => {});
-      if (!set.remove(item)) set.add(item);
+      if (!_checked.remove(key)) _checked.add(key);
     });
   }
 
@@ -147,10 +160,13 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
             if (i > 0) const SizedBox(height: 14),
             MpGrocerySection(
               section: section,
-              expanded: !_collapsed.contains(i),
-              onToggle: () => _toggleSection(i),
-              checked: _checked[i] ?? const {},
-              onCheck: (item) => _check(i, item),
+              expanded: !_collapsed.contains(section.storeId),
+              onToggle: () => _toggleSection(section.storeId),
+              checked: {
+                for (final (n, item) in section.items.indexed)
+                  if (_checked.contains((section.storeId, item.key))) n,
+              },
+              onCheck: (item) => _check(section, item),
             ),
           ],
           const SizedBox(height: 20),

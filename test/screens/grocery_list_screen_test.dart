@@ -121,4 +121,48 @@ void main() {
     );
     expect(find.text('ESTIMATED TOTAL'), findsNothing);
   });
+
+  testWidgets('ticks follow the item, not its position, when the list changes',
+      (tester) async {
+    GroceryList listOf(List<(String, String)> items) => GroceryList(
+          budgetPhp: 2500,
+          sections: [
+            GrocerySection(
+              storeId: 'palengke',
+              name: 'Wet market',
+              monogram: 'W',
+              local: true,
+              items: [
+                for (final (id, name) in items)
+                  GroceryItem(id: id, name: name, quantity: '100 g', pricePhp: 10),
+              ],
+            ),
+          ],
+        );
+    bool struck(WidgetTester t, String name) =>
+        t.widget<Text>(find.text(name)).style?.decoration ==
+        TextDecoration.lineThrough;
+
+    await phone(tester);
+    Future<void> show(GroceryList l) async {
+      await tester.pumpWidget(
+        host(GroceryListScreen(list: l, onBack: () {})),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await show(listOf([('kangkong', 'Kangkong'), ('tomato', 'Tomato')]));
+    await tester.tap(find.text('Kangkong'));
+    await tester.pumpAndSettle();
+    expect(struck(tester, 'Kangkong'), isTrue);
+
+    // A swap lands: Pork joins at the top, Tomato goes.
+    await show(listOf([('pork', 'Pork'), ('kangkong', 'Kangkong')]));
+    expect(struck(tester, 'Kangkong'), isTrue);
+    expect(struck(tester, 'Pork'), isFalse);
+
+    // Tomato comes back later: it was dropped, so it is not ticked.
+    await show(listOf([('kangkong', 'Kangkong'), ('tomato', 'Tomato')]));
+    expect(struck(tester, 'Tomato'), isFalse);
+  });
 }

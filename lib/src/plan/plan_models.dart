@@ -101,15 +101,22 @@ class DayPlan {
 
 class GroceryItem {
   const GroceryItem({
+    this.id,
     required this.name,
     required this.quantity,
     required this.pricePhp,
     this.kind = GroceryKind.pantry,
   });
 
+  /// The ingredient id, so a tick can follow the item when the list changes.
+  /// Falls back to the name when null.
+  final String? id;
   final String name;
   final String quantity;
   final int pricePhp;
+
+  /// What identifies this item within its section.
+  String get key => id ?? name;
 
   /// Drives the little ingredient icon and its tint in the list.
   final GroceryKind kind;

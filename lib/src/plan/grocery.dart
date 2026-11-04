@@ -145,6 +145,7 @@ GroceryList groceryListFor({
         .putIfAbsent(seller?.id ?? _elsewhereId, () => [])
         .add(
           GroceryItem(
+            id: i.id,
             name: i.name,
             quantity: groceryQuantityText(line.qty, i.unit),
             pricePhp: (line.price + 0.5 + _epsilon).floor(),
