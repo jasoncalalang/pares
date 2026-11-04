@@ -131,9 +131,11 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
                       color: headroomColor,
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      headroom,
-                      style: MpTypography.label().copyWith(color: headroomColor),
+                    Expanded(
+                      child: Text(
+                        headroom,
+                        style: MpTypography.label().copyWith(color: headroomColor),
+                      ),
                     ),
                   ],
                 ),

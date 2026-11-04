@@ -9,6 +9,7 @@ import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/data/store_tiles.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/screens/daily_target_screen.dart';
+import 'package:mealpal_ph/screens/grocery_list_screen.dart';
 import 'package:mealpal_ph/screens/this_week_screen.dart';
 import 'package:mealpal_ph/screens/welcome_screen.dart';
 import 'package:mealpal_ph/screens/where_you_shop_screen.dart';
@@ -255,6 +256,61 @@ void main() {
       expect(tester.takeException(), isNull);
       expectWholeWords(tester, find.text('Swapping this meal'));
     });
+  });
+
+  testWidgets('the grocery note, a long item and Elsewhere stay whole at 2x, '
+      '360dp', (tester) async {
+    const long = 'Sinigang (tamarind) mix';
+    await pumpAt(
+      tester,
+      GroceryListScreen(
+        list: const GroceryList(
+          budgetPhp: 2500,
+          sections: [
+            GrocerySection(
+              storeId: 'puregold',
+              name: 'Puregold',
+              monogram: 'P',
+              local: false,
+              items: [
+                GroceryItem(
+                  name: long,
+                  quantity: '1.3 kg',
+                  pricePhp: 40,
+                  kind: GroceryKind.pantry,
+                ),
+              ],
+            ),
+            GrocerySection(
+              storeId: 'elsewhere',
+              name: 'Elsewhere',
+              monogram: 'E',
+              local: false,
+              note: '(not sold at the stores you picked)',
+              items: [
+                GroceryItem(
+                  name: 'Daing na bangus',
+                  quantity: '300 g',
+                  pricePhp: 72,
+                  kind: GroceryKind.fish,
+                ),
+              ],
+            ),
+          ],
+        ),
+        onBack: () {},
+      ),
+      scale: 2.0,
+      size: const Size(360, 844),
+    );
+    expect(tester.takeException(), isNull);
+    expectWholeWords(tester, find.text(groceryListNote));
+    await tester.ensureVisible(find.text(long));
+    expectWholeWords(tester, find.text(long));
+    await tester.ensureVisible(find.text('Elsewhere'));
+    expectWholeWords(tester, find.text('Elsewhere'));
+    expectWholeWords(tester, find.text('(not sold at the stores you picked)'));
+    expect(tester.takeException(), isNull);
   });
 
   for (final size in [const Size(390, 844), const Size(360, 844)]) {

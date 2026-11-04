@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
@@ -117,6 +118,33 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getSize(find.byType(MpPress)).height,
           greaterThanOrEqualTo(MpSize.tap));
+    });
+
+    testWidgets('a fish item gets the fish glyph', (tester) async {
+      await tester.pumpWidget(host(SingleChildScrollView(
+        child: MpGrocerySection(
+          section: const GrocerySection(
+            storeId: 'palengke',
+            name: 'Wet market',
+            monogram: 'W',
+            local: true,
+            items: [
+              GroceryItem(
+                name: 'Daing na bangus',
+                quantity: '300 g',
+                pricePhp: 72,
+                kind: GroceryKind.fish,
+              ),
+            ],
+          ),
+          expanded: true,
+          onToggle: () {},
+          checked: const {},
+          onCheck: (_) {},
+        ),
+      )));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(LucideIcons.fish), findsOneWidget);
     });
 
     testWidgets('a checked row dims its text to faint, not to half opacity',

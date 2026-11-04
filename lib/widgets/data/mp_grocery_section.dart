@@ -50,30 +50,24 @@ class MpGrocerySection extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        // A Wrap, not a one-line Row: at large text the note
+                        // drops under the name instead of cutting it off.
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 4,
                           children: [
-                            Flexible(
-                              child: Text(
-                                section.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: MpTypography.rowTitle().copyWith(color: c.ink),
-                              ),
+                            Text(
+                              section.name,
+                              style: MpTypography.rowTitle().copyWith(color: c.ink),
                             ),
-                            if (section.note != null) ...[
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  section.note!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: MpTypography.rowTitle().copyWith(
-                                    color: c.faint,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                            if (section.note != null)
+                              Text(
+                                section.note!,
+                                style: MpTypography.rowTitle().copyWith(
+                                  color: c.faint,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ],
                           ],
                         ),
                         Text(
@@ -162,6 +156,9 @@ class _GroceryRow extends StatelessWidget {
     final c = context.mp;
     final (icon, accent) = _glyph(item.kind);
     final select = MpMotion.of(context, MpMotion.select);
+    // The ingredient glyph is decoration; at large text the name gets its
+    // room instead, so a word like "(tamarind)" is not cut.
+    final bigText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
     return MpPress(
       onTap: onTap,
       scale: 1,
@@ -179,16 +176,18 @@ class _GroceryRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Container(
-                width: MpSize.iconBox,
-                height: MpSize.iconBox,
-                decoration: BoxDecoration(
-                  color: accent.tint(c),
-                  borderRadius: BorderRadius.circular(MpRadius.iconBox),
+              if (!bigText) ...[
+                Container(
+                  width: MpSize.iconBox,
+                  height: MpSize.iconBox,
+                  decoration: BoxDecoration(
+                    color: accent.tint(c),
+                    borderRadius: BorderRadius.circular(MpRadius.iconBox),
+                  ),
+                  child: Icon(icon, size: 18, color: accent.deep(c)),
                 ),
-                child: Icon(icon, size: 18, color: accent.deep(c)),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
