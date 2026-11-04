@@ -53,12 +53,18 @@ PlannedMeal plannedMealFrom(
   double servings = 1,
 }) {
   double round2(double v) => (v * 100).roundToDouble() / 100;
+  // The meal's price is its scaled ingredient cost, rounded once, so the day
+  // prices and the grocery list tell the same money story.
+  final cost = bank.ingredients.fold<double>(
+    0,
+    (sum, r) => sum + r.qty * servings * sampleIngredients[r.id]!.pricePhpPerUnit,
+  );
   return PlannedMeal(
     slot: slot,
     id: bank.id,
     name: bank.name,
     kcal: (bank.kcal * servings).round(),
-    pricePhp: (bank.pricePhp * servings).round(),
+    pricePhp: (cost + 1e-9).round(),
     image: bank.image,
     servings: servings,
     ingredients: [

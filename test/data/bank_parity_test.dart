@@ -69,12 +69,37 @@ void main() {
     final planned = plannedMealFrom(tapsilog, MealSlot.breakfast, servings: 1.5);
     expect(planned.id, 'tapsilog');
     expect(planned.servings, 1.5);
-    expect(planned.pricePhp, 126);
+    // 84.40 a serving: 126.60 for one and a half, rounded once.
+    expect(planned.pricePhp, 127);
     final rice = planned.ingredients.firstWhere((i) => i.id == 'rice');
     expect(rice.qty, 135.0);
     expect(rice.pricePhp, 6.75);
     expect(rice.name, 'White rice');
     expect(rice.kind, GroceryKind.grain);
     expect(rice.unit, IngredientUnit.g);
+  });
+
+  test('the list total for a tight week matches the figure the server checks', () {
+    MealSlot s(String id) => MealSlot.values.firstWhere((x) => x.name == id);
+    PlannedMeal m(String id, String slot, double servings) => plannedMealFrom(
+      sampleBankMeals.firstWhere((b) => b.id == id),
+      s(slot),
+      servings: servings,
+    );
+    final meals = [
+      m('tapsilog', 'breakfast', 0.75),
+      m('tinola', 'lunch', 1),
+      m('adobo', 'dinner', 1.25),
+      m('boiled-saba', 'snack', 0.75),
+    ];
+    final list = groceryListFor(
+      week: [for (final d in Weekday.values) DayPlan(weekday: d, meals: meals)],
+      stops: const [
+        ShoppingStop(id: 'palengke', name: 'Wet market', monogram: 'W', type: StoreType.wetMarket),
+      ],
+      budgetPhp: 1400,
+    );
+    // The server rejects this week at 1,400 with "The week costs 1,412".
+    expect(list.totalPhp, 1412);
   });
 }
