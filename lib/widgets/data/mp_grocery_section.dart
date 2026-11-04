@@ -144,6 +144,7 @@ class _GroceryRow extends StatelessWidget {
   static (IconData, MpAccent) _glyph(GroceryKind kind) => switch (kind) {
         GroceryKind.meat => (LucideIcons.beef, MpAccent.annatto),
         GroceryKind.poultry => (LucideIcons.drumstick, MpAccent.annatto),
+        GroceryKind.fish => (LucideIcons.fish, MpAccent.annatto),
         GroceryKind.produce => (LucideIcons.leaf, MpAccent.green),
         GroceryKind.fruit => (LucideIcons.banana, MpAccent.amber),
         GroceryKind.aromatics => (LucideIcons.carrot, MpAccent.annatto),

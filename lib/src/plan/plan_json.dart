@@ -65,7 +65,31 @@ PlannedMeal _meal(Object? json) {
     pricePhp: _int(meal['pricePhp'], 'pricePhp'),
     image: _optionalString(meal['image'], 'image'),
     servings: _servings(meal['servings']),
+    ingredients: _ingredients(meal['ingredients']),
   );
+}
+
+List<MealIngredient> _ingredients(Object? v) {
+  if (v == null) return const [];
+  if (v is! List) throw _bad('ingredients is not a list');
+  return [for (final i in v) _ingredient(i)];
+}
+
+MealIngredient _ingredient(Object? json) {
+  final i = _map(json, 'ingredient');
+  return MealIngredient(
+    id: _string(i['id'], 'ingredient id'),
+    name: _string(i['name'], 'ingredient name'),
+    kind: _byName(GroceryKind.values, i['kind'], 'ingredient kind'),
+    unit: _byName(IngredientUnit.values, i['unit'], 'ingredient unit'),
+    qty: _num(i['qty'], 'ingredient qty'),
+    pricePhp: _num(i['pricePhp'], 'ingredient price'),
+  );
+}
+
+double _num(Object? v, String what) {
+  if (v is num) return v.toDouble();
+  throw _bad('$what is not a number');
 }
 
 Map<String, Object?> _map(Object? json, String what) {

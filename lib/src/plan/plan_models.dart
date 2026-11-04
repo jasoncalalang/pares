@@ -34,6 +34,7 @@ class PlannedMeal {
     this.image,
     this.id,
     this.servings = 1,
+    this.ingredients = const [],
   });
 
   final MealSlot slot;
@@ -52,6 +53,33 @@ class PlannedMeal {
   /// How many portions [kcal] and [pricePhp] already cover (0.5 to 2 from
   /// the server; 1 for the sample bank).
   final double servings;
+
+  /// What the meal is made of, already scaled by [servings]. Empty when the
+  /// source (an older server) did not send any.
+  final List<MealIngredient> ingredients;
+}
+
+/// The unit a bank ingredient is measured and priced in.
+enum IngredientUnit { g, ml, pc }
+
+/// One ingredient of a planned meal. [qty] and [pricePhp] already cover the
+/// meal's servings.
+class MealIngredient {
+  const MealIngredient({
+    required this.id,
+    required this.name,
+    required this.kind,
+    required this.unit,
+    required this.qty,
+    required this.pricePhp,
+  });
+
+  final String id;
+  final String name;
+  final GroceryKind kind;
+  final IngredientUnit unit;
+  final double qty;
+  final double pricePhp;
 }
 
 class DayPlan {
@@ -90,6 +118,7 @@ class GroceryItem {
 enum GroceryKind {
   meat,
   poultry,
+  fish,
   produce,
   fruit,
   aromatics,

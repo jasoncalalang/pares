@@ -77,6 +77,84 @@ void main() {
       expect(planSnapshotFromJson(r).week!.first.meals.first.servings, 1.0);
     });
 
+    group('ingredients', () {
+      Map<String, Object?> firstMeal(Map<String, Object?> r) {
+        final d = ((r['week'] as Map)['days'] as List).first as Map;
+        return (d['meals'] as List).first as Map<String, Object?>;
+      }
+
+      Map<String, Object?> ing({
+        Object? id = 'rice',
+        Object? kind = 'grain',
+        Object? unit = 'g',
+        Object? qty = 135,
+        Object? price = 6.75,
+      }) => {
+        'id': id,
+        'name': 'White rice',
+        'kind': kind,
+        'unit': unit,
+        'qty': qty,
+        'pricePhp': price,
+      };
+
+      PlannerException? bad(Map<String, Object?> entry) {
+        final r = record();
+        firstMeal(r)['ingredients'] = [entry];
+        try {
+          planSnapshotFromJson(r);
+        } on PlannerException catch (e) {
+          return e;
+        }
+        return null;
+      }
+
+      test('reads each ingredient, accepting whole and decimal numbers', () {
+        final r = record();
+        firstMeal(r)['ingredients'] = [
+          ing(),
+          ing(id: 'saba', kind: 'fish', unit: 'pc', qty: 3, price: 24),
+          ing(id: 'cooking-oil', kind: 'oil', unit: 'ml', qty: 22.5, price: 2.48),
+        ];
+        final list = planSnapshotFromJson(r).week!.first.meals.first.ingredients;
+        expect(list, hasLength(3));
+        expect(list[0].id, 'rice');
+        expect(list[0].name, 'White rice');
+        expect(list[0].kind, GroceryKind.grain);
+        expect(list[0].unit, IngredientUnit.g);
+        expect(list[0].qty, 135.0);
+        expect(list[0].pricePhp, 6.75);
+        expect(list[1].kind, GroceryKind.fish);
+        expect(list[1].unit, IngredientUnit.pc);
+        expect(list[1].qty, 3.0);
+        expect(list[2].unit, IngredientUnit.ml);
+        expect(list[2].qty, 22.5);
+      });
+
+      test('a meal with no ingredients key (an older server) has none', () {
+        final meal = planSnapshotFromJson(record()).week!.first.meals.first;
+        expect(meal.ingredients, isEmpty);
+      });
+
+      test('rejects a malformed entry, unknown kind or unknown unit', () {
+        for (final e in [
+          bad(ing(kind: 'candy')),
+          bad(ing(unit: 'lb')),
+          bad(ing(id: null)),
+          bad(ing(qty: '5')),
+          bad(ing(price: null)),
+        ]) {
+          expect(e, isNotNull);
+          expect(e!.kind, PlannerErrorKind.badResponse);
+        }
+        final r = record();
+        firstMeal(r)['ingredients'] = ['rice'];
+        expect(() => planSnapshotFromJson(r), throwsA(isA<PlannerException>()));
+        firstMeal(r)['ingredients'] = 'rice';
+        expect(() => planSnapshotFromJson(r), throwsA(isA<PlannerException>()));
+      });
+    });
+
     test('a first plan in progress has no week', () {
       final snap = planSnapshotFromJson(record(status: 'building', week: null));
       expect(snap.status, PlanStatus.building);
