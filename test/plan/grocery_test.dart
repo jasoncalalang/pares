@@ -410,6 +410,45 @@ void main() {
     });
   });
 
+  group('the preference order between two picked stops', () {
+    // Each case picks both types; the kind must go to the first one.
+    void wins(
+      String label,
+      GroceryKind kind,
+      StoreType first,
+      StoreType second,
+    ) {
+      test(label, () {
+        final a = stop('a-${first.name}', first);
+        final b = stop('b-${second.name}', second);
+        for (final stops in [
+          [a, b],
+          [b, a],
+        ]) {
+          final list = listFor([ing('x', kind, 100, 10)], stops: stops);
+          expect(list.sections, hasLength(1), reason: label);
+          expect(list.sections.single.storeId, a.id, reason: label);
+        }
+      });
+    }
+
+    const fresh = GroceryKind.meat;
+    wins('fresh: wet market over supermarket', fresh, StoreType.wetMarket, StoreType.supermarket);
+    wins('fresh: supermarket over hypermarket', fresh, StoreType.supermarket, StoreType.hypermarket);
+    wins('fresh: hypermarket over warehouse club', fresh, StoreType.hypermarket, StoreType.warehouseClub);
+    wins('fresh: warehouse club over online', fresh, StoreType.warehouseClub, StoreType.online);
+    wins('aromatics: online over sari-sari', GroceryKind.aromatics, StoreType.online, StoreType.sariSari);
+    wins('egg: online over sari-sari', GroceryKind.egg, StoreType.online, StoreType.sariSari);
+    wins('egg: sari-sari over convenience', GroceryKind.egg, StoreType.sariSari, StoreType.convenience);
+    const pantry = GroceryKind.grain;
+    wins('pantry: supermarket over hypermarket', pantry, StoreType.supermarket, StoreType.hypermarket);
+    wins('pantry: hypermarket over warehouse club', pantry, StoreType.hypermarket, StoreType.warehouseClub);
+    wins('pantry: warehouse club over wet market', pantry, StoreType.warehouseClub, StoreType.wetMarket);
+    wins('pantry: wet market over online', pantry, StoreType.wetMarket, StoreType.online);
+    wins('pantry: online over sari-sari', pantry, StoreType.online, StoreType.sariSari);
+    wins('pantry: sari-sari over convenience', pantry, StoreType.sariSari, StoreType.convenience);
+  });
+
   group('fresh tofu and grated coconut', () {
     test('are bought fresh: a corner store alone never gets them', () {
       final list = groceryListFor(
