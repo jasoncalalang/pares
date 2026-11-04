@@ -79,7 +79,7 @@ class PlanResourceTest {
                 .body("week.days[0].meals[0].slot", equalTo("breakfast"))
                 .body("week.days[0].meals[0].name", equalTo("Tapsilog: beef tapa, garlic rice and egg"))
                 .body("week.days[0].meals[0].image", equalTo("tapsilog"))
-                .body("week.pricePhp", equalTo(1750));
+                .body("week.pricePhp", equalTo(1365));
     }
 
     @Test

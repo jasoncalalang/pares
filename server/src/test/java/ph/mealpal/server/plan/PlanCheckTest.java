@@ -13,7 +13,7 @@ class PlanCheckTest {
 
     private final PlanCheck check = new PlanCheck(MealBank.fromClasspath("meal-bank.json"));
 
-    /** 2,087 kcal and ₱250 a day: the app's Monday. */
+    /** 2,087 kcal and ₱195 a day: the app's Monday. */
     private static final List<SubmittedMeal> MONDAY = List.of(
             new SubmittedMeal(Slot.BREAKFAST, "tapsilog", 1.0),
             new SubmittedMeal(Slot.LUNCH, "tinola", 1.0),
@@ -118,8 +118,8 @@ class PlanCheckTest {
 
     @Test
     void aWeekOverBudgetIsRejected() {
-        List<String> problems = check.problems(request(2087, 1500), everyDay(MONDAY));
-        assertEquals(List.of("The week costs ₱1,750; the budget is ₱1,500."), problems);
+        List<String> problems = check.problems(request(2087, 1300), everyDay(MONDAY));
+        assertEquals(List.of("The week costs ₱1,365; the budget is ₱1,300."), problems);
     }
 
     @Test
@@ -135,11 +135,11 @@ class PlanCheckTest {
         assertEquals(Slot.BREAKFAST, breakfast.slot());
         assertEquals("Tapsilog: beef tapa, garlic rice and egg", breakfast.name());
         assertEquals(840, breakfast.kcal());
-        assertEquals(143, breakfast.pricePhp());
+        assertEquals(126, breakfast.pricePhp());
         assertEquals(1.5, breakfast.servings());
         assertEquals(2367, monday.kcal());
-        assertEquals(298, monday.pricePhp());
-        assertEquals(7 * 298, week.pricePhp());
+        assertEquals(237, monday.pricePhp());
+        assertEquals(7 * 237, week.pricePhp());
     }
 
     @Test

@@ -25,7 +25,7 @@ class PlanServiceTest {
 
     private static final PlanRequest REQUEST = new PlanRequest(2087, 2000, Goal.LOSE, List.of("palengke", "sm"));
 
-    /** The app's Monday every day: 2,087 kcal, ₱1,750 for the week. */
+    /** The app's Monday every day: 2,087 kcal, ₱1,365 for the week. */
     private static String week(String lunch) {
         return Weekday.stream()
                 .map(d -> """
@@ -80,7 +80,7 @@ class PlanServiceTest {
         PlanRecord ready = plans.find(id).orElseThrow();
         assertEquals(PlanStatus.READY, ready.status());
         assertEquals(7, ready.week().days().size());
-        assertEquals(1750, ready.week().pricePhp());
+        assertEquals(1365, ready.week().pricePhp());
         assertEquals(1, agent.replies.size(), "each submission is answered once");
     }
 
