@@ -45,7 +45,7 @@ String _servingsPrefix(double servings) {
 }
 
 /// What a screen reader says for the card: "Breakfast, Tapsilog, 560 kcal,
-/// ₱95", with the servings before the numbers, or "Swapping this meal" in
+/// ₱84", with the servings before the numbers, or "Swapping this meal" in
 /// their place while a swap builds.
 String _spoken(PlannedMeal meal, {required bool swapping}) {
   final head = '${meal.slot.label}, ${meal.name}';

@@ -36,13 +36,23 @@ MealPal PH.
   `brief` is what the planner is asked for. `week_plan_controller.dart`
   drives a `Planner`: builds, polls, swaps, retries. The This week screen
   only reads it.
-- `lib/data/`: sample week / grocery list / store tiles (stand-ins for the
-  meal bank). `nextAlternative` drives the offline meal swap.
+- `lib/data/`: the offline sample bank (`sample_bank.dart`, a copy of
+  `server/src/main/resources/meal-bank.json`: meals, ingredient catalog,
+  ingredient refs), the sample week built from it, store tiles and
+  `shopping_stops.dart` (picked store ids to `ShoppingStop`s, in Where you
+  shop order). `test/data/bank_parity_test.dart` fails if the Dart bank and
+  the JSON differ, so the two copies cannot drift: edit both together. `nextAlternative` drives the offline meal swap.
   `sample_planner.dart` is the `Planner` used when no server is configured.
 - `lib/app.dart` picks the planner (`plannerFor`, https-only in release) and
   owns the controller.
-  The grocery list and the Welcome collage stay on sample data; the grocery
-  list says so in every mode, since swaps never change it.
+  The grocery route rebuilds from the controller's current week and the
+  draft's picked stores (`ListenableBuilder`), so a swap changes the list in
+  sample and server mode alike. The Welcome collage stays on
+  `sampleWeek().first`.
+- `lib/src/plan/grocery.dart`: `groceryListFor` sums every planned meal's
+  ingredients by id across the week, rounds the amounts up, and files each
+  line under a picked store. Ingredient unit prices live in the bank; that
+  is where the price checker's price book will plug in later.
 - `test/` mirrors `lib/`; `test/helpers.dart` has `host()`, `phone()`,
   `contrast()` and `paintedColor()`. `test/flutter_test_config.dart` loads
   the real Fraunces and Plus Jakarta Sans for every test, so widths and
@@ -123,8 +133,10 @@ The design is filtered with the antislop rules; keep it that way:
   bank holds placeholder numbers). Remove it only with the
   `TODO(meal-bank)` once the FNRI-based bank supplies checked numbers. A
   target capped for the planner reads "(planner max)" in its pill.
-  Owner override (2026-11-02): the Welcome collage keeps its 560 kcal and
-  ₱95 stickers unlabelled; they illustrate the example day, not a claim.
+  Owner override (2026-11-02): the Welcome collage keeps its kcal and
+  price stickers unlabelled; they illustrate the example day, not a claim.
+  Do not hard-code the sticker price in copy or tests: read it from
+  `sampleWeek().first`.
 - One grocery CTA on This week: the pinned "See grocery list" footer. Do
   not bring back a second entry (the old title-row pill).
 - The calorie ring's centre shows the target as a share of maintenance
@@ -135,10 +147,20 @@ The design is filtered with the antislop rules; keep it that way:
   back, so the link looks tappable. The button announces "Back"; the step
   is heard once, from the progress segments. Back headers announce "Back to
   <label>".
-- The grocery list says it is a sample in every mode (`sampleListNote`),
-  until it is built from the planned meals (`TODO(grocery)`).
+- The grocery list labels its numbers in every mode (`groceryListNote`):
+  "Amounts are what your meals use. Prices are rough estimates for now."
+  Remove the price half only once the price checker's price book feeds the
+  unit prices.
+- Store assignment: each ingredient kind has an ordered list of store types
+  that sell it, and the first picked stop of a listed type gets it (fresh
+  kinds: wet market, supermarket, hypermarket, warehouse club, online;
+  aromatics may also use a sari-sari store; eggs and pantry kinds have
+  longer lists). A type not in a kind's list never gets that kind, so a
+  sari-sari store never gets fresh meat. Items no picked stop sells go to a
+  last "Elsewhere" section ("(not sold at the stores you picked)"); that
+  is honest, never a guess.
 - Screen-reader merges: a meal card is one live node ("Breakfast, Tapsilog,
-  560 kcal, ₱95"; the swap button stays its own), a macro card is one node
+  560 kcal, ₱84"; the swap button stays its own), a macro card is one node
   ("Protein, 157 grams") with its gauge excluded, and the ring centre is
   one sentence. `MpCta` takes a `semanticLabel` when the visible text is
   not the spoken one ("Build my plan from 2 stores").
