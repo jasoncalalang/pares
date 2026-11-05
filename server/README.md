@@ -88,12 +88,63 @@ ingredient's cost over the whole week, rounded once per ingredient, then added.
 
 The planner agent never sees ingredients: the bank it reads is still id,
 slots, name, kcal and pricePhp. The server does the arithmetic from
-`src/main/resources/meal-bank.json`, which holds an `ingredients` catalog
-(name, kind, unit, `pricePhpPerUnit`) and, per meal, the quantity per serving
-of each ingredient. A meal's `pricePhp` must equal the rounded cost of its
-ingredients; the bank refuses to load otherwise. Quantities and unit prices
-are placeholder estimates until the price checker's price book exists.
+`src/main/resources/meal-bank.json`, which holds an `ingredients` catalog and,
+per meal, the quantity per serving of each ingredient. The bank holds 30
+Filipino dishes. A meal's `pricePhp` and `kcal` are both computed from its
+ingredients, and the bank refuses to load when either disagrees. Quantities and
+unit prices are placeholder estimates until the price checker's price book
+exists; the calories are not placeholders (below).
+
+## Where the calories come from
+
+Every ingredient names a USDA FoodData Central food (SR Legacy 2018-04 or
+Foundation 2025-04-24). The owner chose USDA because FNRI's PhilFCT site blocks
+automated access. Nothing is guessed: each kcal traces to a USDA food id.
+
+Catalog entries keep `name`, `kind`, `unit` and `pricePhpPerUnit` and add:
+
+| Field | Meaning |
+| --- | --- |
+| `kcalPer100g` | USDA energy for `usda.fdcId`, exactly as published |
+| `gramsPerUnit` | grams in one `unit`: 1 for `g`; the weight of one piece for `pc` (a USDA portion); grams per ml for `ml` (portion grams / portion ml, 3 decimals half up) |
+| `usda` | `{fdcId, description, match, note}`: the food's id, USDA's own description, `exact` or `closest`; a `closest` match must say in `note` what differs ("USDA has no longganisa; fresh pork sausage") |
+| `portion` | required for `pc` and `ml`: `{label, grams}` for pc, `{label, grams, ml}` for ml; the label is one of USDA's portion labels for that food |
+| `edible` | optional `{fraction, note}` when part of the bought amount is not eaten (bone-in chicken); `fraction` is above 0 and below 1 and `note` names the USDA figure it comes from. Left out when everything bought is eaten |
+
+Quantities are per serving, raw or dry (rice 90 g is uncooked rice). Produce is
+trimmed weight; meat and fish are as bought, with bone taken out through
+`edible`. Cooking oil in a recipe counts as eaten.
+
+A meal's kcal is
+
+```
+round_half_up( sum( qty * gramsPerUnit * edible.fraction * kcalPer100g / 100 ) )
+```
+
+computed with `BigDecimal`, so 436.5 is 437 and nothing drifts. A plan's kcal at
+`servings` is still `round(kcal * servings)`. `MealBank` refuses a bank where an
+ingredient lacks any of these fields or breaks their rules, or where a meal's
+`kcal` is not what its ingredients add up to; the message names the meal or
+ingredient. Per-serving bands catch amount typos (a test and the checker both
+enforce them): breakfast 300-850, lunch and dinner 350-950, snack 80-450. Where
+a USDA food is only the closest, the `note` says which way the figure is off;
+saba, for one, is filed as a dessert banana and probably understates.
+
+## USDA tools
+
+`tools/usda/` looks foods up and checks a bank against the USDA data. Run
+`tools/usda/fetch.sh` once to download the data (it goes in the gitignored
+`tools/usda/data/`), then:
+
+```sh
+python3 -I tools/usda/usda.py search chicken breast raw
+python3 -I tools/usda/usda.py show 171077
+python3 -I tools/usda/check_bank.py src/main/resources/meal-bank.json
+```
+
+`check_bank.py` prints one `PROBLEM` line per fault and ends with `OK` or
+`FAIL`. See `tools/usda/README.md`.
 
 ## Tests
 
-`./gradlew test`. No Docker needed: the HTTP tests mock the agent gateway.
+`./gradlew test` (use `./gradlew cleanTest test` to rerun cached results). No Docker needed: the HTTP tests mock the agent gateway.
