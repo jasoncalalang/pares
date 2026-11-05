@@ -3,9 +3,9 @@ import 'sample_bank.dart';
 
 /// Stand-in for the meal bank + AI selection. Every meal comes from
 /// [sampleBankMeals], so its price, kcal and ingredients are the bank's.
-/// Monday is the approved mockup; the other days rotate a few alternates so
-/// the day strip has something to show. Replace with the real recommender
-/// later.
+/// Monday keeps the approved mockup's dishes, now at the servings that land
+/// it on the default target; the other days rotate a few alternates so the
+/// day strip has something to show. Replace with the real recommender later.
 
 PlannedMeal _from(String id, MealSlot slot) => plannedMealFrom(
       sampleBankMeals.firstWhere((m) => m.id == id),
