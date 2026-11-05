@@ -39,3 +39,5 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 # TLS Certificates
 .certs/
+# USDA downloads and the index built from them
+/tools/usda/data/
