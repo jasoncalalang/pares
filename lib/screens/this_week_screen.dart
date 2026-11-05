@@ -128,8 +128,10 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                 ),
               ),
               const SizedBox(height: 3),
-              // TODO(meal-bank): drop this line once the FNRI-based bank
-              // supplies checked numbers.
+              // TODO(meal-bank): calories are computed from USDA FoodData
+              // Central energy per ingredient times the recipe amounts, but
+              // the amounts are estimates and the prices are placeholders.
+              // Drop this line when both are checked.
               Text(
                 'Calories and prices are rough estimates for now.',
                 style: MpTypography.label().copyWith(

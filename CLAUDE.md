@@ -41,7 +41,10 @@ MealPal PH.
   ingredient refs), the sample week built from it, store tiles and
   `shopping_stops.dart` (picked store ids to `ShoppingStop`s, in Where you
   shop order). `test/data/bank_parity_test.dart` fails if the Dart bank and
-  the JSON differ, so the two copies cannot drift: edit both together. `nextAlternative` drives the offline meal swap.
+  the JSON differ, so the two copies cannot drift: edit both together. The
+  Dart copy keeps only what the app reads (no USDA provenance); the 20
+  dishes after the first ten are offered by the offline swap at every slot
+  they list, in bank order. `nextAlternative` drives the offline meal swap.
   `sample_planner.dart` is the `Planner` used when no server is configured.
 - `lib/app.dart` picks the planner (`plannerFor`, https-only in release) and
   owns the controller.
@@ -89,8 +92,16 @@ radius, duration or font family**: read:
 - Icons: Lucide stroke icons only. No emoji. No retailer logos: monograms.
 - Motion: data fills, selection, press, expand, screen fades; no entrance
   animation, nothing bouncy, no gradients, no parallax, no endless loops.
-- Calorie target is deterministic math; the model (later) only selects
-  from the meal bank and never invents nutrition numbers.
+- Calorie target is deterministic math; the model only selects from the
+  meal bank and never invents nutrition numbers.
+- A meal's kcal is computed, never typed: round_half_up(sum(qty *
+  gramsPerUnit * edible fraction * kcalPer100g / 100)) from USDA FoodData
+  Central (SR Legacy and Foundation) energy per ingredient, each with its
+  `usda.fdcId`. FNRI's PhilFCT blocks automated access, so USDA is the
+  source. The lookup and check tools are in `server/tools/usda/` (see its
+  README and `server/README.md`); `bank_parity_test.dart` recomputes every
+  meal's kcal from the JSON so the app suite guards the rule too. Add a dish
+  by adding USDA-backed ingredients, then run `check_bank.py`.
 
 ## antislop (applied 2026-10-21, mode DURING)
 
@@ -119,7 +130,8 @@ The design is filtered with the antislop rules; keep it that way:
   links and grocery section headers reserve it.
 - Large text (150-200%, iOS up to 310%) must not overflow or break a word
   in two: numbers and one-word labels shrink to fit, CTAs wrap and grow,
-  the store grid shrinks names (to 80%) or drops to one column, and a
+  the store grid shrinks names (to 80%) or drops to one column, a meal card
+  drops its thumbnail from 150% so dish names keep their width, and a
   pinned footer scrolls past half the screen. `large_text_test.dart`
   checks it.
 - Contrast is checked, not eyeballed: text 4.5:1, control edges 3:1
@@ -129,9 +141,10 @@ The design is filtered with the antislop rules; keep it that way:
   raised to the safe floor, Daily target shows the real change from
   maintenance and drops the weekly-rate claim.
 - This week labels its numbers: "Calories and prices are rough estimates
-  for now." sits under the day line in sample and server mode alike (the
-  bank holds placeholder numbers). Remove it only with the
-  `TODO(meal-bank)` once the FNRI-based bank supplies checked numbers. A
+  for now." sits under the day line in sample and server mode alike (a
+  meal's kcal is computed from USDA data, but the recipe amounts are
+  estimates and the prices are placeholders). Remove it only with the
+  `TODO(meal-bank)` once the amounts and prices are checked. A
   target capped for the planner reads "(planner max)" in its pill.
   Owner override (2026-11-02): the Welcome collage keeps its kcal and
   price stickers unlabelled; they illustrate the example day, not a claim.
@@ -170,7 +183,7 @@ The design is filtered with the antislop rules; keep it that way:
   to buy yet". At large text the store header and row prices move under
   the name so no word breaks.
 - Screen-reader merges: a meal card is one live node ("Breakfast, Tapsilog,
-  560 kcal, ₱84"; the swap button stays its own), a macro card is one node
+  797 kcal, ₱84"; the swap button stays its own), a macro card is one node
   ("Protein, 157 grams") with its gauge excluded, and the ring centre is
   one sentence. `MpCta` takes a `semanticLabel` when the visible text is
   not the spoken one ("Build my plan from 2 stores").
