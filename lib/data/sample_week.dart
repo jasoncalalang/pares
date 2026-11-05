@@ -36,7 +36,18 @@ final List<PlannedMeal> mealBank = [
   _pinakbet,
   _sabaPeanuts,
   _boiledSaba,
+  ..._newerMeals,
 ];
+
+/// The dishes added after the first ten, each offered at every slot it lists,
+/// in bank order. The first ten keep the single slot they were first offered
+/// at, so their swap cycles do not move.
+final List<PlannedMeal> _newerMeals = [
+  for (final bank in sampleBankMeals.skip(_firstTen))
+    for (final slot in bank.slots) plannedMealFrom(bank, slot),
+];
+
+const _firstTen = 10;
 
 /// The next option in [mealBank] for the same slot as [meal], wrapping round
 /// to the first. Meals are matched by name, so a meal that is not in the bank

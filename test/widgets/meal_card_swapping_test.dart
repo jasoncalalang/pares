@@ -8,6 +8,8 @@ import '../helpers.dart';
 
 void main() {
   final meal = sampleWeek().first.meals.first;
+  final numbers = '${meal.kcal} kcal · ₱${meal.pricePhp}';
+  final spoken = '${meal.kcal} kcal, ₱${meal.pricePhp}';
 
   Future<void> pump(WidgetTester tester, Widget card) async {
     await phone(tester);
@@ -26,7 +28,7 @@ void main() {
       MpMealCard(meal: meal, swapping: true, onSwap: () => swaps++),
     );
     expect(find.text('Swapping this meal'), findsOneWidget);
-    expect(find.text('560 kcal · ₱84'), findsNothing);
+    expect(find.text(numbers), findsNothing);
     // The old dish stays readable while the swap builds.
     expect(find.text(meal.name), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Swap breakfast'));
@@ -38,7 +40,7 @@ void main() {
     tester,
   ) async {
     await pump(tester, MpMealCard(meal: meal, onSwap: null));
-    expect(find.text('560 kcal · ₱84'), findsOneWidget);
+    expect(find.text(numbers), findsOneWidget);
     expect(find.text('Swapping this meal'), findsNothing);
     expect(
       tester.getSemantics(find.bySemanticsLabel('Swap breakfast')),
@@ -89,20 +91,20 @@ void main() {
       final handle = tester.ensureSemantics();
       await pump(tester, MpMealCard(meal: meal, onSwap: () {}));
       final card = find.bySemanticsLabel(
-        'Breakfast, Tapsilog: beef tapa, garlic rice and egg, 560 kcal, ₱84',
+        'Breakfast, Tapsilog: beef tapa, garlic rice and egg, $spoken',
       );
       expect(card, findsOneWidget);
       expect(
         tester.getSemantics(card),
         isSemantics(
           label:
-              'Breakfast, Tapsilog: beef tapa, garlic rice and egg, 560 kcal, ₱84',
+              'Breakfast, Tapsilog: beef tapa, garlic rice and egg, $spoken',
           isLiveRegion: true,
         ),
       );
       expect(find.bySemanticsLabel('Swap breakfast'), findsOneWidget);
       expect(find.bySemanticsLabel('BREAKFAST'), findsNothing);
-      expect(find.bySemanticsLabel('560 kcal · ₱84'), findsNothing);
+      expect(find.bySemanticsLabel(numbers), findsNothing);
       handle.dispose();
     });
 

@@ -15,10 +15,17 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** The vetted dishes a planner may choose from. */
+/** The vetted dishes a planner may choose from. A meal's kcal and price are checked against its ingredients at load. */
 public final class MealBank {
 
-    private record RawIngredient(String name, String kind, String unit, Double pricePhpPerUnit) {}
+    private record RawUsda(Integer fdcId, String description, String match, String note) {}
+
+    private record RawPortion(String label, BigDecimal grams, BigDecimal ml) {}
+
+    private record RawEdible(BigDecimal fraction, String note) {}
+
+    private record RawIngredient(String name, String kind, String unit, Double pricePhpPerUnit,
+            BigDecimal kcalPer100g, BigDecimal gramsPerUnit, RawUsda usda, RawPortion portion, RawEdible edible) {}
 
     private record RawRef(String id, Double qty) {}
 
@@ -86,7 +93,96 @@ public final class MealBank {
         if (raw.pricePhpPerUnit() == null || raw.pricePhpPerUnit() < 0) {
             throw new IllegalStateException("Ingredient '" + id + "' needs a pricePhpPerUnit of zero or more.");
         }
-        return new Ingredient(id, raw.name(), kind, unit, raw.pricePhpPerUnit());
+        Ingredient.Usda usda = usda(id, raw.usda());
+        if (raw.kcalPer100g() == null || raw.kcalPer100g().signum() <= 0) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs a kcalPer100g of more than zero (USDA's energy for "
+                    + usda.fdcId() + ").");
+        }
+        if (raw.gramsPerUnit() == null || raw.gramsPerUnit().signum() <= 0) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs a gramsPerUnit of more than zero.");
+        }
+        if (unit == Ingredient.Unit.G && raw.gramsPerUnit().compareTo(BigDecimal.ONE) != 0) {
+            throw new IllegalStateException("Ingredient '" + id + "' is sold by the gram, so its gramsPerUnit must be 1, not "
+                    + raw.gramsPerUnit().toPlainString() + ".");
+        }
+        Ingredient.Portion portion = portion(id, unit, raw);
+        Ingredient.Edible edible = edible(id, raw.edible());
+        return new Ingredient(id, raw.name(), kind, unit, raw.pricePhpPerUnit(), raw.kcalPer100g(), raw.gramsPerUnit(),
+                usda, portion, edible);
+    }
+
+    private static Ingredient.Usda usda(String id, RawUsda raw) {
+        if (raw == null) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs a usda source: {fdcId, description, match}.");
+        }
+        if (raw.fdcId() == null || raw.fdcId() <= 0) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs a usda.fdcId, a positive USDA food id.");
+        }
+        if (isBlank(raw.description())) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs the usda.description of food " + raw.fdcId() + ".");
+        }
+        if (!"exact".equals(raw.match()) && !"closest".equals(raw.match())) {
+            throw new IllegalStateException("Ingredient '" + id + "' has usda.match '" + raw.match()
+                    + "' (use exact or closest).");
+        }
+        if ("closest".equals(raw.match()) && isBlank(raw.note())) {
+            throw new IllegalStateException("Ingredient '" + id
+                    + "' is a closest USDA match, so usda.note must say what differs.");
+        }
+        return new Ingredient.Usda(raw.fdcId(), raw.description(), raw.match(), raw.note());
+    }
+
+    private static Ingredient.Portion portion(String id, Ingredient.Unit unit, RawIngredient raw) {
+        RawPortion p = raw.portion();
+        if (unit == Ingredient.Unit.G) {
+            return p == null ? null : new Ingredient.Portion(p.label(), p.grams(), p.ml());
+        }
+        if (p == null) {
+            throw new IllegalStateException("Ingredient '" + id + "' is sold by the " + unit.json()
+                    + ", so it needs a USDA portion: {label, grams" + (unit == Ingredient.Unit.ML ? ", ml" : "") + "}.");
+        }
+        if (isBlank(p.label())) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs the portion.label of the USDA portion it uses.");
+        }
+        if (p.grams() == null || p.grams().signum() <= 0) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs a portion.grams of more than zero.");
+        }
+        if (unit == Ingredient.Unit.PC) {
+            if (raw.gramsPerUnit().compareTo(p.grams()) != 0) {
+                throw new IllegalStateException("Ingredient '" + id + "' has gramsPerUnit " + raw.gramsPerUnit().toPlainString()
+                        + " but its portion weighs " + p.grams().toPlainString() + " g; one piece is that portion.");
+            }
+        } else {
+            if (p.ml() == null || p.ml().signum() <= 0) {
+                throw new IllegalStateException("Ingredient '" + id + "' is sold by the ml, so its portion needs a portion.ml"
+                        + " of more than zero.");
+            }
+            BigDecimal perMl = p.grams().divide(p.ml(), 3, RoundingMode.HALF_UP);
+            if (raw.gramsPerUnit().compareTo(perMl) != 0) {
+                throw new IllegalStateException("Ingredient '" + id + "' has gramsPerUnit " + raw.gramsPerUnit().toPlainString()
+                        + " but portion.grams / portion.ml is " + perMl.toPlainString() + " g per ml.");
+            }
+        }
+        return new Ingredient.Portion(p.label(), p.grams(), p.ml());
+    }
+
+    private static Ingredient.Edible edible(String id, RawEdible raw) {
+        if (raw == null) {
+            return null;
+        }
+        if (raw.fraction() == null || raw.fraction().signum() <= 0 || raw.fraction().compareTo(BigDecimal.ONE) >= 0) {
+            throw new IllegalStateException("Ingredient '" + id + "' has an edible.fraction of "
+                    + (raw.fraction() == null ? null : raw.fraction().toPlainString())
+                    + "; it must be more than 0 and less than 1 (leave edible out when all of it is eaten).");
+        }
+        if (isBlank(raw.note())) {
+            throw new IllegalStateException("Ingredient '" + id + "' needs an edible.note saying where the fraction comes from.");
+        }
+        return new Ingredient.Edible(raw.fraction(), raw.note());
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.isBlank();
     }
 
     private static Meal meal(RawMeal raw, Map<String, Ingredient> catalog) {
@@ -95,6 +191,7 @@ public final class MealBank {
         }
         List<MealIngredient> refs = new ArrayList<>();
         BigDecimal cost = BigDecimal.ZERO;
+        BigDecimal kcal = BigDecimal.ZERO;
         for (RawRef ref : raw.ingredients()) {
             Ingredient ingredient = ref.id() == null ? null : catalog.get(ref.id());
             if (ingredient == null) {
@@ -105,7 +202,9 @@ public final class MealBank {
                         + " for ingredient '" + ref.id() + "'; a quantity must be more than zero.");
             }
             refs.add(new MealIngredient(ref.id(), ref.qty()));
-            cost = cost.add(BigDecimal.valueOf(ref.qty()).multiply(BigDecimal.valueOf(ingredient.pricePhpPerUnit())));
+            BigDecimal qty = BigDecimal.valueOf(ref.qty());
+            cost = cost.add(qty.multiply(BigDecimal.valueOf(ingredient.pricePhpPerUnit())));
+            kcal = kcal.add(kcalOf(qty, ingredient));
         }
         int expected = cost.setScale(0, RoundingMode.HALF_UP).intValueExact();
         if (expected != raw.pricePhp()) {
@@ -113,7 +212,22 @@ public final class MealBank {
                     + " but its ingredients cost " + expected + " (" + cost.stripTrailingZeros().toPlainString()
                     + " before rounding).");
         }
+        int expectedKcal = kcal.setScale(0, RoundingMode.HALF_UP).intValueExact();
+        if (expectedKcal != raw.kcal()) {
+            throw new IllegalStateException("Meal '" + raw.id() + "' has kcal " + raw.kcal()
+                    + " but its ingredients add up to " + expectedKcal + " (" + kcal.stripTrailingZeros().toPlainString()
+                    + " before rounding).");
+        }
         return new Meal(raw.id(), raw.slots(), raw.name(), raw.kcal(), raw.pricePhp(), raw.image(), List.copyOf(refs));
+    }
+
+    /** USDA kcal for {@code qty} of an ingredient as bought: grams eaten times kcal per 100 g, exactly. */
+    private static BigDecimal kcalOf(BigDecimal qty, Ingredient ingredient) {
+        BigDecimal eaten = qty.multiply(ingredient.gramsPerUnit());
+        if (ingredient.edible() != null) {
+            eaten = eaten.multiply(ingredient.edible().fraction());
+        }
+        return eaten.multiply(ingredient.kcalPer100g()).movePointLeft(2);
     }
 
     public List<Meal> meals() {

@@ -15,6 +15,13 @@ import '../helpers.dart';
 String get _stickerPrice =>
     formatPeso(sampleWeek().first.meals.first.pricePhp, decimals: 0);
 
+/// The lead plate's kcal, read from the data like the sticker does.
+String get _stickerKcal => '${sampleWeek().first.meals.first.kcal} kcal';
+
+/// The example day's total, read from the data like the sticker does.
+String get _stickerDayKcal =>
+    '${formatThousands(sampleWeek().first.kcal)} kcal / day';
+
 const _headline = 'Filipino meals that fit your calorie goal and your weekly budget.';
 const _sheetBody = 'Sign-in is coming soon. For now no account is needed, and '
     'your plan is not kept after you close the app.';
@@ -49,9 +56,9 @@ void main() {
     );
     expect(find.byType(Image), findsNWidgets(4));
     // Stickers come from the example day: its first plate and its total.
-    expect(find.text('560 kcal'), findsOneWidget);
+    expect(find.text(_stickerKcal), findsOneWidget);
     expect(find.text(_stickerPrice), findsOneWidget);
-    expect(find.text('2,087 kcal / day'), findsOneWidget);
+    expect(find.text(_stickerDayKcal), findsOneWidget);
     expect(find.text('Find my calorie target'), findsOneWidget);
     expect(find.text('or continue with'), findsOneWidget);
     expect(find.text(_comingSoon), findsOneWidget,

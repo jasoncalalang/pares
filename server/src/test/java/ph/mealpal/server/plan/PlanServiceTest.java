@@ -23,9 +23,9 @@ import ph.mealpal.server.bank.Slot;
  */
 class PlanServiceTest {
 
-    private static final PlanRequest REQUEST = new PlanRequest(2087, 2000, Goal.LOSE, List.of("palengke", "sm"));
+    private static final PlanRequest REQUEST = new PlanRequest(2565, 2000, Goal.LOSE, List.of("palengke", "sm"));
 
-    /** The app's Monday every day: 2,087 kcal, ₱1,365 for the week. */
+    /** The same Monday every day: 2,565 kcal, ₱1,365 for the week. */
     private static String week(String lunch) {
         return Weekday.stream()
                 .map(d -> """
@@ -64,7 +64,7 @@ class PlanServiceTest {
 
         assertEquals(PlanStatus.BUILDING, plan.status());
         assertNull(plan.week());
-        assertTrue(agent.messages.getFirst().contains("2,087 kcal a day"));
+        assertTrue(agent.messages.getFirst().contains("2,565 kcal a day"));
         assertTrue(agent.replies.isEmpty(), "nothing is answered until the plan is read");
     }
 
@@ -101,7 +101,7 @@ class PlanServiceTest {
         PlanRecord plan = settle(plans.create(REQUEST).id());
 
         assertTrue(agent.replies.getFirst().error());
-        assertTrue(agent.replies.getFirst().text().contains("Monday comes to 2,647 kcal"));
+        assertTrue(agent.replies.getFirst().text().contains("Monday comes to 3,362 kcal"));
         assertTrue(agent.replies.getFirst().text().contains("call submit_plan again"));
         assertEquals(PlanStatus.READY, plan.status());
     }

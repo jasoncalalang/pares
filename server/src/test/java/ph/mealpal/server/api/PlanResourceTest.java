@@ -21,7 +21,7 @@ import ph.mealpal.server.plan.Weekday;
 class PlanResourceTest {
 
     private static final String REQUEST = """
-            {"targetKcal": 2087, "budgetPhp": 2000, "goal": "lose", "storeIds": ["palengke"]}
+            {"targetKcal": 2565, "budgetPhp": 2000, "goal": "lose", "storeIds": ["palengke"]}
             """;
 
     private static String week(String lunch) {
@@ -75,7 +75,7 @@ class PlanResourceTest {
                 .body("status", equalTo("ready"))
                 .body("week.days.size()", equalTo(7))
                 .body("week.days[0].weekday", equalTo("mon"))
-                .body("week.days[0].kcal", equalTo(2087))
+                .body("week.days[0].kcal", equalTo(2565))
                 .body("week.days[0].meals[0].slot", equalTo("breakfast"))
                 .body("week.days[0].meals[0].name", equalTo("Tapsilog: beef tapa, garlic rice and egg"))
                 .body("week.days[0].meals[0].image", equalTo("tapsilog"))
