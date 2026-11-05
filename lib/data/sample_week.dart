@@ -58,14 +58,27 @@ PlannedMeal nextAlternative(PlannedMeal meal) {
   return options[(i + 1) % options.length];
 }
 
+/// [meal] planned at [servings] of the bank's portion, as the planner may
+/// (0.5 to 2): kcal and price scale with it.
+PlannedMeal _at(PlannedMeal meal, double servings) => plannedMealFrom(
+      sampleBankMeals.firstWhere((b) => b.id == meal.id),
+      meal.slot,
+      servings: servings,
+    );
+
+/// The sample week as the offline planner serves it. Every day lands within
+/// 3% of the default brief's 2,087 kcal target (a test holds it there): the
+/// bank's dishes run bigger than the old placeholders, so Monday's approved
+/// dishes keep their place and take smaller servings rather than being swapped
+/// for lighter ones.
 List<DayPlan> sampleWeek() => [
-      DayPlan(weekday: Weekday.mon, meals: [_tapsilog, _tinola, _munggo, _sabaPeanuts]),
-      DayPlan(weekday: Weekday.tue, meals: [_daingsilog, _tinola, _sinigang, _sabaPeanuts]),
-      DayPlan(weekday: Weekday.wed, meals: [_lugaw, _adobo, _munggo, _boiledSaba]),
-      DayPlan(weekday: Weekday.thu, meals: [_tapsilog, _adobo, _pinakbet, _sabaPeanuts]),
-      DayPlan(weekday: Weekday.fri, meals: [_daingsilog, _tinola, _munggo, _boiledSaba]),
-      DayPlan(weekday: Weekday.sat, meals: [_lugaw, _adobo, _sinigang, _sabaPeanuts]),
-      DayPlan(weekday: Weekday.sun, meals: [_tapsilog, _tinola, _pinakbet, _boiledSaba]),
+      DayPlan(weekday: Weekday.mon, meals: [_at(_tapsilog, 0.75), _tinola, _at(_munggo, 0.75), _at(_sabaPeanuts, 0.75)]),
+      DayPlan(weekday: Weekday.tue, meals: [_at(_daingsilog, 0.75), _tinola, _at(_sinigang, 0.75), _at(_sabaPeanuts, 0.75)]),
+      DayPlan(weekday: Weekday.wed, meals: [_lugaw, _adobo, _munggo, _at(_boiledSaba, 0.75)]),
+      DayPlan(weekday: Weekday.thu, meals: [_at(_tapsilog, 0.75), _at(_adobo, 0.75), _pinakbet, _sabaPeanuts]),
+      DayPlan(weekday: Weekday.fri, meals: [_at(_daingsilog, 0.75), _tinola, _at(_munggo, 0.75), _boiledSaba]),
+      DayPlan(weekday: Weekday.sat, meals: [_at(_lugaw, 0.75), _adobo, _sinigang, _sabaPeanuts]),
+      DayPlan(weekday: Weekday.sun, meals: [_at(_tapsilog, 0.75), _tinola, _pinakbet, _at(_boiledSaba, 0.75)]),
     ];
 
 /// A fixed list for widget tests. The app builds its list with

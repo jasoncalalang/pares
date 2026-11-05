@@ -7,7 +7,8 @@ import 'package:mealpal_ph/widgets/widgets.dart';
 import '../helpers.dart';
 
 void main() {
-  final meal = sampleWeek().first.meals.first;
+  // One serving, so the card says no servings (the sample week plans some at 0.75).
+  final meal = mealBank.first;
   final numbers = '${meal.kcal} kcal · ₱${meal.pricePhp}';
   final spoken = '${meal.kcal} kcal, ₱${meal.pricePhp}';
 

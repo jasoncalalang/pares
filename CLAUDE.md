@@ -38,7 +38,7 @@ MealPal PH.
   only reads it.
 - `lib/data/`: the offline sample bank (`sample_bank.dart`, a copy of
   `server/src/main/resources/meal-bank.json`: meals, ingredient catalog,
-  ingredient refs), the sample week built from it, store tiles and
+  ingredient refs), the sample week built from it (some dishes at 0.75 servings, so every day is within 3% of the default 2,087 kcal target; `sample_week_test.dart` holds it), store tiles and
   `shopping_stops.dart` (picked store ids to `ShoppingStop`s, in Where you
   shop order). `test/data/bank_parity_test.dart` fails if the Dart bank and
   the JSON differ, so the two copies cannot drift: edit both together. The

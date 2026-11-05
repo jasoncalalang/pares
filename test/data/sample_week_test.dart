@@ -1,6 +1,7 @@
 import 'package:mealpal_ph/data/sample_bank.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
+import 'package:mealpal_ph/state/plan_draft.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -81,12 +82,33 @@ void main() {
     }
   });
 
+  test('every sample day is within 3% of the default brief\'s calorie target', () {
+    // The sample week is what the app shows without a server, under the
+    // pill "2,087 kcal/day"; a day far over it would contradict the pill.
+    final target = PlanDraft().brief.targetKcal;
+    for (final day in sampleWeek()) {
+      expect(
+        day.kcal,
+        inInclusiveRange(target * 0.97, target * 1.03),
+        reason: '${day.weekday.name} is ${day.kcal} kcal against $target',
+      );
+    }
+  });
+
+  test('sample servings are ones the planner may plan', () {
+    final allowed = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+    for (final day in sampleWeek()) {
+      for (final meal in day.meals) {
+        expect(allowed, contains(meal.servings), reason: meal.name);
+      }
+    }
+  });
+
   test('every sample meal carries its bank id and ingredients', () {
     for (final day in sampleWeek()) {
       for (final meal in day.meals) {
         expect(meal.id, isNotNull, reason: meal.name);
         expect(meal.ingredients, isNotEmpty, reason: meal.name);
-        expect(meal.servings, 1);
       }
     }
     for (final meal in mealBank) {
@@ -95,11 +117,11 @@ void main() {
     }
   });
 
-  test('sample prices are the bank prices, Monday adds up to 195 and the week to 1268', () {
+  test('sample prices are the bank prices at the planned servings, Monday adds up to 161 and the week to 1105', () {
     final monday = sampleWeek().first;
-    expect(monday.meals.map((m) => m.pricePhp), [84, 57, 32, 22]);
-    expect(monday.pricePhp, 195);
-    expect(sampleWeek().fold(0, (s, d) => s + d.pricePhp), 1268);
+    expect(monday.meals.map((m) => m.pricePhp), [63, 57, 24, 17]);
+    expect(monday.pricePhp, 161);
+    expect(sampleWeek().fold(0, (s, d) => s + d.pricePhp), 1105);
   });
 
   test('a swapped-in alternative carries its own ingredients', () {

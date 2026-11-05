@@ -65,7 +65,9 @@ DayPlan _mondayWith(PlannedMeal breakfast) {
   ]);
 }
 
-String _mealLine(PlannedMeal m) => '${m.kcal} kcal · ₱${m.pricePhp}';
+String _mealLine(PlannedMeal m) =>
+    '${m.servings == 1 ? '' : '${m.servings} servings · '}'
+    '${m.kcal} kcal · ₱${m.pricePhp}';
 
 void main() {
   late PlanDraft draft;

@@ -95,18 +95,20 @@ void main() {
     );
   });
 
-  test('started and swapped meals carry ingredients for one serving', () async {
+  test('meals carry ingredients scaled to their servings; a swapped-in dish is one serving', () async {
     final p = SamplePlanner();
     final started = await p.start(_brief());
     final tapsilog = started.week!.first.meal(MealSlot.breakfast)!;
     expect(tapsilog.ingredients.map((i) => i.id), contains('beef-tapa'));
     expect(
       tapsilog.ingredients.firstWhere((i) => i.id == 'rice').qty,
-      90.0,
+      90.0 * tapsilog.servings,
     );
     final swapped = await p.swap(started.id, Weekday.mon, MealSlot.breakfast);
     final daing = swapped.week!.first.meal(MealSlot.breakfast)!;
     expect(daing.id, 'daingsilog');
+    expect(daing.servings, 1);
+    expect(daing.ingredients.firstWhere((i) => i.id == 'rice').qty, 90.0);
     expect(daing.ingredients.map((i) => i.id), contains('daing-bangus'));
     expect(daing.ingredients.map((i) => i.id), isNot(contains('beef-tapa')));
   });
