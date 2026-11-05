@@ -484,7 +484,7 @@ const List<BankMeal> sampleBankMeals = [
     id: 'bistek',
     name: 'Bistek tagalog: beef with onion rings and rice',
     slots: [MealSlot.lunch, MealSlot.dinner],
-    kcal: 788,
+    kcal: 783,
     pricePhp: 110,
     ingredients: [
       BankIngredientRef('beef-sirloin', 150.0),

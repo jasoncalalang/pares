@@ -3,6 +3,7 @@ package ph.mealpal.server.bank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,5 +67,16 @@ class ShippedBankTest {
         for (String id : List.of("lumpia-wrapper", "tofu", "silken-tofu", "grated-coconut", "calamansi")) {
             assertTrue(bank.ingredient(id).orElseThrow().kind() != Ingredient.Kind.PANTRY, id);
         }
+    }
+
+    @Test
+    void calamansiCountsOnlyTheJuiceItYields() {
+        // Bistek squeezes the calamansi and throws the peel and seeds away, so USDA's
+        // "1 lime yields 44 g" juice out of "1 fruit 67 g" is the edible share.
+        Ingredient calamansi = bank.ingredient("calamansi").orElseThrow();
+        assertEquals(168156, calamansi.usda().fdcId());
+        assertEquals("Lime juice, raw", calamansi.usda().description());
+        assertEquals(0, new BigDecimal("0.657").compareTo(calamansi.edible().fraction()));
+        assertEquals(783, bank.find("bistek").orElseThrow().kcal());
     }
 }
