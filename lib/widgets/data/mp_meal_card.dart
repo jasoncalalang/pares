@@ -47,7 +47,7 @@ String _servingsPrefix(double servings) {
   return '$n servings · ';
 }
 
-/// What a screen reader says for the card: "Breakfast, Tapsilog, 560 kcal,
+/// What a screen reader says for the card: "Breakfast, Tapsilog, 797 kcal,
 /// ₱84", with the servings before the numbers, or "Swapping this meal" in
 /// their place while a swap builds.
 String _spoken(PlannedMeal meal, {required bool swapping}) {
