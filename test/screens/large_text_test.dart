@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mealpal_ph/data/sample_bank.dart';
 import 'package:mealpal_ph/data/sample_planner.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
@@ -345,6 +346,87 @@ void main() {
             expectWholeWords(tester, f, reason: '${t.id} ${item.name}');
           }
         }
+      }
+    });
+  }
+
+  testWidgets('a meal card keeps its photo at 1x and drops it from 1.5x', (
+    tester,
+  ) async {
+    final tapsilog = plannedMealFrom(
+      sampleBankMeals.firstWhere((m) => m.id == 'tapsilog'),
+      MealSlot.breakfast,
+    );
+    for (final (scale, photo) in [(1.0, true), (1.5, false), (2.0, false)]) {
+      await pumpAt(
+        tester,
+        Scaffold(body: MpMealCard(meal: tapsilog, onSwap: () {})),
+        scale: scale,
+        size: const Size(360, 844),
+      );
+      expect(find.byType(Image), photo ? findsOneWidget : findsNothing,
+          reason: '${scale}x');
+      expect(find.text(tapsilog.name), findsOneWidget, reason: '${scale}x');
+    }
+  });
+
+  for (final scale in [1.5, 2.0]) {
+    testWidgets('every bank meal name stays whole in its card at ${scale}x, '
+        '360dp', (tester) async {
+      for (final bank in sampleBankMeals) {
+        final meal = plannedMealFrom(bank, bank.slots.first);
+        await pumpAt(
+          tester,
+          Scaffold(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: MpMealCard(meal: meal, onSwap: () {}),
+            ),
+          ),
+          scale: scale,
+          size: const Size(360, 844),
+        );
+        expect(tester.takeException(), isNull, reason: bank.id);
+        expectWholeWords(tester, find.text(meal.name), reason: bank.id);
+      }
+    });
+
+    testWidgets('every catalog ingredient name stays whole in a grocery row '
+        'at ${scale}x, 360dp', (tester) async {
+      // One long list of every ingredient the bank knows, each with a wide
+      // quantity and price, so no name gets more room than it would in life.
+      final list = GroceryList(
+        budgetPhp: 2500,
+        sections: [
+          GrocerySection(
+            storeId: 'puregold',
+            name: 'Puregold',
+            monogram: 'P',
+            local: false,
+            items: [
+              for (final e in sampleIngredients.values)
+                GroceryItem(
+                  name: e.name,
+                  quantity: '1.3 kg',
+                  pricePhp: 1188,
+                  kind: e.kind,
+                ),
+            ],
+          ),
+        ],
+      );
+      await pumpAt(
+        tester,
+        GroceryListScreen(list: list, onBack: () {}),
+        scale: scale,
+        size: const Size(360, 844),
+      );
+      expect(tester.takeException(), isNull);
+      for (final e in sampleIngredients.values) {
+        final f = find.text(e.name);
+        await tester.ensureVisible(f);
+        expect(tester.takeException(), isNull, reason: e.name);
+        expectWholeWords(tester, f, reason: e.name);
       }
     });
   }

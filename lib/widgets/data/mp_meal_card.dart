@@ -10,6 +10,9 @@ import '../core/mp_press.dart';
 /// when the bank has no photo), uppercase slot label, dish name, "kcal · ₱",
 /// and a square swap button that spins half a turn when pressed.
 ///
+/// At 150% text and up the thumbnail steps aside, so long dish names keep
+/// the width they need and no word breaks in two.
+///
 /// While [swapping] the card keeps showing the current dish, says "Swapping
 /// this meal" in place of the kcal line (announced to screen readers) and
 /// shows a spinner in the button. A null [onSwap] disables the button.
@@ -70,37 +73,40 @@ class _MpMealCardState extends State<MpMealCard> {
     final c = context.mp;
     final meal = widget.meal;
     final accent = MpMealCard.accentFor(meal.slot);
+    final bigText = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
     return MpCard(
       padding: const EdgeInsets.all(13),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(MpRadius.thumb),
-            child: Container(
-              width: MpSize.thumb,
-              height: MpSize.thumb,
-              color: accent.tint(c),
-              alignment: Alignment.center,
-              child: meal.image == null
-                  // Decorative: the dish name is read in full beside it.
-                  ? ExcludeSemantics(
-                      child: Text(
-                        meal.name.substring(0, 1),
-                        style: MpTypography.monogram().copyWith(
-                          fontSize: 20,
-                          color: accent.deep(c),
+          if (!bigText) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(MpRadius.thumb),
+              child: Container(
+                width: MpSize.thumb,
+                height: MpSize.thumb,
+                color: accent.tint(c),
+                alignment: Alignment.center,
+                child: meal.image == null
+                    // Decorative: the dish name is read in full beside it.
+                    ? ExcludeSemantics(
+                        child: Text(
+                          meal.name.substring(0, 1),
+                          style: MpTypography.monogram().copyWith(
+                            fontSize: 20,
+                            color: accent.deep(c),
+                          ),
                         ),
+                      )
+                    : Image.asset(
+                        'assets/images/meals/${meal.image}.jpg',
+                        fit: BoxFit.cover,
+                        width: MpSize.thumb,
+                        height: MpSize.thumb,
                       ),
-                    )
-                  : Image.asset(
-                      'assets/images/meals/${meal.image}.jpg',
-                      fit: BoxFit.cover,
-                      width: MpSize.thumb,
-                      height: MpSize.thumb,
-                    ),
+              ),
             ),
-          ),
-          const SizedBox(width: 13),
+            const SizedBox(width: 13),
+          ],
           Expanded(
             // One node for slot, dish and numbers, so they are read together
             // rather than as three fragments sorted by position. A live
