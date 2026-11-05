@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -11,7 +13,9 @@ import '../core/mp_press.dart';
 /// and a square swap button that spins half a turn when pressed.
 ///
 /// At 150% text and up the thumbnail steps aside, so long dish names keep
-/// the width they need and no word breaks in two.
+/// the width they need and no word breaks in two. When a name's longest word
+/// still does not fit the room left (the largest sizes, a 320dp phone), the
+/// name alone shrinks, by no more than [_DishName.minScale], until it does.
 ///
 /// While [swapping] the card keeps showing the current dish, says "Swapping
 /// this meal" in place of the kcal line (announced to screen readers) and
@@ -58,6 +62,63 @@ String _spoken(PlannedMeal meal, {required bool swapping}) {
       : '${_servingsPrefix(meal.servings).replaceAll(' · ', '')}, ';
   return '$head, $servings${meal.kcal} kcal, '
       '${formatPeso(meal.pricePhp, decimals: 0)}';
+}
+
+/// The dish name, shrunk just enough that its longest word fits the width it
+/// is given, so no word breaks in two. Bold, the weight it is drawn in.
+class _DishName extends StatelessWidget {
+  const _DishName({required this.name, required this.color});
+
+  final String name;
+  final Color color;
+
+  /// The least a name may shrink to, as a share of the person's text size.
+  static const double minScale = 0.6;
+
+  /// The widest word of [name] at [scaler], in pixels.
+  static double _widest(String name, TextStyle style, TextScaler scaler) {
+    var widest = 0.0;
+    for (final word in name.split(' ')) {
+      final painter = TextPainter(
+        text: TextSpan(text: word, style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+      )..layout();
+      widest = math.max(widest, painter.width);
+      painter.dispose();
+    }
+    return widest;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final style = MpTypography.bodyStrong().copyWith(color: color);
+    // What the Text really draws: its style on top of the inherited one
+    // (the theme adds letter spacing), so the measure matches the paint.
+    final drawn = DefaultTextStyle.of(context).style.merge(style);
+    final scaler = MediaQuery.textScalerOf(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final wanted = scaler.scale(1);
+        final floor = wanted * minScale;
+        var scale = wanted;
+        var widest = _widest(name, drawn, scaler);
+        // Glyph advances do not scale exactly with the size, so measure at
+        // each step, with the clamped scaler the text will use, instead of
+        // trusting the ratio; a few steps converge.
+        for (var i = 0; i < 8 && widest > box.maxWidth && scale > floor; i++) {
+          scale = math.max(floor, scale * box.maxWidth / widest * 0.98);
+          widest = _widest(name, drawn, scaler.clamp(maxScaleFactor: scale));
+        }
+        final text = Text(name, style: style);
+        if (scale >= wanted) return text;
+        return MediaQuery.withClampedTextScaling(
+          maxScaleFactor: scale,
+          child: text,
+        );
+      },
+    );
+  }
 }
 
 class _MpMealCardState extends State<MpMealCard> {
@@ -126,10 +187,7 @@ class _MpMealCardState extends State<MpMealCard> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      meal.name,
-                      style: MpTypography.bodyStrong().copyWith(color: c.ink),
-                    ),
+                    _DishName(name: meal.name, color: c.ink),
                     const SizedBox(height: 3),
                     Text(
                       widget.swapping

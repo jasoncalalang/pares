@@ -370,27 +370,34 @@ void main() {
     }
   });
 
-  for (final scale in [1.5, 2.0]) {
+  // The steps phones really offer: Android's 1.15, 1.3 and 1.4 and the
+  // accessibility sizes, up to the 3.1 iOS allows.
+  for (final scale in [1.0, 1.15, 1.3, 1.4, 1.5, 1.8, 2.0, 2.5, 3.1]) {
     testWidgets('every bank meal name stays whole in its card at ${scale}x, '
-        '360dp', (tester) async {
-      for (final bank in sampleBankMeals) {
-        final meal = plannedMealFrom(bank, bank.slots.first);
-        await pumpAt(
-          tester,
-          Scaffold(
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: MpMealCard(meal: meal, onSwap: () {}),
-            ),
-          ),
-          scale: scale,
-          size: const Size(360, 844),
-        );
-        expect(tester.takeException(), isNull, reason: bank.id);
-        expectWholeWords(tester, find.text(meal.name), reason: bank.id);
+        '320dp and 360dp', (tester) async {
+      for (final width in [320.0, 360.0]) {
+        for (final bank in sampleBankMeals) {
+          final meal = plannedMealFrom(bank, bank.slots.first);
+          // In MpPage, the frame the screens use (22px gutters), so the card
+          // gets the width it gets in the app.
+          await pumpAt(
+            tester,
+            MpPage(content: [MpMealCard(meal: meal, onSwap: () {})]),
+            scale: scale,
+            size: Size(width, 844),
+          );
+          expect(tester.takeException(), isNull, reason: bank.id);
+          expectWholeWords(
+            tester,
+            find.text(meal.name),
+            reason: '${bank.id} at ${width}dp',
+          );
+        }
       }
     });
+  }
 
+  for (final scale in [1.5, 2.0]) {
     testWidgets('every catalog ingredient name stays whole in a grocery row '
         'at ${scale}x, 360dp', (tester) async {
       // One long list of every ingredient the bank knows, each with a wide

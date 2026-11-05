@@ -131,9 +131,12 @@ The design is filtered with the antislop rules; keep it that way:
 - Large text (150-200%, iOS up to 310%) must not overflow or break a word
   in two: numbers and one-word labels shrink to fit, CTAs wrap and grow,
   the store grid shrinks names (to 80%) or drops to one column, a meal card
-  drops its thumbnail from 150% so dish names keep their width, and a
+  drops its thumbnail from 150% so dish names keep their width and shrinks
+  a name (to 60%) only when its longest word still does not fit, dish names
+  carry no hyphenated compounds (a line breaks after a hyphen), and a
   pinned footer scrolls past half the screen. `large_text_test.dart`
-  checks it.
+  checks it, meal names at every common step from 1x to 3.1x on 320dp and
+  360dp in the real page frame.
 - Contrast is checked, not eyeballed: text 4.5:1, control edges 3:1
   (`outline`), via the antislop contrast script or `contrast()` in tests.
   Dim with the `faint` token, never with opacity.

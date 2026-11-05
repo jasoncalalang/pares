@@ -584,7 +584,7 @@ const List<BankMeal> sampleBankMeals = [
   ),
   BankMeal(
     id: 'turon',
-    name: 'Turon: fried saba banana in a spring-roll wrapper with brown sugar',
+    name: 'Turon: fried saba banana in a spring roll wrapper with brown sugar',
     slots: [MealSlot.snack],
     kcal: 385,
     pricePhp: 16,
@@ -619,7 +619,7 @@ const List<BankMeal> sampleBankMeals = [
   ),
   BankMeal(
     id: 'taho',
-    name: 'Taho: silken tofu with brown-sugar syrup and sago pearls',
+    name: 'Taho: silken tofu with brown sugar syrup and sago pearls',
     slots: [MealSlot.snack],
     kcal: 249,
     pricePhp: 17,

@@ -117,13 +117,13 @@
      "ingredients": [{"id": "taro-leaves", "qty": 150}, {"id": "coconut-milk", "qty": 150}, {"id": "pork", "qty": 40}, {"id": "bagoong", "qty": 10}, {"id": "ginger", "qty": 10}, {"id": "garlic", "qty": 5}, {"id": "onion", "qty": 25}, {"id": "chili", "qty": 5}, {"id": "rice", "qty": 90}]},
     {"id": "sardinas-misua", "slots": ["lunch", "dinner"], "name": "Sardinas with misua: sardines in tomato sauce and thin noodles, with rice", "kcal": 725, "pricePhp": 40,
      "ingredients": [{"id": "sardines", "qty": 100}, {"id": "misua", "qty": 40}, {"id": "tomato", "qty": 60}, {"id": "onion", "qty": 25}, {"id": "garlic", "qty": 5}, {"id": "cooking-oil", "qty": 5}, {"id": "rice", "qty": 90}]},
-    {"id": "turon", "slots": ["snack"], "name": "Turon: fried saba banana in a spring-roll wrapper with brown sugar", "kcal": 385, "pricePhp": 16,
+    {"id": "turon", "slots": ["snack"], "name": "Turon: fried saba banana in a spring roll wrapper with brown sugar", "kcal": 385, "pricePhp": 16,
      "ingredients": [{"id": "saba", "qty": 1}, {"id": "lumpia-wrapper", "qty": 2}, {"id": "brown-sugar", "qty": 12}, {"id": "cooking-oil", "qty": 10}]},
     {"id": "kamote-cue", "slots": ["snack"], "name": "Kamote cue: sweet potato fried in caramelised sugar", "kcal": 305, "pricePhp": 10,
      "ingredients": [{"id": "sweet-potato", "qty": 150}, {"id": "brown-sugar", "qty": 25}, {"id": "cooking-oil", "qty": 10}]},
     {"id": "nilagang-mais", "slots": ["snack"], "name": "Nilagang mais: boiled corn on the cob", "kcal": 175, "pricePhp": 30,
      "ingredients": [{"id": "corn", "qty": 2}]},
-    {"id": "taho", "slots": ["snack"], "name": "Taho: silken tofu with brown-sugar syrup and sago pearls", "kcal": 249, "pricePhp": 17,
+    {"id": "taho", "slots": ["snack"], "name": "Taho: silken tofu with brown sugar syrup and sago pearls", "kcal": 249, "pricePhp": 17,
      "ingredients": [{"id": "silken-tofu", "qty": 150}, {"id": "brown-sugar", "qty": 25}, {"id": "sago", "qty": 20}]}
   ]
 }
