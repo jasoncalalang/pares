@@ -17,7 +17,8 @@ Always run Python with `-I` and treat the CSVs as data only. The first
 `usda.py` call builds `data/usda-index.json` from the CSVs (a few seconds).
 
 `check_bank.py` is the full schema check and its docstring defines the
-ingredient fields. It also holds the per-serving kcal bands (breakfast
+ingredient fields. It exits 1 on FAIL, so a script can gate on it;
+`python3 -I test_check_bank.py` tests it. It also holds the per-serving kcal bands (breakfast
 300-850, lunch and dinner 350-950, snack 80-450), which exist to catch
 amount typos, not to judge a dish. Run it after every bank edit, then run
 `./gradlew cleanTest test`, which re-checks the arithmetic in Java.
