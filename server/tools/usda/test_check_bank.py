@@ -1,6 +1,6 @@
 """Tests for check_bank.py. Run: python3 -I test_check_bank.py
 They need the USDA index (fetch.sh, then any usda.py call) and skip without it."""
-import copy, json, os, subprocess, sys, tempfile, unittest
+import json, os, shutil, subprocess, sys, tempfile, unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BANK = os.path.join(HERE, '..', '..', 'src', 'main', 'resources', 'meal-bank.json')
@@ -59,6 +59,24 @@ class CheckBankTest(unittest.TestCase):
         ing = next(i for i in self.bank['ingredients'].values() if i['unit'] == 'pc')
         ing['portion']['grams'] = 'lots'
         self.assert_problem_not_crash(self.bank, 'portion.grams')
+
+
+ZIPS = ['FoodData_Central_sr_legacy_food_csv_2018-04.zip', 'FoodData_Central_foundation_food_csv_2025-04-24.zip']
+
+
+@unittest.skipUnless(all(os.path.exists(os.path.join(HERE, 'data', z)) for z in ZIPS), 'no downloaded zips')
+class FetchTest(unittest.TestCase):
+    def test_check_bank_works_right_after_fetch_sh_with_no_other_step(self):
+        with tempfile.TemporaryDirectory() as d:
+            for name in ('fetch.sh', 'usda.py', 'check_bank.py'):
+                shutil.copy(os.path.join(HERE, name), d)
+            os.mkdir(os.path.join(d, 'data'))
+            for z in ZIPS:  # already present, so fetch.sh does not download
+                os.symlink(os.path.join(HERE, 'data', z), os.path.join(d, 'data', z))
+            subprocess.run(['bash', os.path.join(d, 'fetch.sh')], check=True, capture_output=True)
+            r = subprocess.run([sys.executable, '-I', os.path.join(d, 'check_bank.py'), BANK],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
 
 if __name__ == '__main__':

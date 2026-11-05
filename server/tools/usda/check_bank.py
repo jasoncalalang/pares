@@ -15,7 +15,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 HERE = os.path.dirname(os.path.abspath(__file__))
 INDEX = os.path.join(HERE, 'data', 'usda-index.json')
 if not os.path.exists(INDEX):
-    sys.exit('No USDA index yet. Run fetch.sh, then any usda.py command (e.g. usda.py search rice) builds it.')
+    sys.exit('No USDA index yet. Run fetch.sh, which downloads the data and builds it.')
 idx = json.load(open(INDEX))
 bank = json.load(open(sys.argv[1]))
 ML = {'tbsp': Decimal('14.787'), 'tsp': Decimal('4.929'), 'cup': Decimal('236.588'), 'fl oz': Decimal('29.574')}

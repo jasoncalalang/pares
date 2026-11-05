@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Downloads the two USDA FoodData Central CSV sets into data/ and unzips them
-# as usda.py expects (data/sr and data/fnd). Safe to rerun. data/ is gitignored.
+# as usda.py expects (data/sr and data/fnd), then rebuilds data/usda-index.json.
+# Safe to rerun. data/ is gitignored.
 set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p data/sr data/fnd
@@ -12,4 +13,5 @@ fnd=FoodData_Central_foundation_food_csv_2025-04-24
 unzip -qo "data/$sr.zip" -d data/sr
 unzip -qo "data/$fnd.zip" -d data/fnd
 rm -f data/usda-index.json
+python3 -I usda.py search rice >/dev/null   # rebuilds the index, so check_bank.py works at once
 echo "USDA data ready in $(pwd)/data. Try: python3 -I usda.py search rice"
