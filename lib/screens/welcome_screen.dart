@@ -72,7 +72,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: MpBrandMark(
                     MpBrand.apple,
                     size: MpSize.brandMark - 2,
-                    color: c.cream,
+                    color: c.paper,
                   ),
                 ),
               ),
@@ -310,7 +310,7 @@ class _OrDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.mp;
-    // A full-width rule behind the label, the label on a cream backing: it
+    // A full-width rule behind the label, the label on a paper backing: it
     // stays on one line until the row itself is too narrow, then wraps.
     return SizedBox(
       width: double.infinity,
@@ -323,7 +323,7 @@ class _OrDivider extends StatelessWidget {
             ),
           ),
           Container(
-            color: c.cream,
+            color: c.paper,
             padding: const EdgeInsets.symmetric(horizontal: MpSpacing.md),
             child: Text(
               'or continue with',

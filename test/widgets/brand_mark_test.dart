@@ -27,7 +27,7 @@ void main() {
       mainAxisSize: MainAxisSize.min,
       children: [
         const MpBrandMark(MpBrand.google, key: ValueKey('g')),
-        MpBrandMark(MpBrand.apple, key: const ValueKey('a'), color: c.cream),
+        MpBrandMark(MpBrand.apple, key: const ValueKey('a'), color: c.paper),
         const MpBrandMark(MpBrand.apple, key: ValueKey('ink')),
       ],
     )));
@@ -43,7 +43,7 @@ void main() {
         ..path(color: const Color(0xFFFBBC05))
         ..path(color: const Color(0xFFEA4335)),
     );
-    expect(mark('a'), paints..path(color: c.cream));
+    expect(mark('a'), paints..path(color: c.paper));
     expect(mark('ink'), paints..path(color: c.ink));
   });
 

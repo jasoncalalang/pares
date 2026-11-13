@@ -9,10 +9,12 @@ void main() {
     const c = MpColors.light;
 
     test('pins the brand palette from the design system', () {
-      expect(c.cream, const Color(0xFFFCF8EF));
+      // The page is white paper (DESIGN.md): warmth comes from the photos,
+      // the ink and annatto, never from tinting the ground.
+      expect(c.paper, const Color(0xFFFFFFFF));
       expect(c.ink, const Color(0xFF241C15));
       expect(c.muted, const Color(0xFF6B5D4C));
-      // Faint copy is still read at 12px, so it clears 4.5:1 on cream and white.
+      // Faint copy is still read at 12px, so it clears 4.5:1 on the white page.
       expect(c.faint, const Color(0xFF776855));
       expect(c.annatto, const Color(0xFFB5401C));
       expect(c.annattoDeep, const Color(0xFFA8370F));
@@ -26,7 +28,7 @@ void main() {
       expect(c.amberTint, const Color(0xFFFBF0D8));
       expect(c.surface, const Color(0xFFFFFFFF));
       expect(c.hairline, const Color(0xFFECE3D2));
-      // Control boundaries (inputs, toggles, tiles) clear 3:1 on cream and white.
+      // Control boundaries (inputs, toggles, tiles) clear 3:1 on the white page.
       expect(c.outline, const Color(0xFF998871));
       expect(c.divider, const Color(0xFFF2EADB));
       expect(c.track, const Color(0xFFEEE6D7));
@@ -117,10 +119,10 @@ void main() {
   });
 
   group('MpTheme', () {
-    test('registers MpColors and paints the cream ground', () {
+    test('registers MpColors and paints the white paper ground', () {
       final theme = MpTheme.light();
       expect(theme.extension<MpColors>(), isNotNull);
-      expect(theme.scaffoldBackgroundColor, MpColors.light.cream);
+      expect(theme.scaffoldBackgroundColor, MpColors.light.paper);
       expect(theme.colorScheme.primary, MpColors.light.annatto);
       expect(theme.textTheme.bodyMedium?.fontFamily, 'PlusJakartaSans');
     });

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
 
-/// Page frame every screen uses: cream ground, safe area, 22px gutters,
+/// Page frame every screen uses: white paper ground, safe area, 22px gutters,
 /// 24px top padding, scrolling [content], and an optional [footer] (the
 /// CTA block) pinned beneath the scroll area. At the largest text sizes a
 /// footer may not fit; past half the screen's height it scrolls on its own
@@ -17,7 +17,7 @@ class MpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.mp;
     return Scaffold(
-      backgroundColor: c.cream,
+      backgroundColor: c.paper,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: MpSpacing.gutter),
