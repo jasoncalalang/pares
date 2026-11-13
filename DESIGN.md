@@ -22,7 +22,8 @@ Dial: ENERGY 2 / RHYTHM 2 / MOTION 2
   day strip.
 - MOTION 2. Motion only where it carries information or feedback: the
   calorie arc and gauges fill, a selection settles, a press dips, a grocery
-  section opens, screens fade. Nothing plays on page load.
+  section opens, screens fade. Nothing decorative enters on load: the data
+  fills and the one new progress segment play once when their screen opens.
 
 ## Identity
 
@@ -124,7 +125,8 @@ Two faces, strictly divided. Both are variable fonts shipped in the app.
   feel printed, not displayed. Weight 600, tight leading (1.0 to 1.2),
   optical size matched to point size.
 - Plus Jakarta Sans: everything else. Body 14, labels 12 to 13, buttons 15
-  bold.
+  bold. A plain, open sans that stays readable at 11 to 14px and stays
+  quiet, so Fraunces carries the editorial voice alone.
 
 Scale in use: display 30, h1 28, hero number 50, ring number 30, total 34,
 body 14, small 12, kickers 10 to 12.
@@ -136,8 +138,12 @@ magazine department line does. They are the only uppercase text.
 ## Shape and space
 
 - Single column, 22px gutters, one phone width. Pinned action at the bottom.
-- Radii are soft but not round: inputs 13, buttons 15, cards 16 to 18, the
-  hero card 20. Only chips and pills are fully round.
+  On a wider screen (a tablet, a phone on its side) the column stays 430
+  wide at most and sits in the middle; it is never stretched.
+- Radius follows size, soft but not round: hero card and plates 20, cards 16
+  to 18, the primary button and macro cards 15, store tiles 14, inputs and
+  secondary buttons 13, segmented choices and day cells 12, small squares 7
+  to 11. Fully round: chips, pills, bars and the round steppers.
 - Borders do the work: 1px hairlines on cards, 1px `outline` on controls,
   1.5px accent border plus a faint 3px halo on a selected control.
 - Flat. Two shadows exist: a plate photo resting on the table and the
@@ -153,15 +159,23 @@ magazine department line does. They are the only uppercase text.
   small paper stickers for a calorie figure and a peso price. It shows an
   example day; it is not a claim.
 - Stores are monograms in Fraunces on a tinted square. No retailer logos.
-- Icons are Lucide stroke icons at 2px. No emoji, no illustrations, no 3D.
+- Icons are Lucide stroke icons at 2px: one set whose stroke matches the
+  1 to 2px outlines of the controls, used only where a glyph pictures the
+  thing (an arrow for direction, a fish for fish, a bottle for condiments).
+  A glyph that does not picture its content is dropped. No emoji, no
+  illustrations, no 3D.
 
 ## Motion
 
-Press 0.97 scale in 120ms. Selection 250ms. Data reveals (arc, gauges, bars,
-count-up) 850ms after a 350ms delay. Expand and collapse 350ms. Easing
+Press 0.97 scale in 120ms. Selection 250ms; a picked store tile pops to
+1.03 over 400ms. Data reveals (arc, gauges, bars, count-up) 850ms after a
+350ms delay. The progress segment for the step just reached fills in 700ms,
+so the bar says "one step on"; steps already done are drawn full. The day
+highlight slides in 320ms. Expand and collapse 350ms. Easing
 `cubic-bezier(.2, .7, .3, 1)` throughout. Reduced-motion settings collapse
-every duration to zero. No entrance animation, nothing bouncy, no parallax,
-no loops.
+every duration to zero. No decorative entrance, nothing bouncy, no parallax,
+no endless loops: the only repeating motion is the spinner while a plan
+builds or a meal swaps.
 
 ## Voice
 
@@ -170,7 +184,9 @@ no loops.
 - Buttons name what they do: "Compute my target", "Build my plan (2)",
   "See grocery list".
 - Money is pesos with the ₱ sign; measures are metric.
-- Estimates are labelled as estimates, where the number appears.
+- Estimates are labelled as estimates, where the number appears. A week
+  that is a sample, not built to the person's target and budget, says so on
+  This week.
 
 ## One focal point per screen
 
@@ -188,6 +204,8 @@ no loops.
 A filter pass may question these. Each has a reason, so they stay:
 
 - A serif display face: it is the editorial voice and sets the numerals.
+- Lucide icons: one stroke set at the weight of the control outlines, each
+  glyph picturing its content.
 - Uppercase kickers: department labels, small and rare.
 - The dark hero card: the one heavy block, on the screen whose whole point
   is one number.

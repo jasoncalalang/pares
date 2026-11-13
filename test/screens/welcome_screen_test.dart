@@ -67,6 +67,18 @@ void main() {
     expect(find.textContaining('STEP'), findsNothing);
   });
 
+  testWidgets('the headline is the screen\'s heading for screen readers', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await pump(tester);
+    expect(
+      tester.getSemantics(find.text(_headline)),
+      isSemantics(isHeader: true),
+    );
+    handle.dispose();
+  });
+
   testWidgets('the peso sticker sits on the plate whose price it quotes',
       (tester) async {
     await pump(tester);

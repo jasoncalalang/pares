@@ -3,8 +3,16 @@ import 'sample_week.dart';
 
 /// A [Planner] that needs no server: it answers from the local sample bank,
 /// ready at once. Used when the app is built without a server URL.
+///
+/// The week is the same whatever the brief asks for, so every snapshot
+/// carries [sampleNotice]: This week shows it under the person's own target
+/// and budget, which this week was not built to.
 class SamplePlanner implements Planner {
   static const _id = 'sample';
+
+  static const sampleNotice =
+      'This is a sample week. It is not matched to your target, budget or '
+      'stores yet.';
 
   List<DayPlan>? _week;
 
@@ -49,5 +57,10 @@ class SamplePlanner implements Planner {
   }
 
   PlanSnapshot _snapshot([String id = _id]) =>
-      PlanSnapshot(id: _id, status: PlanStatus.ready, week: _known(id));
+      PlanSnapshot(
+        id: _id,
+        status: PlanStatus.ready,
+        week: _known(id),
+        message: sampleNotice,
+      );
 }

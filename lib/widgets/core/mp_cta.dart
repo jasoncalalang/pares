@@ -9,7 +9,7 @@ import 'mp_press.dart';
 /// off the action's name.
 /// The trailing arrow marks a step forward in the flow; pass a leading
 /// [icon] with [iconLeading] for an action that stays on the screen. A null
-/// [onPressed] renders it disabled (hairline fill, faint text) so the screen
+/// [onPressed] renders it disabled (hairline fill, muted text) so the screen
 /// can hold the user until its inputs are complete.
 class MpCta extends StatelessWidget {
   const MpCta({
@@ -34,7 +34,9 @@ class MpCta extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.mp;
     final enabled = onPressed != null;
-    final fg = enabled ? c.surface : c.faint;
+    // muted, not faint: the disabled label is still read, and faint on the
+    // hairline fill is 4.2:1.
+    final fg = enabled ? c.surface : c.muted;
     final glyph = Icon(icon, size: 19, color: fg);
     return MpPress(
       onTap: onPressed,

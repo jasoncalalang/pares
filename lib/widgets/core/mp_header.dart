@@ -4,8 +4,9 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../design_system/design_system.dart';
 import 'mp_press.dart';
 
-/// Thin 4-segment onboarding progress bar. Filled segments animate in from
-/// the left, one after another.
+/// Thin 4-segment onboarding progress bar. Steps already done are drawn
+/// full; only the segment for the step just reached fills from the left,
+/// so the motion says "you moved one step on" and nothing replays.
 class MpProgressSegments extends StatelessWidget {
   const MpProgressSegments({super.key, required this.step, this.of = 4});
 
@@ -27,7 +28,11 @@ class MpProgressSegments extends StatelessWidget {
                 child: Container(
                   height: MpSize.segment,
                   color: c.track,
-                  child: i < step ? _SegmentFill(index: i) : null,
+                  child: i < step - 1
+                      ? SizedBox.expand(child: ColoredBox(color: c.annatto))
+                      : i == step - 1
+                          ? const _SegmentFill()
+                          : null,
                 ),
               ),
             ),
@@ -39,17 +44,12 @@ class MpProgressSegments extends StatelessWidget {
 }
 
 class _SegmentFill extends StatelessWidget {
-  const _SegmentFill({required this.index});
-
-  final int index;
+  const _SegmentFill();
 
   @override
   Widget build(BuildContext context) {
     final fill = MpMotion.of(context, MpMotion.segment);
-    final delay = MpMotion.of(
-      context,
-      Duration(milliseconds: 150 + 140 * index),
-    );
+    final delay = MpMotion.of(context, const Duration(milliseconds: 150));
     final total = fill + delay;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -226,7 +226,10 @@ class MpTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: MpTypography.h1().copyWith(color: c.ink)),
+        Semantics(
+          header: true,
+          child: Text(title, style: MpTypography.h1().copyWith(color: c.ink)),
+        ),
         if (subtitle != null) ...[
           const SizedBox(height: 8),
           Text(subtitle!, style: MpTypography.body().copyWith(color: c.muted)),

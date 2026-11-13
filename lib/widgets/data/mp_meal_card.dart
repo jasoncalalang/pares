@@ -33,8 +33,11 @@ class MpMealCard extends StatefulWidget {
   final bool swapping;
 
   static MpAccent accentFor(MealSlot slot) => switch (slot) {
-    MealSlot.breakfast => MpAccent.annatto,
-    MealSlot.lunch || MealSlot.dinner => MpAccent.green,
+    // Meals are annatto (DESIGN.md); green is for local stores, budget and
+    // protein, so a dinner with no photo does not borrow it.
+    MealSlot.breakfast ||
+    MealSlot.lunch ||
+    MealSlot.dinner => MpAccent.annatto,
     MealSlot.snack => MpAccent.amber,
   };
 
@@ -160,6 +163,9 @@ class _MpMealCardState extends State<MpMealCard> {
                       )
                     : Image.asset(
                         'assets/images/meals/${meal.image}.jpg',
+                        // Decorative, like the initial: the dish name is
+                        // read in full beside it.
+                        excludeFromSemantics: true,
                         fit: BoxFit.cover,
                         width: MpSize.thumb,
                         height: MpSize.thumb,
@@ -217,10 +223,15 @@ class _MpMealCardState extends State<MpMealCard> {
             child: Container(
               width: MpSize.swap,
               height: MpSize.swap,
+              // Disabled (another meal is swapping) takes the disabled CTA's
+              // look, hairline fill and no control outline, so it is not
+              // told apart by the announcement alone.
               decoration: BoxDecoration(
-                color: c.paper,
+                color: widget.onSwap == null ? c.hairline : c.paper,
                 borderRadius: BorderRadius.circular(MpRadius.swap),
-                border: Border.all(color: c.outline),
+                border: Border.all(
+                  color: widget.onSwap == null ? c.hairline : c.outline,
+                ),
               ),
               alignment: Alignment.center,
               child: widget.swapping

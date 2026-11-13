@@ -32,9 +32,12 @@ class WelcomeScreen extends StatelessWidget {
         const SizedBox(height: 18),
         _Collage(plates: plates, dayKcal: exampleDay.kcal),
         const SizedBox(height: 20),
-        Text(
-          'Filipino meals that fit your calorie goal and your weekly budget.',
-          style: MpTypography.display().copyWith(color: c.ink),
+        Semantics(
+          header: true,
+          child: Text(
+            'Filipino meals that fit your calorie goal and your weekly budget.',
+            style: MpTypography.display().copyWith(color: c.ink),
+          ),
         ),
         const SizedBox(height: 10),
         Text(

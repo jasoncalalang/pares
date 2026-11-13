@@ -147,6 +147,9 @@ class _GroceryRow extends StatelessWidget {
   final bool last;
   final VoidCallback onTap;
 
+  /// Each glyph pictures its kind, so a row can be picked out by kind
+  /// before its name is read: a bottle for condiments, a sprout for dried
+  /// leaves and peppercorns, a pack for packaged pantry goods.
   static (IconData, MpAccent) _glyph(GroceryKind kind) => switch (kind) {
         GroceryKind.meat => (LucideIcons.beef, MpAccent.annatto),
         GroceryKind.poultry => (LucideIcons.drumstick, MpAccent.annatto),
@@ -158,9 +161,9 @@ class _GroceryRow extends StatelessWidget {
         GroceryKind.egg => (LucideIcons.egg, MpAccent.amber),
         GroceryKind.legume => (LucideIcons.bean, MpAccent.amber),
         GroceryKind.oil => (LucideIcons.droplet, MpAccent.amber),
-        GroceryKind.condiment => (LucideIcons.flaskConical, MpAccent.annatto),
-        GroceryKind.spice => (LucideIcons.utensils, MpAccent.amber),
-        GroceryKind.pantry => (LucideIcons.shoppingBag, MpAccent.amber),
+        GroceryKind.condiment => (LucideIcons.milk, MpAccent.annatto),
+        GroceryKind.spice => (LucideIcons.sprout, MpAccent.amber),
+        GroceryKind.pantry => (LucideIcons.package, MpAccent.amber),
       };
 
   @override

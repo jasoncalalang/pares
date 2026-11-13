@@ -14,7 +14,12 @@ void main() {
   test('start answers ready at once with the sample week', () async {
     final snap = await SamplePlanner().start(_brief());
     expect(snap.status, PlanStatus.ready);
-    expect(snap.message, isNull);
+    // The week ignores the brief, and says so where the person can see it.
+    expect(
+      snap.message,
+      'This is a sample week. It is not matched to your target, budget or '
+      'stores yet.',
+    );
     expect(snap.week, hasLength(7));
     expect(
       snap.week!.first.meals.first.name,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/screens/grocery_list_screen.dart';
@@ -44,6 +45,28 @@ void main() {
     expect(find.text('Beef tapa cut'), findsOneWidget);
     expect(find.text('400 g'), findsOneWidget);
     expect(find.text('₱180'), findsOneWidget);
+  });
+
+  testWidgets('each row glyph shows its kind: a bottle for condiments, a '
+      'sprout for spices, a pack for pantry goods', (tester) async {
+    await pump(tester);
+    expect(find.byIcon(LucideIcons.milk), findsWidgets);
+    // A lab flask, cutlery and a shopping bag say nothing about the item.
+    expect(find.byIcon(LucideIcons.flaskConical), findsNothing);
+    expect(find.byIcon(LucideIcons.utensils), findsNothing);
+    expect(find.byIcon(LucideIcons.shoppingBag), findsNothing);
+  });
+
+  testWidgets('the screen title is a heading for screen readers', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await pump(tester);
+    expect(
+      tester.getSemantics(find.text('Grocery list')),
+      isSemantics(isHeader: true, label: 'Grocery list'),
+    );
+    handle.dispose();
   });
 
   testWidgets('says what the amounts and prices are and keeps the subtitle short',

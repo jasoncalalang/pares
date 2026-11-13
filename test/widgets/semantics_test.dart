@@ -10,6 +10,24 @@ import '../helpers.dart';
 
 /// What a screen reader is told about each control.
 void main() {
+  testWidgets('a screen title is a heading, so headings navigation finds it',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(host(const MpTitle(
+      title: 'Where do you shop?',
+      subtitle: 'Pick the stores you actually buy from.',
+    )));
+    expect(
+      tester.getSemantics(find.text('Where do you shop?')),
+      isSemantics(isHeader: true, label: 'Where do you shop?'),
+    );
+    expect(
+      tester.getSemantics(find.text('Pick the stores you actually buy from.')),
+      isSemantics(isHeader: false),
+    );
+    handle.dispose();
+  });
+
   testWidgets('the step header back link says Back and the step is heard once',
       (tester) async {
     final handle = tester.ensureSemantics();

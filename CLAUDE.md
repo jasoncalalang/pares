@@ -198,8 +198,21 @@ The design is filtered with the antislop rules; keep it that way:
 - `HttpPlanner` maps only `Exception`s to a network error; an `Error` is a
   bug and propagates.
 - Uppercase kickers, Lucide glyphs, the selection halo and the two shadows
-  are deliberate and written up in the design-system doc; do not add more
-  decoration without writing the reason down.
+  are deliberate and written up in `DESIGN.md` ("Kept on purpose"); do not
+  add more decoration without writing the reason down.
+- Delivery Gate fixes (2026-11-13), keep them: `MpPage` puts the gutters
+  inside its scroll areas (a ring, halo or badge at the gutter is not
+  clipped) and caps the column at `MpSize.pageMax`; the number fields wear
+  the focus ring and take a tap anywhere in their box; a disabled CTA label
+  is `muted` (4.5:1 on its fill); a disabled swap button takes the hairline
+  fill; dish photos are excluded from semantics; screen titles are
+  semantic headings; only the progress segment for the step just reached
+  animates; a way back carries a left arrow; grocery glyphs picture their
+  kind; lunch and dinner are annatto like breakfast.
+- Sample mode says so: `SamplePlanner` ignores the brief, so every snapshot
+  carries `SamplePlanner.sampleNotice` and This week shows it under the
+  pills. Remove it only when the offline planner honours the target and
+  budget.
 
 ## Run against the server
 

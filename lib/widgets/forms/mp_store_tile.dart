@@ -50,11 +50,15 @@ class MpStoreTile extends StatelessWidget {
     double gap = MpSpacing.tileGap,
   }) {
     final scaler = MediaQuery.textScalerOf(context);
+    // What the Text really draws: bold (the picked weight, the wider of the
+    // two) on top of the inherited style, whose letter spacing counts.
+    final drawn = DefaultTextStyle.of(context).style.merge(
+      MpTypography.bodyBold(),
+    );
     var widest = 0.0;
     for (final word in names.expand((n) => n.split(' '))) {
-      // Bold, the selected weight, is the wider of the two.
       final painter = TextPainter(
-        text: TextSpan(text: word, style: MpTypography.bodyBold()),
+        text: TextSpan(text: word, style: drawn),
         textDirection: TextDirection.ltr,
         textScaler: scaler,
       )..layout();

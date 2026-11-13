@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mealpal_ph/data/sample_planner.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
@@ -444,8 +445,44 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Try again'), findsNothing);
     expect(find.textContaining('budgetPhp'), findsNothing);
+    // A way back points back: the forward arrow is for a step forward.
+    final goBack = find.widgetWithText(MpCta, 'Go back');
+    expect(
+      find.descendant(of: goBack, matching: find.byIcon(LucideIcons.arrowLeft)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: goBack, matching: find.byIcon(LucideIcons.arrowRight)),
+      findsNothing,
+    );
     await tester.tap(find.text('Go back').last);
     expect(backs, 1);
+  });
+
+  testWidgets('the sample week says it is a sample, under the numbers it '
+      'does not match', (tester) async {
+    await show(tester, WeekPlanController(SamplePlanner()));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'This is a sample week. It is not matched to your target, budget or '
+        'stores yet.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the screen title is a heading for screen readers', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await show(tester, WeekPlanController(SamplePlanner()));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSemantics(find.text('This week')),
+      isSemantics(isHeader: true, label: 'This week'),
+    );
+    handle.dispose();
   });
 
   testWidgets('the building and failed cards are live regions, read once', (
