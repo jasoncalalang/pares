@@ -45,7 +45,25 @@ class _MpBigValueFieldState extends State<MpBigValueField> {
 
   late final FocusNode _focus = FocusNode()..addListener(_focusChanged);
 
-  void _focusChanged() => setState(() {});
+  void _focusChanged() {
+    setState(() {});
+    if (_focus.hasFocus) _revealRing();
+  }
+
+  /// Scrolls the box and its ring into view, not just the line of digits.
+  void _revealRing() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final box = _boxKey.currentContext?.findRenderObject();
+      if (box is! RenderBox || !box.hasSize) return;
+      box.showOnScreen(
+        rect: (Offset.zero & box.size).inflate(
+          MpStroke.focus + MpStroke.focusGap,
+        ),
+      );
+    });
+  }
+
+  final _boxKey = GlobalKey();
 
   @override
   void dispose() {
@@ -74,63 +92,68 @@ class _MpBigValueFieldState extends State<MpBigValueField> {
         const SizedBox(height: 7),
         // Not an MpPress: the text field is the control and names itself.
         // This only widens its hit area from the line of digits to the 64px
-        // box a person sees, unit included.
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          excludeFromSemantics: true,
-          onTap: _focus.requestFocus,
-          child: Container(
-            height: MpSize.bigInput,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: c.surface,
-              borderRadius: BorderRadius.circular(MpRadius.input),
-              border: Border.all(color: c.outline),
-            ),
-            foregroundDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(MpRadius.input),
-              border: Border.all(
-                color: _focus.hasFocus ? c.annatto : Colors.transparent,
-                width: MpStroke.focus,
-                strokeAlign: BorderSide.strokeAlignOutside +
-                    2 * MpStroke.focusGap / MpStroke.focus,
+        // box a person sees, unit included. The tap region makes the padding
+        // and unit count as inside the field, so a mouse click there on a
+        // field that already has focus does not drop and retake it.
+        TextFieldTapRegion(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: true,
+            onTap: _focus.requestFocus,
+            child: Container(
+              key: _boxKey,
+              height: MpSize.bigInput,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: c.surface,
+                borderRadius: BorderRadius.circular(MpRadius.input),
+                border: Border.all(color: c.outline),
               ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Semantics(
-                    label: '${widget.label}, in ${widget.spokenUnit ?? widget.unit}',
-                    child: TextField(
-                      key: widget.fieldKey,
-                      controller: _controller,
-                      focusNode: _focus,
-                      onChanged: _changed,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(3),
-                      ],
-                      style: MpTypography.bigValue().copyWith(color: c.ink),
-                      cursorColor: c.annatto,
-                      decoration: const InputDecoration(
-                        isCollapsed: true,
-                        border: InputBorder.none,
+              foregroundDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(MpRadius.input),
+                border: Border.all(
+                  color: _focus.hasFocus ? c.annatto : Colors.transparent,
+                  width: MpStroke.focus,
+                  strokeAlign: BorderSide.strokeAlignOutside +
+                      2 * MpStroke.focusGap / MpStroke.focus,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      label: '${widget.label}, in ${widget.spokenUnit ?? widget.unit}',
+                      child: TextField(
+                        key: widget.fieldKey,
+                        controller: _controller,
+                        focusNode: _focus,
+                        onChanged: _changed,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(3),
+                        ],
+                        style: MpTypography.bigValue().copyWith(color: c.ink),
+                        cursorColor: c.annatto,
+                        decoration: const InputDecoration(
+                          isCollapsed: true,
+                          border: InputBorder.none,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                ExcludeSemantics(
-                  child: Text(
-                    widget.unit,
-                    style: MpTypography.label().copyWith(
-                      color: c.faint,
-                      fontWeight: FontWeight.w400,
+                  ExcludeSemantics(
+                    child: Text(
+                      widget.unit,
+                      style: MpTypography.label().copyWith(
+                        color: c.faint,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

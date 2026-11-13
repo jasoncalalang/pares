@@ -110,6 +110,8 @@ Future<void> showSignInSheet(BuildContext context) {
     backgroundColor: c.surface,
     barrierColor: c.ink.withValues(alpha: 0.34),
     barrierLabel: 'Close sign-in',
+    // One phone wide, like the page behind it, on a tablet too.
+    constraints: const BoxConstraints(maxWidth: MpSize.pageMax),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(MpRadius.hero)),
     ),

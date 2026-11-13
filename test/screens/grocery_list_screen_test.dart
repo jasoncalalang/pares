@@ -51,6 +51,8 @@ void main() {
       'sprout for spices, a pack for pantry goods', (tester) async {
     await pump(tester);
     expect(find.byIcon(LucideIcons.milk), findsWidgets);
+    // Onion, garlic and ginger are not carrots: aromatics take the leaf.
+    expect(find.byIcon(LucideIcons.carrot), findsNothing);
     // A lab flask, cutlery and a shopping bag say nothing about the item.
     expect(find.byIcon(LucideIcons.flaskConical), findsNothing);
     expect(find.byIcon(LucideIcons.utensils), findsNothing);

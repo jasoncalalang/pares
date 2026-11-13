@@ -87,6 +87,30 @@ void main() {
     expect(tester.widget<Image>(find.byType(Image)).excludeFromSemantics, isTrue);
   });
 
+  for (final (width, lines) in [(346.0, 1), (316.0, 2)]) {
+    testWidgets('servings and numbers share a line when they fit and take '
+        'one each when they do not: ${width}dp', (tester) async {
+      final part = sampleWeek().first.meals.first;
+      expect(part.servings, 0.75);
+      final numbers = '${part.kcal} kcal · ₱${part.pricePhp}';
+      await tester.pumpWidget(host(Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: width,
+          child: MpMealCard(meal: part, onSwap: () {}),
+        ),
+      )));
+      await tester.pump();
+      if (lines == 1) {
+        expect(find.text('0.75 servings · $numbers'), findsOneWidget);
+      } else {
+        // No dot left hanging at a line end, no number parted from its unit.
+        expect(find.text('0.75 servings'), findsOneWidget);
+        expect(find.text(numbers), findsOneWidget);
+      }
+    });
+  }
+
   test('meals are annatto, the snack is amber', () {
     expect(MpMealCard.accentFor(MealSlot.breakfast), MpAccent.annatto);
     expect(MpMealCard.accentFor(MealSlot.lunch), MpAccent.annatto);

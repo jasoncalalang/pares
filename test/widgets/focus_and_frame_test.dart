@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
@@ -76,6 +78,82 @@ void main() {
       await tester.tap(find.text('kg'));
       await tester.pump();
       expect(focused(tester), isTrue, reason: 'the unit');
+    });
+  });
+
+  group('MpBigValueField with a mouse', () {
+    testWidgets('a click on the unit of a field that already has focus '
+        'keeps the focus and the caret where they were', (tester) async {
+      await phone(tester);
+      await tester.pumpWidget(host(Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200,
+          child: MpBigValueField(
+            label: 'Weight',
+            value: 74,
+            unit: 'kg',
+            fieldKey: const ValueKey('field-weight'),
+            onChanged: (_) {},
+          ),
+        ),
+      )));
+      final field = find.byKey(const ValueKey('field-weight'));
+      await tester.tap(field, kind: PointerDeviceKind.mouse);
+      await tester.pump();
+      final text = tester.widget<TextField>(field);
+      text.controller!.selection = const TextSelection.collapsed(offset: 2);
+      await tester.pump();
+
+      await tester.tap(find.text('kg'), kind: PointerDeviceKind.mouse);
+      await tester.pump();
+      expect(text.focusNode!.hasFocus, isTrue);
+      expect(
+        text.controller!.selection,
+        const TextSelection.collapsed(offset: 2),
+      );
+    });
+  });
+
+  group('keyboard focus near a scroll edge', () {
+    testWidgets('the whole ring is scrolled into view, not just the control',
+        (tester) async {
+      await phone(tester);
+      await tester.pumpWidget(host(MpPage(
+        content: [
+          for (var i = 0; i < 24; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 9),
+              child: MpPress(
+                key: ValueKey('row-$i'),
+                onTap: () {},
+                child: SizedBox(height: 51, child: Text('row $i')),
+              ),
+            ),
+        ],
+        footer: MpCta(label: 'Go', onPressed: () {}),
+      )));
+      final view = tester.getRect(find.byType(SingleChildScrollView).first);
+      const ring = MpStroke.focus + MpStroke.focusGap;
+      for (var i = 0; i < 24; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+        final row = tester.getRect(find.byKey(ValueKey('row-$i')));
+        expect(row.top - ring, greaterThanOrEqualTo(view.top), reason: 'row $i top');
+        expect(row.bottom + ring, lessThanOrEqualTo(view.bottom),
+            reason: 'row $i bottom');
+      }
+      // And back up: Shift+Tab reveals the ring above the control.
+      for (var i = 22; i >= 0; i--) {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+        await tester.pumpAndSettle();
+        final row = tester.getRect(find.byKey(ValueKey('row-$i')));
+        expect(row.top - ring, greaterThanOrEqualTo(view.top), reason: 'row $i top');
+        expect(row.bottom + ring, lessThanOrEqualTo(view.bottom),
+            reason: 'row $i bottom');
+      }
     });
   });
 

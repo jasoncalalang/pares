@@ -75,7 +75,9 @@ Consequences that are intended:
 
 ## Palette
 
-Every colour is a token on `MpColors`. Names below are the token names.
+Every colour the app chooses is a token on `MpColors`. Names below are the
+token names. The one exception is the Google and Apple marks on the sign-in
+buttons, which are the providers' own shapes and colours.
 
 | Token | Hex | Role |
 | --- | --- | --- |
@@ -102,13 +104,18 @@ Every colour is a token on `MpColors`. Names below are the token names.
 
 How the colours are used:
 
-- Annatto is the single accent. One filled annatto button per screen, the
-  pinned action; every other control, the budget steppers included, is
-  outlined. The rest of the annatto on a screen is small (an eyebrow, a
-  monogram, a slot label).
-- Green and amber are categories, not decoration: green means local stores,
-  budget and protein; amber means snack and fat. A colour never appears only
-  because a section needed variety.
+- Annatto is the single accent. At most one filled annatto button per
+  screen, the pinned action; every other control, the budget steppers
+  included, is outlined (the Apple sign-in button is ink, as its mark
+  requires). The rest of the annatto on a screen is small: an eyebrow, a
+  monogram, a slot label, a picked choice, a deficit.
+- Green and amber are categories, not decoration. Green means local stores,
+  the budget and anything within it (the under-budget total, a ticked
+  grocery row), protein, produce, and a surplus over maintenance. Amber
+  means snack, fat and dry goods. On the grocery list the small kind tile
+  sorts rows by family: annatto for meat, fish and condiments, green for
+  produce, amber for dry goods. A colour never appears only because a
+  section needed variety.
 - The neutrals are warm (brown-black ink, tan hairlines) on purpose. No cool
   greys.
 - No gradients, glows, glass, neon, pastel blocks, pink or purple.
@@ -142,12 +149,13 @@ magazine department line does. They are the only uppercase text.
 - Single column, 22px gutters, one phone width. Pinned action at the bottom.
   On a wider screen (a tablet, a phone on its side) the column stays 430
   wide at most and sits in the middle; it is never stretched.
-- Radius follows size, soft but not round: hero card and plates 20, cards 16
-  to 18, the primary button and macro cards 15, store tiles 14, inputs and
-  secondary buttons 13, segmented choices and day cells 12, small squares 7
-  to 11. Fully round: chips, pills, bars and the round steppers.
-- Borders do the work: 1px hairlines on cards, 1px `outline` on controls,
-  1.5px accent border plus a faint 3px halo on a selected control.
+- Radius follows size, soft but not round: hero card, plates and the
+  sign-in sheet 20, cards 16 to 18, the primary button and macro cards 15,
+  store tiles 14, inputs, the gender choice, meal photos and secondary
+  buttons 13, the goal choice and day cells 12, small squares 7 to 11.
+  Fully round: chips, pills, bars and the round steppers.
+- Borders do the work: 1px hairlines on cards, a 1 to 1.5px `outline` on
+  controls, 1.5px accent border plus a faint 3px halo on a selected control.
 - Flat. Two shadows exist: a plate photo resting on the table and the
   sticker on it (Welcome). Nothing else lifts, the grocery total included.
 - Tap targets are 44px or more. One recorded exception: on a 320dp-wide
@@ -158,6 +166,8 @@ magazine department line does. They are the only uppercase text.
 
 - Photographs of the actual dishes, shot from above or at a low angle on
   wood and woven surfaces, in natural light. The plate fills the frame.
+  Four of the thirty dishes have a photograph so far; a dish without one
+  shows its initial in Fraunces on its slot tint, never a stand-in picture.
 - The Welcome collage is the motif: four plates tilted on a table, with
   small paper stickers for a calorie figure and a peso price. It shows an
   example day; it is not a claim.
@@ -171,11 +181,13 @@ magazine department line does. They are the only uppercase text.
 ## Motion
 
 Press 0.97 scale in 120ms. Selection 250ms; a picked store tile pops to
-1.03 over 400ms. Data reveals (arc, gauges, bars, count-up) 850ms after a
-350ms delay. The progress segment for the step just reached fills in 700ms,
+1.03 over 400ms. Data reveals (arc, gauges, bars, count-up) take 850ms
+after a short delay: 250 to 350ms, the three gauges one after another up to
+310ms later. The progress segment for the step just reached fills in 700ms,
 so the bar says "one step on"; steps already done are drawn full. The day
-highlight slides in 320ms. Expand and collapse 350ms. Easing
-`cubic-bezier(.2, .7, .3, 1)` throughout. Reduced-motion settings collapse
+highlight slides and the swap glyph turns in 320ms. Expand and collapse
+350ms. Easing `cubic-bezier(.2, .7, .3, 1)` on every move and fill; the
+press dip and colour fades are linear. Reduced-motion settings collapse
 every duration to zero. No decorative entrance, nothing bouncy, no parallax,
 no endless loops: the only repeating motion is the spinner while a plan
 builds or a meal swaps.

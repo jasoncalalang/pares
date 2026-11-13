@@ -45,13 +45,59 @@ class MpMealCard extends StatefulWidget {
   State<MpMealCard> createState() => _MpMealCardState();
 }
 
-/// "2 servings · " when the numbers cover other than one portion.
-String _servingsPrefix(double servings) {
-  if (servings == 1) return '';
+/// "2 servings" when the numbers cover other than one portion, else null.
+String? _servingsLabel(double servings) {
+  if (servings == 1) return null;
   final n = servings == servings.roundToDouble()
       ? servings.round().toString()
       : servings.toString();
-  return '$n servings · ';
+  return '$n servings';
+}
+
+/// "2 servings · " in front of the numbers, or nothing for one portion.
+String _servingsPrefix(double servings) {
+  final label = _servingsLabel(servings);
+  return label == null ? '' : '$label · ';
+}
+
+/// The line under the dish name: "0.75 servings · 598 kcal · ₱63". When
+/// that does not fit on one line, the servings take a line of their own, so
+/// no separator is left hanging and no number is parted from its unit.
+class _Detail extends StatelessWidget {
+  const _Detail({required this.servings, required this.numbers, required this.style});
+
+  final String? servings;
+  final String numbers;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final servings = this.servings;
+    if (servings == null) return Text(numbers, style: style);
+    final whole = '$servings · $numbers';
+    final drawn = DefaultTextStyle.of(context).style.merge(style);
+    final scaler = MediaQuery.textScalerOf(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final painter = TextPainter(
+          text: TextSpan(text: whole, style: drawn),
+          textDirection: TextDirection.ltr,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        final fits = painter.width <= box.maxWidth;
+        painter.dispose();
+        if (fits) return Text(whole, style: style);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(servings, style: style),
+            Text(numbers, style: style),
+          ],
+        );
+      },
+    );
+  }
 }
 
 /// What a screen reader says for the card: "Breakfast, Tapsilog, 797 kcal,
@@ -195,16 +241,23 @@ class _MpMealCardState extends State<MpMealCard> {
                     const SizedBox(height: 2),
                     _DishName(name: meal.name, color: c.ink),
                     const SizedBox(height: 3),
-                    Text(
-                      widget.swapping
-                          ? 'Swapping this meal'
-                          : '${_servingsPrefix(meal.servings)}${meal.kcal} '
-                                'kcal · '
-                                '${formatPeso(meal.pricePhp, decimals: 0)}',
-                      style: MpTypography.smallStrong().copyWith(
-                        color: widget.swapping ? c.annattoDeep : c.faint,
+                    if (widget.swapping)
+                      Text(
+                        'Swapping this meal',
+                        style: MpTypography.smallStrong().copyWith(
+                          color: c.annattoDeep,
+                        ),
+                      )
+                    else
+                      _Detail(
+                        servings: _servingsLabel(meal.servings),
+                        numbers:
+                            '${meal.kcal} kcal · '
+                            '${formatPeso(meal.pricePhp, decimals: 0)}',
+                        style: MpTypography.smallStrong().copyWith(
+                          color: c.faint,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

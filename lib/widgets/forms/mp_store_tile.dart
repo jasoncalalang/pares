@@ -153,8 +153,10 @@ class MpStoreTile extends StatelessWidget {
   }
 }
 
-/// Round 44px stepper button (minus / plus). [filled] draws it solid annatto.
-/// A null [onTap] disables it (at a limit) and draws its glyph faint.
+/// Round 44px stepper button (minus / plus), outlined: the pinned CTA is the
+/// one filled annatto on a screen. A null [onTap] disables it (at a limit)
+/// and gives it the disabled CTA's look, hairline fill and no outline, so
+/// it is not told apart by the glyph's colour alone.
 class MpStepperButton extends StatelessWidget {
   const MpStepperButton({
     super.key,
@@ -178,14 +180,18 @@ class MpStepperButton extends StatelessWidget {
         width: MpSize.stepper,
         height: MpSize.stepper,
         decoration: BoxDecoration(
-          color: c.surface,
+          color: onTap == null ? c.hairline : c.surface,
           shape: BoxShape.circle,
-          border: Border.all(color: c.outline, width: MpStroke.selected),
+          border: Border.all(
+            color: onTap == null ? c.hairline : c.outline,
+            width: MpStroke.selected,
+          ),
         ),
         child: Icon(
           icon,
           size: 18,
-          color: onTap == null ? c.faint : c.ink,
+          // muted on the hairline fill is 5:1; faint would be 4.2.
+          color: onTap == null ? c.muted : c.ink,
         ),
       ),
     );

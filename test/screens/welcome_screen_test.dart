@@ -79,6 +79,16 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('on a wide screen the sign-in sheet is one phone wide, like '
+      'the page behind it', (tester) async {
+    await pump(tester, size: const Size(768, 1024));
+    await tester.tap(find.bySemanticsLabel('Continue with Google'));
+    await tester.pumpAndSettle();
+    final close = tester.getRect(find.widgetWithText(MpSecondaryButton, 'Close'));
+    expect(close.width, lessThanOrEqualTo(MpSize.pageMax));
+    expect(close.center.dx, 768 / 2);
+  });
+
   testWidgets('the peso sticker sits on the plate whose price it quotes',
       (tester) async {
     await pump(tester);

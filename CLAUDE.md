@@ -215,9 +215,17 @@ The design is filtered with the antislop rules; keep it that way:
   card carries a shadow, the grocery total included; at 320dp the day
   buttons stay 39px wide so the whole week is in view (the one tap-size
   exception, 44px from 352dp up).
+- Second pass of the same gate, keep these too: keyboard focus scrolls the
+  ring into view, not just the control (`MpPress._revealRing`, and the
+  number fields); the number field box is a `TextFieldTapRegion`; the
+  sign-in sheet is capped at `MpSize.pageMax`; a disabled stepper takes the
+  hairline fill; the meal card's servings take their own line when the
+  detail line does not fit (360dp); aromatics take the leaf glyph; every
+  choice on Tell us about you picks in annatto; ingredient names carry no
+  hyphenated compounds either ("Chicken (bone in)").
 - Sample mode says so: `SamplePlanner` ignores the brief, so every snapshot
-  carries `SamplePlanner.sampleNotice` and This week shows it under the
-  pills. Remove it only when the offline planner honours the target and
+  carries `SamplePlanner.sampleNotice` and This week shows it under the day
+  line and the estimates line, above the meal cards. Remove it only when the offline planner honours the target and
   budget.
 
 ## Run against the server
