@@ -63,13 +63,16 @@ MealPal PH.
 
 ## Design system (lib/design_system/)
 
-Mirrors the approved Superdesign mockups. **Never hard-code a colour, size,
+Direction lives in `DESIGN.md` (identity, palette, type, motion, dials, and
+the reasons); read it before any UI work, then apply the antislop rules as
+the filter. The tokens mirror the approved Superdesign mockups, on the white
+paper ground the owner chose on 2026-11-13. **Never hard-code a colour, size,
 radius, duration or font family**: read:
 
-- `MpColors` (ThemeExtension, `context.mp`): cream ground `#FCF8EF`, ink,
+- `MpColors` (ThemeExtension, `context.mp`): white `paper` ground, ink,
   annatto primary, green secondary, amber, tints, hero surface. `hairline`
   is for decorative card borders only; every interactive control draws its
-  boundary with `outline` (3:1 on cream and white). `faint` and `amber`
+  boundary with `outline` (3:1 on the white page). `faint` and `amber`
   were darkened so 11-12px labels clear 4.5:1.
   `MpAccent` (annatto | green | amber) picks a family: chains/CTAs/meals =
   annatto, local stores/budget/protein = green, snack/fat = amber.
@@ -82,7 +85,8 @@ radius, duration or font family**: read:
   animation (dial MOTION 2: motion only where it carries information or
   feedback). Always read durations through `MpMotion.of(context, …)` so
   `disableAnimations` collapses them.
-- `MpTheme.light()`: the only theme (the brand surface is cream paper).
+- `MpTheme.light()`: the only theme (the brand surface is white paper).
+  Do not tint the ground: cream was dropped as a generic look (DESIGN.md).
 
 ## Brand rules
 

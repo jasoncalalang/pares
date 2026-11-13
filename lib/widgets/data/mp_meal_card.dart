@@ -218,7 +218,7 @@ class _MpMealCardState extends State<MpMealCard> {
               width: MpSize.swap,
               height: MpSize.swap,
               decoration: BoxDecoration(
-                color: c.cream,
+                color: c.paper,
                 borderRadius: BorderRadius.circular(MpRadius.swap),
                 border: Border.all(color: c.outline),
               ),
@@ -323,7 +323,7 @@ class MpDayStrip extends StatelessWidget {
                                   ),
                                   style: MpTypography.dayName().copyWith(
                                     // faint, not dimmed muted: 10px names
-                                    // need 4.5:1 on cream.
+                                    // need 4.5:1 on the page.
                                     color: i == selected
                                         ? c.heroMuted
                                         : c.faint,

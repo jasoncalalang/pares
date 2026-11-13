@@ -5,7 +5,7 @@ import 'mp_spacing.dart';
 import 'mp_typography.dart';
 
 /// Builds the Material theme for MealPal PH. Light only: the brand is a
-/// warm cream page, not a dark tracker.
+/// white paper page, not a dark tracker.
 abstract final class MpTheme {
   static ThemeData light() {
     const c = MpColors.light;
@@ -37,8 +37,8 @@ abstract final class MpTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: scheme,
-      scaffoldBackgroundColor: c.cream,
-      canvasColor: c.cream,
+      scaffoldBackgroundColor: c.paper,
+      canvasColor: c.paper,
       fontFamily: MpTypography.uiFamily,
       textTheme: textTheme,
       splashFactory: NoSplash.splashFactory,

@@ -2,7 +2,7 @@ import 'package:flutter/painting.dart';
 
 import 'mp_colors.dart';
 
-/// Shadows. The page is flat cream paper; only the welcome collage lifts off
+/// Shadows. The page is flat white paper; only the welcome collage lifts off
 /// it, because the plates on the table are that screen's motif. The grocery
 /// total card's hairline shadow lives on `MpCard(shadow: true)`.
 abstract final class MpElevation {

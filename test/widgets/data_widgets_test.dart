@@ -89,7 +89,7 @@ void main() {
           greaterThanOrEqualTo(4.5));
     });
 
-    testWidgets('unselected day names clear 4.5:1 on cream', (tester) async {
+    testWidgets('unselected day names clear 4.5:1 on the page', (tester) async {
       await phone(tester);
       await tester.pumpWidget(host(MpDayStrip(
         days: Weekday.values,
@@ -99,7 +99,7 @@ void main() {
       )));
       await tester.pumpAndSettle();
       for (final d in ['MON', 'TUE', 'WED', 'FRI', 'SAT', 'SUN']) {
-        expect(contrast(paintedColor(tester, find.text(d)), MpColors.light.cream),
+        expect(contrast(paintedColor(tester, find.text(d)), MpColors.light.paper),
             greaterThanOrEqualTo(4.5),
             reason: d);
       }

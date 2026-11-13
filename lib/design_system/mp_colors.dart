@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 /// Colour tokens for MealPal PH, pinned to the Superdesign/Claude Design
-/// mockups. Warm cream ground, ink text, annatto (clay orange) primary,
-/// leafy green secondary, amber for snacks/fat. No pink, purple, neon or
-/// gradient washes.
+/// mockups, on white paper (see DESIGN.md). Ink text, annatto (clay orange)
+/// primary, leafy green secondary, amber for snacks/fat. No pink, purple,
+/// neon or gradient washes.
 @immutable
 class MpColors extends ThemeExtension<MpColors> {
   const MpColors({
-    required this.cream,
+    required this.paper,
     required this.ink,
     required this.muted,
     required this.faint,
@@ -34,8 +34,9 @@ class MpColors extends ThemeExtension<MpColors> {
     required this.heroTrack,
   });
 
-  /// Page background.
-  final Color cream;
+  /// Page background: white paper. The warmth is in the photos, the ink
+  /// and annatto, never in a tinted ground.
+  final Color paper;
 
   /// Primary text.
   final Color ink;
@@ -44,7 +45,7 @@ class MpColors extends ThemeExtension<MpColors> {
   final Color muted;
 
   /// Faint labels, helper copy, quantities. Still body-sized text, so it
-  /// clears 4.5:1 on cream (5.1) and white (5.4).
+  /// clears 4.5:1 on the white page (5.4).
   final Color faint;
 
   /// Primary accent: CTAs, step eyebrow, supermarket chains.
@@ -73,7 +74,7 @@ class MpColors extends ThemeExtension<MpColors> {
   final Color hairline;
 
   /// 1px boundary on interactive controls (inputs, toggles, tiles,
-  /// steppers, checkboxes): 3.2:1 on cream and 3.4:1 on white, so the
+  /// steppers, checkboxes): 3.4:1 on the white page, so the
   /// control edge itself passes WCAG 1.4.11.
   final Color outline;
 
@@ -91,7 +92,7 @@ class MpColors extends ThemeExtension<MpColors> {
   final Color heroTrack;
 
   static const MpColors light = MpColors(
-    cream: Color(0xFFFCF8EF),
+    paper: Color(0xFFFFFFFF),
     ink: Color(0xFF241C15),
     muted: Color(0xFF6B5D4C),
     faint: Color(0xFF776855),
@@ -123,7 +124,7 @@ class MpColors extends ThemeExtension<MpColors> {
 
   @override
   MpColors copyWith({
-    Color? cream,
+    Color? paper,
     Color? ink,
     Color? muted,
     Color? faint,
@@ -150,7 +151,7 @@ class MpColors extends ThemeExtension<MpColors> {
     Color? heroTrack,
   }) {
     return MpColors(
-      cream: cream ?? this.cream,
+      paper: paper ?? this.paper,
       ink: ink ?? this.ink,
       muted: muted ?? this.muted,
       faint: faint ?? this.faint,
@@ -183,7 +184,7 @@ class MpColors extends ThemeExtension<MpColors> {
     if (other is! MpColors) return this;
     Color l(Color a, Color b) => Color.lerp(a, b, t)!;
     return MpColors(
-      cream: l(cream, other.cream),
+      paper: l(paper, other.paper),
       ink: l(ink, other.ink),
       muted: l(muted, other.muted),
       faint: l(faint, other.faint),
