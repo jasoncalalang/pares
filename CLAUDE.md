@@ -209,6 +209,12 @@ The design is filtered with the antislop rules; keep it that way:
   semantic headings; only the progress segment for the step just reached
   animates; a way back carries a left arrow; grocery glyphs picture their
   kind; lunch and dinner are annatto like breakfast.
+- Owner decisions from the same gate (2026-11-13): the calorie arc is
+  `annattoFleck` (annatto is 2.97:1 on the hero card); both budget steppers
+  are outlined, so the pinned CTA is the one filled annatto on a screen; no
+  card carries a shadow, the grocery total included; at 320dp the day
+  buttons stay 39px wide so the whole week is in view (the one tap-size
+  exception, 44px from 352dp up).
 - Sample mode says so: `SamplePlanner` ignores the brief, so every snapshot
   carries `SamplePlanner.sampleNotice` and This week shows it under the
   pills. Remove it only when the offline planner honours the target and

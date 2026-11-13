@@ -57,6 +57,18 @@ void main() {
     expect(find.byIcon(LucideIcons.shoppingBag), findsNothing);
   });
 
+  testWidgets('every card is flat, the total included: hairlines separate '
+      'them, not shadows', (tester) async {
+    await pump(tester);
+    final blurred = tester
+        .widgetList<Container>(find.byType(Container))
+        .map((c) => c.decoration)
+        .whereType<BoxDecoration>()
+        .expand((d) => d.boxShadow ?? const <BoxShadow>[])
+        .where((s) => s.blurRadius > 0);
+    expect(blurred, isEmpty);
+  });
+
   testWidgets('the screen title is a heading for screen readers', (
     tester,
   ) async {

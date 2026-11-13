@@ -1,6 +1,10 @@
 import 'dart:ui' show Tristate;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
+import 'package:mealpal_ph/widgets/widgets.dart';
 import 'package:mealpal_ph/data/store_tiles.dart';
 import 'package:mealpal_ph/screens/where_you_shop_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';
@@ -65,6 +69,22 @@ void main() {
     expect(find.bySemanticsLabel('Build my plan from 1 store'),
         findsOneWidget);
     handle.dispose();
+  });
+
+  testWidgets('both budget steppers are outlined: the pinned button is the '
+      'one filled annatto on the screen', (tester) async {
+    await pump(tester);
+    for (final icon in [LucideIcons.minus, LucideIcons.plus]) {
+      final box = tester.widget<Container>(
+        find.descendant(
+          of: find.widgetWithIcon(MpStepperButton, icon),
+          matching: find.byType(Container),
+        ).last,
+      );
+      final d = box.decoration! as BoxDecoration;
+      expect(d.color, MpColors.light.surface, reason: '$icon');
+      expect(d.border!.top.color, MpColors.light.outline, reason: '$icon');
+    }
   });
 
   testWidgets('steppers move the budget by ₱100', (tester) async {

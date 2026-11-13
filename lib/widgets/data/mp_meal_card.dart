@@ -283,6 +283,9 @@ class MpDayStrip extends StatelessWidget {
       builder: (context, constraints) {
         final n = days.length;
         // Narrow phones give up gap before a day drops under MpSize.tap.
+        // Below 352dp even that is not enough: at 320dp a day is 39px wide
+        // (and 52 tall). Owner decision, 2026-11-13: keep the whole week in
+        // view there instead of scrolling the strip.
         final spare = (constraints.maxWidth - n * MpSize.tap) / (n - 1);
         final gap = spare.clamp(0.0, _gap);
         final cell = (constraints.maxWidth - gap * (n - 1)) / n;

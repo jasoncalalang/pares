@@ -113,7 +113,6 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
         else ...[
           MpCard(
             radius: MpRadius.cardLg,
-            shadow: true,
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

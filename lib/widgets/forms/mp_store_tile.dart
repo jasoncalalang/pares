@@ -161,13 +161,11 @@ class MpStepperButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     required this.semanticLabel,
-    this.filled = false,
   });
 
   final IconData icon;
   final VoidCallback? onTap;
   final String semanticLabel;
-  final bool filled;
 
   @override
   Widget build(BuildContext context) {
@@ -180,17 +178,14 @@ class MpStepperButton extends StatelessWidget {
         width: MpSize.stepper,
         height: MpSize.stepper,
         decoration: BoxDecoration(
-          color: filled ? c.annatto : c.surface,
+          color: c.surface,
           shape: BoxShape.circle,
-          border: Border.all(
-            color: filled ? c.annatto : c.outline,
-            width: MpStroke.selected,
-          ),
+          border: Border.all(color: c.outline, width: MpStroke.selected),
         ),
         child: Icon(
           icon,
           size: 18,
-          color: onTap == null ? c.faint : (filled ? c.surface : c.ink),
+          color: onTap == null ? c.faint : c.ink,
         ),
       ),
     );

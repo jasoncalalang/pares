@@ -54,7 +54,8 @@ class MpColors extends ThemeExtension<MpColors> {
   final Color annattoTint;
   final Color annattoTintBorder;
 
-  /// Warm fleck used for the eyebrow inside the dark hero card.
+  /// Light annatto for the dark hero card: its eyebrow and the calorie arc
+  /// (8:1 there, where plain annatto is under 3:1).
   final Color annattoFleck;
 
   /// Secondary accent: local stores, budget progress, protein.

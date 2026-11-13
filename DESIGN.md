@@ -96,14 +96,16 @@ Every colour is a token on `MpColors`. Names below are the token names.
 | `outline` | `#998871` | The edge of every interactive control |
 | `divider` | `#F2EADB` | Row dividers inside cards |
 | `track` | `#EEE6D7` | Empty part of bars and step segments |
+| `annattoFleck` | `#F0A36B` | Annatto on the dark hero card: its eyebrow and the calorie arc (8.1:1 there; plain annatto is under 3:1) |
 | `heroText` | `#FCF8EF` | Text on the dark hero card |
 | `heroMuted` | `#C9BEB0` | Secondary text on the dark hero card |
 
 How the colours are used:
 
-- Annatto is the single accent. One filled annatto button per screen; the
-  rest of the annatto on a screen is small (an eyebrow, a monogram, a slot
-  label).
+- Annatto is the single accent. One filled annatto button per screen, the
+  pinned action; every other control, the budget steppers included, is
+  outlined. The rest of the annatto on a screen is small (an eyebrow, a
+  monogram, a slot label).
 - Green and amber are categories, not decoration: green means local stores,
   budget and protein; amber means snack and fat. A colour never appears only
   because a section needed variety.
@@ -147,9 +149,10 @@ magazine department line does. They are the only uppercase text.
 - Borders do the work: 1px hairlines on cards, 1px `outline` on controls,
   1.5px accent border plus a faint 3px halo on a selected control.
 - Flat. Two shadows exist: a plate photo resting on the table and the
-  sticker on it (Welcome), plus one hairline shadow under the grocery total.
-  Nothing else lifts.
-- Tap targets are 44px or more.
+  sticker on it (Welcome). Nothing else lifts, the grocery total included.
+- Tap targets are 44px or more. One recorded exception: on a 320dp-wide
+  phone the seven day buttons are 39px wide (and 52 tall), so the whole
+  week stays in view without scrolling. From 352dp up they are 44px.
 
 ## Imagery
 

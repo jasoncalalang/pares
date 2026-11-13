@@ -33,6 +33,25 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('the arc is the light annatto, which clears 3:1 on the hero '
+        'card', (tester) async {
+      const c = MpColors.light;
+      await tester.pumpWidget(
+        host(const MpCalorieRing(percent: 81, fraction: 0.81)),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(MpCalorieRing),
+          matching: find.byType(CustomPaint),
+        ),
+        paints
+          ..arc()
+          ..arc(color: c.annattoFleck),
+      );
+      expect(contrast(c.annattoFleck, c.heroSurface), greaterThanOrEqualTo(3));
+    });
+
     testWidgets('shows the final value at once under reduced motion',
         (tester) async {
       await tester.pumpWidget(
