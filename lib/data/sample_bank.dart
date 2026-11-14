@@ -102,7 +102,7 @@ const Map<String, BankIngredient> sampleIngredients = {
   'sinigang-mix': BankIngredient('Sinigang (tamarind) mix', GroceryKind.pantry, IngredientUnit.g, 0.5),
   'beef-tapa': BankIngredient('Beef tapa cut', GroceryKind.meat, IngredientUnit.g, 0.45),
   'pork': BankIngredient('Pork', GroceryKind.meat, IngredientUnit.g, 0.33),
-  'chicken': BankIngredient('Chicken (bone-in)', GroceryKind.poultry, IngredientUnit.g, 0.2),
+  'chicken': BankIngredient('Chicken (bone in)', GroceryKind.poultry, IngredientUnit.g, 0.2),
   'daing-bangus': BankIngredient('Daing na bangus', GroceryKind.fish, IngredientUnit.g, 0.24),
   'green-papaya': BankIngredient('Green papaya', GroceryKind.produce, IngredientUnit.g, 0.04),
   'malunggay': BankIngredient('Malunggay leaves', GroceryKind.produce, IngredientUnit.g, 0.1),

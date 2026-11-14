@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../design_system/design_system.dart';
 
-/// 118px ring for the dark hero card: an annatto arc draws from zero to
+/// 118px ring for the dark hero card: a light annatto arc (the fleck token,
+/// 8:1 on the card; plain annatto is under 3:1 there) draws from zero to
 /// [fraction] while the figure inside counts up to [percent], the target as
 /// a share of maintenance (what the arc shows; the hero number beside the
 /// ring already states the target itself). Replays
@@ -98,7 +99,7 @@ class _MpCalorieRingState extends State<MpCalorieRing>
                 painter: _RingPainter(
                   fraction: widget.fraction * t,
                   track: c.heroTrack,
-                  arc: c.annatto,
+                  arc: c.annattoFleck,
                   stroke: MpSize.ringStroke,
                 ),
                 // Inside the inner circle, clear of the stroke, shrinking at

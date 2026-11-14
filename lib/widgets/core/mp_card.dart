@@ -13,7 +13,6 @@ class MpCard extends StatelessWidget {
     this.color,
     this.borderColor,
     this.borderWidth = MpStroke.hairline,
-    this.shadow = false,
   });
 
   final Widget child;
@@ -22,9 +21,6 @@ class MpCard extends StatelessWidget {
   final Color? color;
   final Color? borderColor;
   final double borderWidth;
-
-  /// The one soft shadow the grocery total card gets (`0 1px 3px 4%`).
-  final bool shadow;
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +31,6 @@ class MpCard extends StatelessWidget {
         color: color ?? c.surface,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: borderColor ?? c.hairline, width: borderWidth),
-        boxShadow: shadow
-            ? [
-                BoxShadow(
-                  color: c.ink.withValues(alpha: 0.04),
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
-                ),
-              ]
-            : null,
       ),
       child: child,
     );

@@ -7,6 +7,12 @@ import '../../design_system/design_system.dart';
 /// CTA block) pinned beneath the scroll area. At the largest text sizes a
 /// footer may not fit; past half the screen's height it scrolls on its own
 /// rather than overflow.
+///
+/// The gutters are padding inside the scroll areas, not around them: a
+/// scroll area clips at its own edge, and a focus ring, selection halo or
+/// check badge drawn just outside a control at the gutter has to survive
+/// that. The column is one phone wide at most ([MpSize.pageMax]); on a
+/// wider screen the gutters grow and the column sits in the middle.
 class MpPage extends StatelessWidget {
   const MpPage({super.key, required this.content, this.footer});
 
@@ -19,10 +25,12 @@ class MpPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: c.paper,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MpSpacing.gutter),
-          child: LayoutBuilder(
-            builder: (context, box) => Column(
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final spare = box.maxWidth - MpSize.pageMax;
+            final side = MpSpacing.gutter + (spare > 0 ? spare / 2 : 0);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Each area is one traversal group, so Tab walks all of the
                 // content before the pinned footer instead of interleaving
@@ -30,9 +38,11 @@ class MpPage extends StatelessWidget {
                 Expanded(
                   child: FocusTraversalGroup(
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.only(
-                        top: MpSpacing.top,
-                        bottom: footer == null ? MpSpacing.bottom : MpSpacing.md,
+                      padding: EdgeInsets.fromLTRB(
+                        side,
+                        MpSpacing.top,
+                        side,
+                        footer == null ? MpSpacing.bottom : MpSpacing.md,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,17 +58,19 @@ class MpPage extends StatelessWidget {
                       child: SingleChildScrollView(
                         primary: false,
                         physics: const ClampingScrollPhysics(),
-                        padding: const EdgeInsets.only(
-                          top: MpSpacing.sm,
-                          bottom: MpSpacing.bottom,
+                        padding: EdgeInsets.fromLTRB(
+                          side,
+                          MpSpacing.sm,
+                          side,
+                          MpSpacing.bottom,
                         ),
                         child: footer,
                       ),
                     ),
                   ),
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

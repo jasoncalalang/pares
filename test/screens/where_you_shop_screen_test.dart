@@ -1,6 +1,10 @@
 import 'dart:ui' show Tristate;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
+import 'package:mealpal_ph/widgets/widgets.dart';
 import 'package:mealpal_ph/data/store_tiles.dart';
 import 'package:mealpal_ph/screens/where_you_shop_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';
@@ -67,6 +71,39 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('both budget steppers are outlined: the pinned button is the '
+      'one filled annatto on the screen', (tester) async {
+    await pump(tester);
+    for (final icon in [LucideIcons.minus, LucideIcons.plus]) {
+      final box = tester.widget<Container>(
+        find.descendant(
+          of: find.widgetWithIcon(MpStepperButton, icon),
+          matching: find.byType(Container),
+        ).last,
+      );
+      final d = box.decoration! as BoxDecoration;
+      expect(d.color, MpColors.light.surface, reason: '$icon');
+      expect(d.border!.top.color, MpColors.light.outline, reason: '$icon');
+    }
+  });
+
+  testWidgets('on a 320dp phone the budget does not touch the stepper', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      host(WhereYouShopScreen(draft: PlanDraft(), onNext: () {})),
+    );
+    await tester.pumpAndSettle();
+    final week = tester.getRect(find.text('/ week'));
+    final minus = tester.getRect(
+      find.widgetWithIcon(MpStepperButton, LucideIcons.minus),
+    );
+    expect(minus.left - week.right, greaterThanOrEqualTo(MpSpacing.tileGap));
+  });
+
   testWidgets('steppers move the budget by ₱100', (tester) async {
     await pump(tester);
     await tester.tap(find.bySemanticsLabel('Increase budget'));
@@ -131,6 +168,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('₱500'), findsOneWidget);
     expect(tester.getSemantics(down).flagsCollection.isEnabled, Tristate.isFalse);
+    // Disabled is seen, not only announced: the disabled CTA's hairline look.
+    final off = tester.widget<Container>(
+      find.descendant(
+        of: find.widgetWithIcon(MpStepperButton, LucideIcons.minus),
+        matching: find.byType(Container),
+      ).last,
+    ).decoration! as BoxDecoration;
+    expect(off.color, MpColors.light.hairline);
+    expect(off.border!.top.color, MpColors.light.hairline);
     await tester.tap(find.bySemanticsLabel('Increase budget'));
     await tester.pumpAndSettle();
     expect(tester.getSemantics(down).flagsCollection.isEnabled, Tristate.isTrue);

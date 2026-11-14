@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mealpal_ph/data/sample_week.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
@@ -47,6 +48,74 @@ void main() {
       tester.getSemantics(find.bySemanticsLabel('Swap breakfast')),
       isSemantics(isButton: true, isEnabled: false, hasEnabledState: true),
     );
+  });
+
+  Container swapBox(WidgetTester tester) => tester.widget<Container>(
+    find.descendant(
+      of: find.byType(MpPress),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w is Container &&
+            w.constraints ==
+                const BoxConstraints.tightFor(
+                  width: MpSize.swap,
+                  height: MpSize.swap,
+                ),
+      ),
+    ),
+  );
+
+  testWidgets('a disabled swap button looks disabled, not only sounds it', (
+    tester,
+  ) async {
+    await pump(tester, MpMealCard(meal: meal, onSwap: () {}));
+    final live = swapBox(tester).decoration! as BoxDecoration;
+    expect(live.color, MpColors.light.paper);
+    expect(live.border!.top.color, MpColors.light.outline);
+
+    await pump(tester, MpMealCard(meal: meal, onSwap: null));
+    final off = swapBox(tester).decoration! as BoxDecoration;
+    // The disabled CTA's pattern: hairline fill, no control outline.
+    expect(off.color, MpColors.light.hairline);
+    expect(off.border!.top.color, MpColors.light.hairline);
+  });
+
+  testWidgets('the dish photo is decoration: the name beside it is what a '
+      'screen reader hears', (tester) async {
+    final pictured = mealBank.firstWhere((m) => m.image != null);
+    await pump(tester, MpMealCard(meal: pictured, onSwap: () {}));
+    expect(tester.widget<Image>(find.byType(Image)).excludeFromSemantics, isTrue);
+  });
+
+  for (final (width, lines) in [(346.0, 1), (316.0, 2)]) {
+    testWidgets('servings and numbers share a line when they fit and take '
+        'one each when they do not: ${width}dp', (tester) async {
+      final part = sampleWeek().first.meals.first;
+      expect(part.servings, 0.75);
+      final numbers = '${part.kcal} kcal · ₱${part.pricePhp}';
+      await tester.pumpWidget(host(Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: width,
+          child: MpMealCard(meal: part, onSwap: () {}),
+        ),
+      )));
+      await tester.pump();
+      if (lines == 1) {
+        expect(find.text('0.75 servings · $numbers'), findsOneWidget);
+      } else {
+        // No dot left hanging at a line end, no number parted from its unit.
+        expect(find.text('0.75 servings'), findsOneWidget);
+        expect(find.text(numbers), findsOneWidget);
+      }
+    });
+  }
+
+  test('meals are annatto, the snack is amber', () {
+    expect(MpMealCard.accentFor(MealSlot.breakfast), MpAccent.annatto);
+    expect(MpMealCard.accentFor(MealSlot.lunch), MpAccent.annatto);
+    expect(MpMealCard.accentFor(MealSlot.dinner), MpAccent.annatto);
+    expect(MpMealCard.accentFor(MealSlot.snack), MpAccent.amber);
   });
 
   testWidgets('an idle card swaps as before', (tester) async {

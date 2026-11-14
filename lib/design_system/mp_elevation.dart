@@ -3,8 +3,8 @@ import 'package:flutter/painting.dart';
 import 'mp_colors.dart';
 
 /// Shadows. The page is flat white paper; only the welcome collage lifts off
-/// it, because the plates on the table are that screen's motif. The grocery
-/// total card's hairline shadow lives on `MpCard(shadow: true)`.
+/// it, because the plates on the table are that screen's motif. Cards are
+/// flat everywhere, the grocery total included.
 abstract final class MpElevation {
   /// A plate photo resting on the table.
   static List<BoxShadow> plate(MpColors c) => [

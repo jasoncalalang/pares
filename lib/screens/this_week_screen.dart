@@ -72,11 +72,14 @@ class _ThisWeekScreenState extends State<ThisWeekScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'This week',
-                        style: MpTypography.h1().copyWith(
-                          color: c.ink,
-                          height: 1.05,
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          'This week',
+                          style: MpTypography.h1().copyWith(
+                            color: c.ink,
+                            height: 1.05,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 11),
@@ -257,7 +260,12 @@ class _PlanStateCard extends StatelessWidget {
             ),
           ] else if (failed && onBack != null) ...[
             const SizedBox(height: 16),
-            MpCta(label: 'Go back', onPressed: onBack),
+            MpCta(
+              label: 'Go back',
+              icon: LucideIcons.arrowLeft,
+              iconLeading: true,
+              onPressed: onBack,
+            ),
           ],
         ],
       ),

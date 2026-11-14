@@ -22,7 +22,8 @@ Dial: ENERGY 2 / RHYTHM 2 / MOTION 2
   day strip.
 - MOTION 2. Motion only where it carries information or feedback: the
   calorie arc and gauges fill, a selection settles, a press dips, a grocery
-  section opens, screens fade. Nothing plays on page load.
+  section opens, screens fade. Nothing decorative enters on load: the data
+  fills and the one new progress segment play once when their screen opens.
 
 ## Identity
 
@@ -74,7 +75,9 @@ Consequences that are intended:
 
 ## Palette
 
-Every colour is a token on `MpColors`. Names below are the token names.
+Every colour the app chooses is a token on `MpColors`. Names below are the
+token names. The one exception is the Google and Apple marks on the sign-in
+buttons, which are the providers' own shapes and colours.
 
 | Token | Hex | Role |
 | --- | --- | --- |
@@ -95,17 +98,24 @@ Every colour is a token on `MpColors`. Names below are the token names.
 | `outline` | `#998871` | The edge of every interactive control |
 | `divider` | `#F2EADB` | Row dividers inside cards |
 | `track` | `#EEE6D7` | Empty part of bars and step segments |
+| `annattoFleck` | `#F0A36B` | Annatto on the dark hero card: its eyebrow and the calorie arc (8.1:1 there; plain annatto is under 3:1) |
 | `heroText` | `#FCF8EF` | Text on the dark hero card |
 | `heroMuted` | `#C9BEB0` | Secondary text on the dark hero card |
 
 How the colours are used:
 
-- Annatto is the single accent. One filled annatto button per screen; the
-  rest of the annatto on a screen is small (an eyebrow, a monogram, a slot
-  label).
-- Green and amber are categories, not decoration: green means local stores,
-  budget and protein; amber means snack and fat. A colour never appears only
-  because a section needed variety.
+- Annatto is the single accent. At most one filled annatto button per
+  screen, the pinned action; every other control, the budget steppers
+  included, is outlined (the Apple sign-in button is ink, as its mark
+  requires). The rest of the annatto on a screen is small: an eyebrow, a
+  monogram, a slot label, a picked choice, a deficit.
+- Green and amber are categories, not decoration. Green means local stores,
+  the budget and anything within it (the under-budget total, a ticked
+  grocery row), protein, produce, and a surplus over maintenance. Amber
+  means snack, fat and dry goods. On the grocery list the small kind tile
+  sorts rows by family: annatto for meat, fish and condiments, green for
+  produce, amber for dry goods. A colour never appears only because a
+  section needed variety.
 - The neutrals are warm (brown-black ink, tan hairlines) on purpose. No cool
   greys.
 - No gradients, glows, glass, neon, pastel blocks, pink or purple.
@@ -124,7 +134,8 @@ Two faces, strictly divided. Both are variable fonts shipped in the app.
   feel printed, not displayed. Weight 600, tight leading (1.0 to 1.2),
   optical size matched to point size.
 - Plus Jakarta Sans: everything else. Body 14, labels 12 to 13, buttons 15
-  bold.
+  bold. A plain, open sans that stays readable at 11 to 14px and stays
+  quiet, so Fraunces carries the editorial voice alone.
 
 Scale in use: display 30, h1 28, hero number 50, ring number 30, total 34,
 body 14, small 12, kickers 10 to 12.
@@ -136,32 +147,50 @@ magazine department line does. They are the only uppercase text.
 ## Shape and space
 
 - Single column, 22px gutters, one phone width. Pinned action at the bottom.
-- Radii are soft but not round: inputs 13, buttons 15, cards 16 to 18, the
-  hero card 20. Only chips and pills are fully round.
-- Borders do the work: 1px hairlines on cards, 1px `outline` on controls,
-  1.5px accent border plus a faint 3px halo on a selected control.
+  On a wider screen (a tablet, a phone on its side) the column stays 430
+  wide at most and sits in the middle; it is never stretched.
+- Radius follows size, soft but not round: hero card, plates and the
+  sign-in sheet 20, cards 16 to 18, the primary button and macro cards 15,
+  store tiles 14, inputs, the gender choice, meal photos and secondary
+  buttons 13, the goal choice and day cells 12, small squares 7 to 11.
+  Fully round: chips, pills, bars and the round steppers.
+- Borders do the work: 1px hairlines on cards, a 1 to 1.5px `outline` on
+  controls, 1.5px accent border plus a faint 3px halo on a selected control.
 - Flat. Two shadows exist: a plate photo resting on the table and the
-  sticker on it (Welcome), plus one hairline shadow under the grocery total.
-  Nothing else lifts.
-- Tap targets are 44px or more.
+  sticker on it (Welcome). Nothing else lifts, the grocery total included.
+- Tap targets are 44px or more. One recorded exception: on a 320dp-wide
+  phone the seven day buttons are 39px wide (and 52 tall), so the whole
+  week stays in view without scrolling. From 352dp up they are 44px.
 
 ## Imagery
 
 - Photographs of the actual dishes, shot from above or at a low angle on
   wood and woven surfaces, in natural light. The plate fills the frame.
+  Four of the thirty dishes have a photograph so far; a dish without one
+  shows its initial in Fraunces on its slot tint, never a stand-in picture.
 - The Welcome collage is the motif: four plates tilted on a table, with
   small paper stickers for a calorie figure and a peso price. It shows an
   example day; it is not a claim.
 - Stores are monograms in Fraunces on a tinted square. No retailer logos.
-- Icons are Lucide stroke icons at 2px. No emoji, no illustrations, no 3D.
+- Icons are Lucide stroke icons at 2px: one set whose stroke matches the
+  1 to 2px outlines of the controls, used only where a glyph pictures the
+  thing (an arrow for direction, a fish for fish, a bottle for condiments).
+  A glyph that does not picture its content is dropped. No emoji, no
+  illustrations, no 3D.
 
 ## Motion
 
-Press 0.97 scale in 120ms. Selection 250ms. Data reveals (arc, gauges, bars,
-count-up) 850ms after a 350ms delay. Expand and collapse 350ms. Easing
-`cubic-bezier(.2, .7, .3, 1)` throughout. Reduced-motion settings collapse
-every duration to zero. No entrance animation, nothing bouncy, no parallax,
-no loops.
+Press 0.97 scale in 120ms. Selection 250ms; a picked store tile pops to
+1.03 over 400ms. Data reveals (arc, gauges, bars, count-up) take 850ms
+after a short delay: 250 to 350ms, the three gauges one after another up to
+310ms later. The progress segment for the step just reached fills in 700ms,
+so the bar says "one step on"; steps already done are drawn full. The day
+highlight slides and the swap glyph turns in 320ms. Expand and collapse
+350ms. Easing `cubic-bezier(.2, .7, .3, 1)` on every move and fill; the
+press dip and colour fades are linear. Reduced-motion settings collapse
+every duration to zero. No decorative entrance, nothing bouncy, no parallax,
+no endless loops: the only repeating motion is the spinner while a plan
+builds or a meal swaps.
 
 ## Voice
 
@@ -170,7 +199,9 @@ no loops.
 - Buttons name what they do: "Compute my target", "Build my plan (2)",
   "See grocery list".
 - Money is pesos with the ₱ sign; measures are metric.
-- Estimates are labelled as estimates, where the number appears.
+- Estimates are labelled as estimates, where the number appears. A week
+  that is a sample, not built to the person's target and budget, says so on
+  This week.
 
 ## One focal point per screen
 
@@ -188,6 +219,8 @@ no loops.
 A filter pass may question these. Each has a reason, so they stay:
 
 - A serif display face: it is the editorial voice and sets the numerals.
+- Lucide icons: one stroke set at the weight of the control outlines, each
+  glyph picturing its content.
 - Uppercase kickers: department labels, small and rare.
 - The dark hero card: the one heavy block, on the screen whose whole point
   is one number.

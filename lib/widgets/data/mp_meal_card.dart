@@ -33,8 +33,11 @@ class MpMealCard extends StatefulWidget {
   final bool swapping;
 
   static MpAccent accentFor(MealSlot slot) => switch (slot) {
-    MealSlot.breakfast => MpAccent.annatto,
-    MealSlot.lunch || MealSlot.dinner => MpAccent.green,
+    // Meals are annatto (DESIGN.md); green is for local stores, budget and
+    // protein, so a dinner with no photo does not borrow it.
+    MealSlot.breakfast ||
+    MealSlot.lunch ||
+    MealSlot.dinner => MpAccent.annatto,
     MealSlot.snack => MpAccent.amber,
   };
 
@@ -42,13 +45,59 @@ class MpMealCard extends StatefulWidget {
   State<MpMealCard> createState() => _MpMealCardState();
 }
 
-/// "2 servings · " when the numbers cover other than one portion.
-String _servingsPrefix(double servings) {
-  if (servings == 1) return '';
+/// "2 servings" when the numbers cover other than one portion, else null.
+String? _servingsLabel(double servings) {
+  if (servings == 1) return null;
   final n = servings == servings.roundToDouble()
       ? servings.round().toString()
       : servings.toString();
-  return '$n servings · ';
+  return '$n servings';
+}
+
+/// "2 servings · " in front of the numbers, or nothing for one portion.
+String _servingsPrefix(double servings) {
+  final label = _servingsLabel(servings);
+  return label == null ? '' : '$label · ';
+}
+
+/// The line under the dish name: "0.75 servings · 598 kcal · ₱63". When
+/// that does not fit on one line, the servings take a line of their own, so
+/// no separator is left hanging and no number is parted from its unit.
+class _Detail extends StatelessWidget {
+  const _Detail({required this.servings, required this.numbers, required this.style});
+
+  final String? servings;
+  final String numbers;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final servings = this.servings;
+    if (servings == null) return Text(numbers, style: style);
+    final whole = '$servings · $numbers';
+    final drawn = DefaultTextStyle.of(context).style.merge(style);
+    final scaler = MediaQuery.textScalerOf(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        final painter = TextPainter(
+          text: TextSpan(text: whole, style: drawn),
+          textDirection: TextDirection.ltr,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        final fits = painter.width <= box.maxWidth;
+        painter.dispose();
+        if (fits) return Text(whole, style: style);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(servings, style: style),
+            Text(numbers, style: style),
+          ],
+        );
+      },
+    );
+  }
 }
 
 /// What a screen reader says for the card: "Breakfast, Tapsilog, 797 kcal,
@@ -160,6 +209,9 @@ class _MpMealCardState extends State<MpMealCard> {
                       )
                     : Image.asset(
                         'assets/images/meals/${meal.image}.jpg',
+                        // Decorative, like the initial: the dish name is
+                        // read in full beside it.
+                        excludeFromSemantics: true,
                         fit: BoxFit.cover,
                         width: MpSize.thumb,
                         height: MpSize.thumb,
@@ -189,16 +241,23 @@ class _MpMealCardState extends State<MpMealCard> {
                     const SizedBox(height: 2),
                     _DishName(name: meal.name, color: c.ink),
                     const SizedBox(height: 3),
-                    Text(
-                      widget.swapping
-                          ? 'Swapping this meal'
-                          : '${_servingsPrefix(meal.servings)}${meal.kcal} '
-                                'kcal · '
-                                '${formatPeso(meal.pricePhp, decimals: 0)}',
-                      style: MpTypography.smallStrong().copyWith(
-                        color: widget.swapping ? c.annattoDeep : c.faint,
+                    if (widget.swapping)
+                      Text(
+                        'Swapping this meal',
+                        style: MpTypography.smallStrong().copyWith(
+                          color: c.annattoDeep,
+                        ),
+                      )
+                    else
+                      _Detail(
+                        servings: _servingsLabel(meal.servings),
+                        numbers:
+                            '${meal.kcal} kcal · '
+                            '${formatPeso(meal.pricePhp, decimals: 0)}',
+                        style: MpTypography.smallStrong().copyWith(
+                          color: c.faint,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -217,10 +276,15 @@ class _MpMealCardState extends State<MpMealCard> {
             child: Container(
               width: MpSize.swap,
               height: MpSize.swap,
+              // Disabled (another meal is swapping) takes the disabled CTA's
+              // look, hairline fill and no control outline, so it is not
+              // told apart by the announcement alone.
               decoration: BoxDecoration(
-                color: c.paper,
+                color: widget.onSwap == null ? c.hairline : c.paper,
                 borderRadius: BorderRadius.circular(MpRadius.swap),
-                border: Border.all(color: c.outline),
+                border: Border.all(
+                  color: widget.onSwap == null ? c.hairline : c.outline,
+                ),
               ),
               alignment: Alignment.center,
               child: widget.swapping
@@ -272,6 +336,9 @@ class MpDayStrip extends StatelessWidget {
       builder: (context, constraints) {
         final n = days.length;
         // Narrow phones give up gap before a day drops under MpSize.tap.
+        // Below 352dp even that is not enough: at 320dp a day is 39px wide
+        // (and 52 tall). Owner decision, 2026-11-13: keep the whole week in
+        // view there instead of scrolling the strip.
         final spare = (constraints.maxWidth - n * MpSize.tap) / (n - 1);
         final gap = spare.clamp(0.0, _gap);
         final cell = (constraints.maxWidth - gap * (n - 1)) / n;

@@ -59,6 +59,21 @@ class _MpPressState extends State<MpPress> {
     if (_down != down) setState(() => _down = down);
   }
 
+  /// Keyboard focus scrolls a control flush with the edge of its scroll
+  /// area, which would cut the ring drawn outside it; ask for the ring too.
+  void _revealRing() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_focused) return;
+      final box = context.findRenderObject();
+      if (box is! RenderBox || !box.hasSize) return;
+      box.showOnScreen(
+        rect: (Offset.zero & box.size).inflate(
+          MpStroke.focus + widget.focusGap,
+        ),
+      );
+    });
+  }
+
   @override
   void didUpdateWidget(MpPress oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -82,7 +97,10 @@ class _MpPressState extends State<MpPress> {
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         mouseCursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
-        onShowFocusHighlight: (v) => setState(() => _focused = v),
+        onShowFocusHighlight: (v) {
+          setState(() => _focused = v);
+          if (v) _revealRing();
+        },
         // Space is an ActivateIntent everywhere; Enter is an ActivateIntent on
         // mobile and desktop but a ButtonActivateIntent on the web.
         actions: {

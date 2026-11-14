@@ -477,6 +477,26 @@ void main() {
     });
   }
 
+  for (final size in const [Size(360, 640), Size(360, 844), Size(375, 667)]) {
+    testWidgets('a picked store keeps its whole name at default text, '
+        '${size.width}x${size.height}', (tester) async {
+      await pumpAt(
+        tester,
+        WhereYouShopScreen(draft: PlanDraft(), onNext: () {}),
+        scale: 1.0,
+        size: size,
+      );
+      for (final t in [...chainTiles, ...localTiles]) {
+        final name = find.text(t.name).last;
+        await tester.ensureVisible(name);
+        await tester.tap(name);
+        await tester.pumpAndSettle();
+        // Bold once picked, which is the wider weight.
+        expectWholeWords(tester, find.text(t.name).last, reason: t.name);
+      }
+    });
+  }
+
   for (final (size, fullSize) in [
     (const Size(390, 844), true),
     (const Size(360, 640), false),

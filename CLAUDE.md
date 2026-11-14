@@ -198,8 +198,35 @@ The design is filtered with the antislop rules; keep it that way:
 - `HttpPlanner` maps only `Exception`s to a network error; an `Error` is a
   bug and propagates.
 - Uppercase kickers, Lucide glyphs, the selection halo and the two shadows
-  are deliberate and written up in the design-system doc; do not add more
-  decoration without writing the reason down.
+  are deliberate and written up in `DESIGN.md` ("Kept on purpose"); do not
+  add more decoration without writing the reason down.
+- Delivery Gate fixes (2026-11-13), keep them: `MpPage` puts the gutters
+  inside its scroll areas (a ring, halo or badge at the gutter is not
+  clipped) and caps the column at `MpSize.pageMax`; the number fields wear
+  the focus ring and take a tap anywhere in their box; a disabled CTA label
+  is `muted` (4.5:1 on its fill); a disabled swap button takes the hairline
+  fill; dish photos are excluded from semantics; screen titles are
+  semantic headings; only the progress segment for the step just reached
+  animates; a way back carries a left arrow; grocery glyphs picture their
+  kind; lunch and dinner are annatto like breakfast.
+- Owner decisions from the same gate (2026-11-13): the calorie arc is
+  `annattoFleck` (annatto is 2.97:1 on the hero card); both budget steppers
+  are outlined, so the pinned CTA is the one filled annatto on a screen; no
+  card carries a shadow, the grocery total included; at 320dp the day
+  buttons stay 39px wide so the whole week is in view (the one tap-size
+  exception, 44px from 352dp up).
+- Second pass of the same gate, keep these too: keyboard focus scrolls the
+  ring into view, not just the control (`MpPress._revealRing`, and the
+  number fields); the number field box is a `TextFieldTapRegion`; the
+  sign-in sheet is capped at `MpSize.pageMax`; a disabled stepper takes the
+  hairline fill; the meal card's servings take their own line when the
+  detail line does not fit (360dp); aromatics take the leaf glyph; every
+  choice on Tell us about you picks in annatto; ingredient names carry no
+  hyphenated compounds either ("Chicken (bone in)").
+- Sample mode says so: `SamplePlanner` ignores the brief, so every snapshot
+  carries `SamplePlanner.sampleNotice` and This week shows it under the day
+  line and the estimates line, above the meal cards. Remove it only when the offline planner honours the target and
+  budget.
 
 ## Run against the server
 

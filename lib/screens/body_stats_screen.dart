@@ -105,7 +105,6 @@ class BodyStatsScreen extends StatelessWidget {
               for (final (level, label) in _activities)
                 MpChoiceButton(
                   label: label,
-                  accent: MpAccent.green,
                   height: MpSize.pillButton,
                   radius: MpRadius.pill,
                   selected: draft.activity == level,

@@ -32,9 +32,12 @@ class WelcomeScreen extends StatelessWidget {
         const SizedBox(height: 18),
         _Collage(plates: plates, dayKcal: exampleDay.kcal),
         const SizedBox(height: 20),
-        Text(
-          'Filipino meals that fit your calorie goal and your weekly budget.',
-          style: MpTypography.display().copyWith(color: c.ink),
+        Semantics(
+          header: true,
+          child: Text(
+            'Filipino meals that fit your calorie goal and your weekly budget.',
+            style: MpTypography.display().copyWith(color: c.ink),
+          ),
         ),
         const SizedBox(height: 10),
         Text(
@@ -107,6 +110,8 @@ Future<void> showSignInSheet(BuildContext context) {
     backgroundColor: c.surface,
     barrierColor: c.ink.withValues(alpha: 0.34),
     barrierLabel: 'Close sign-in',
+    // One phone wide, like the page behind it, on a tablet too.
+    constraints: const BoxConstraints(maxWidth: MpSize.pageMax),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(MpRadius.hero)),
     ),

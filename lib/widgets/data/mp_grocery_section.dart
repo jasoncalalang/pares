@@ -147,20 +147,25 @@ class _GroceryRow extends StatelessWidget {
   final bool last;
   final VoidCallback onTap;
 
+  /// Each glyph pictures its kind, so a row can be picked out by kind
+  /// before its name is read: a leaf for vegetables, aromatics included, a
+  /// bottle for condiments, a sprout for dried leaves and peppercorns, a
+  /// pack for packaged pantry goods. The tint sorts rows by family: annatto
+  /// for meat, fish and condiments, green for produce, amber for dry goods.
   static (IconData, MpAccent) _glyph(GroceryKind kind) => switch (kind) {
         GroceryKind.meat => (LucideIcons.beef, MpAccent.annatto),
         GroceryKind.poultry => (LucideIcons.drumstick, MpAccent.annatto),
         GroceryKind.fish => (LucideIcons.fish, MpAccent.annatto),
         GroceryKind.produce => (LucideIcons.leaf, MpAccent.green),
         GroceryKind.fruit => (LucideIcons.banana, MpAccent.amber),
-        GroceryKind.aromatics => (LucideIcons.carrot, MpAccent.annatto),
+        GroceryKind.aromatics => (LucideIcons.leaf, MpAccent.green),
         GroceryKind.grain => (LucideIcons.wheat, MpAccent.amber),
         GroceryKind.egg => (LucideIcons.egg, MpAccent.amber),
         GroceryKind.legume => (LucideIcons.bean, MpAccent.amber),
         GroceryKind.oil => (LucideIcons.droplet, MpAccent.amber),
-        GroceryKind.condiment => (LucideIcons.flaskConical, MpAccent.annatto),
-        GroceryKind.spice => (LucideIcons.utensils, MpAccent.amber),
-        GroceryKind.pantry => (LucideIcons.shoppingBag, MpAccent.amber),
+        GroceryKind.condiment => (LucideIcons.milk, MpAccent.annatto),
+        GroceryKind.spice => (LucideIcons.sprout, MpAccent.amber),
+        GroceryKind.pantry => (LucideIcons.package, MpAccent.amber),
       };
 
   @override

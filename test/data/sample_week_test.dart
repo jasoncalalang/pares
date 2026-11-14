@@ -5,6 +5,13 @@ import 'package:mealpal_ph/state/plan_draft.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('no ingredient name carries a hyphenated compound, which a narrow '
+      'grocery row would break in two', () {
+    for (final ingredient in sampleIngredients.values) {
+      expect(ingredient.name, isNot(matches(RegExp(r'\w-\w'))));
+    }
+  });
+
   test('no dish name carries an em dash', () {
     for (final day in sampleWeek()) {
       for (final meal in day.meals) {

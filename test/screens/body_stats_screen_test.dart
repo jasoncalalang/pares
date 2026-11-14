@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mealpal_ph/design_system/design_system.dart';
 import 'package:mealpal_ph/mealpal_ph.dart';
 import 'package:mealpal_ph/screens/body_stats_screen.dart';
 import 'package:mealpal_ph/state/plan_draft.dart';
+import 'package:mealpal_ph/widgets/widgets.dart';
 
 import '../helpers.dart';
 
@@ -42,6 +44,16 @@ void main() {
         findsOneWidget);
     expect(find.text('An estimate, not medical advice. You can adjust it anytime.'),
         findsOneWidget);
+  });
+
+  testWidgets('every choice on the form picks in annatto: green is kept for '
+      'local stores, budget and protein', (tester) async {
+    await pump(tester);
+    for (final choice in tester.widgetList<MpChoiceButton>(
+      find.byType(MpChoiceButton),
+    )) {
+      expect(choice.accent, MpAccent.annatto, reason: choice.label);
+    }
   });
 
   testWidgets('prefills the draft values', (tester) async {

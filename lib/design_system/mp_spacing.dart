@@ -40,6 +40,10 @@ abstract final class MpRadius {
 }
 
 abstract final class MpSize {
+  /// The widest the page column gets. Past it (a tablet, a phone on its
+  /// side) the column stays one phone wide and sits in the middle.
+  static const double pageMax = 430;
+
   /// Full-width primary CTA height.
   static const double cta = 54;
 

@@ -50,11 +50,15 @@ class MpStoreTile extends StatelessWidget {
     double gap = MpSpacing.tileGap,
   }) {
     final scaler = MediaQuery.textScalerOf(context);
+    // What the Text really draws: bold (the picked weight, the wider of the
+    // two) on top of the inherited style, whose letter spacing counts.
+    final drawn = DefaultTextStyle.of(context).style.merge(
+      MpTypography.bodyBold(),
+    );
     var widest = 0.0;
     for (final word in names.expand((n) => n.split(' '))) {
-      // Bold, the selected weight, is the wider of the two.
       final painter = TextPainter(
-        text: TextSpan(text: word, style: MpTypography.bodyBold()),
+        text: TextSpan(text: word, style: drawn),
         textDirection: TextDirection.ltr,
         textScaler: scaler,
       )..layout();
@@ -149,21 +153,21 @@ class MpStoreTile extends StatelessWidget {
   }
 }
 
-/// Round 44px stepper button (minus / plus). [filled] draws it solid annatto.
-/// A null [onTap] disables it (at a limit) and draws its glyph faint.
+/// Round 44px stepper button (minus / plus), outlined: the pinned CTA is the
+/// one filled annatto on a screen. A null [onTap] disables it (at a limit)
+/// and gives it the disabled CTA's look, hairline fill and no outline, so
+/// it is not told apart by the glyph's colour alone.
 class MpStepperButton extends StatelessWidget {
   const MpStepperButton({
     super.key,
     required this.icon,
     required this.onTap,
     required this.semanticLabel,
-    this.filled = false,
   });
 
   final IconData icon;
   final VoidCallback? onTap;
   final String semanticLabel;
-  final bool filled;
 
   @override
   Widget build(BuildContext context) {
@@ -176,17 +180,18 @@ class MpStepperButton extends StatelessWidget {
         width: MpSize.stepper,
         height: MpSize.stepper,
         decoration: BoxDecoration(
-          color: filled ? c.annatto : c.surface,
+          color: onTap == null ? c.hairline : c.surface,
           shape: BoxShape.circle,
           border: Border.all(
-            color: filled ? c.annatto : c.outline,
+            color: onTap == null ? c.hairline : c.outline,
             width: MpStroke.selected,
           ),
         ),
         child: Icon(
           icon,
           size: 18,
-          color: onTap == null ? c.faint : (filled ? c.surface : c.ink),
+          // muted on the hairline fill is 5:1; faint would be 4.2.
+          color: onTap == null ? c.muted : c.ink,
         ),
       ),
     );

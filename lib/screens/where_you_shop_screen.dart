@@ -80,6 +80,7 @@ class WhereYouShopScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(width: MpSpacing.tileGap),
                   MpStepperButton(
                     icon: LucideIcons.minus,
                     semanticLabel: 'Decrease budget',
@@ -89,7 +90,6 @@ class WhereYouShopScreen extends StatelessWidget {
                   MpStepperButton(
                     icon: LucideIcons.plus,
                     semanticLabel: 'Increase budget',
-                    filled: true,
                     onTap: draft.budgetUp,
                   ),
                 ],

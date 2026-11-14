@@ -157,7 +157,7 @@ void main() {
           greaterThanOrEqualTo(1.5));
     });
 
-    testWidgets('the focus ring shows on the filled stepper', (tester) async {
+    testWidgets('the focus ring shows on a stepper', (tester) async {
       expect(
         await ringWidth(
           tester,
@@ -166,7 +166,6 @@ void main() {
             child: MpStepperButton(
               icon: LucideIcons.plus,
               semanticLabel: 'Increase budget',
-              filled: true,
               onTap: () {},
             ),
           ),
