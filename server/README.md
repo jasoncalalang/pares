@@ -5,19 +5,19 @@ The app never holds an Anthropic credential; this server does.
 
 ## How a plan is built
 
-1. `POST /plans` with the person's numbers opens a planner session and answers
+1. `POST /v1/plans` with the person's numbers opens a planner session and answers
    `202` with the plan's id. The calorie target is computed in the app.
 2. The planner agent picks dishes from the meal bank and calls the
    `submit_plan` tool. The server re-adds calories and prices from the bank
    (`PlanCheck`) and either accepts the week or sends the problems back.
    After three rejected weeks the plan fails.
-3. The app polls `GET /plans/{id}` until `status` is `ready` or `failed`.
+3. The app polls `GET /v1/plans/{id}` until `status` is `ready` or `failed`.
    The server keeps no plan state: each read replays the session's events,
    answers any `submit_plan` call still waiting, and works out the status.
    The plan's id is the session id, and the request rides in the session's
    metadata, so any instance can answer and the service can scale to zero.
    The polling is what moves the plan along.
-4. `POST /plans/{id}/swaps` sends a swap into the same session and the plan
+4. `POST /v1/plans/{id}/swaps` sends a swap into the same session and the plan
    builds again; a failed swap keeps the last week.
 
 ## Run it
@@ -61,11 +61,37 @@ The agent and environment ids come from `anthropic/claude-lock.json`, so run
 
 ## API
 
+The contract is `openapi.json` in this directory, OpenAPI 3.1, generated from
+`PlanResource`'s annotations and the records it returns. `OpenApiContractTest`
+fails when the served document and the checked-in file differ, so an API change
+shows up in review as a diff to that file. When the change is meant, copy the
+served one over:
+
+```sh
+./gradlew test --tests '*OpenApiContractTest'   # writes build/openapi.json on a mismatch
+cp build/openapi.json openapi.json
+```
+
+The app's half is `test/plan/api_contract_test.dart`: every call `HttpPlanner`
+makes must be in the contract, its bodies must carry the required fields and no
+unknown ones, every refusal code listed must map to its own error, and the
+enums must match. Dev and test serve the document at `/q/openapi` (and Swagger
+UI at `/q/swagger-ui` under `quarkusDev`); production does not.
+
+The version is in the path. An installed app keeps calling the version it was
+built with, so a change an older app cannot read goes under `/v2` while `/v1`
+keeps answering. Adding an optional field or a new call is not such a change.
+A new error code is: the app maps each code it knows, and the contract test
+fails until it maps the new one.
+
+Every call needs `X-MealPal-Key` when the server has an app key (`401
+{message}` otherwise).
+
 | Call | Body | Answer |
 | --- | --- | --- |
-| `POST /plans` | `{"targetKcal": 2087, "budgetPhp": 2000, "goal": "lose", "storeIds": ["palengke"]}` | `202` plan, `400 {problems}`, `503 {message}` |
-| `GET /plans/{id}` | | `200` plan, `404` |
-| `POST /plans/{id}/swaps` | `{"weekday": "tue", "slot": "lunch", "note": "something cheaper"}` | `202` plan, `400`, `404`, `409` while building |
+| `POST /v1/plans` | `{"targetKcal": 2087, "budgetPhp": 2000, "goal": "lose", "storeIds": ["palengke"]}` | `202` plan, `400 {problems}`, `503 {message}` |
+| `GET /v1/plans/{id}` | | `200` plan, `404 {message}` |
+| `POST /v1/plans/{id}/swaps` | `{"weekday": "tue", "slot": "lunch", "note": "something cheaper"}` | `202` plan, `400 {problems}`, `404 {message}`, `409 {message}` while building |
 
 A plan is `{id, status: building | ready | failed, week, message}`. `week.days`
 run Monday first; each meal carries the bank's name, image key, kcal and

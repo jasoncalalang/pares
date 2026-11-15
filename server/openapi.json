@@ -1,0 +1,417 @@
+{
+  "openapi" : "3.1.0",
+  "components" : {
+    "schemas" : {
+      "Goal" : {
+        "type" : "string",
+        "enum" : [ "lose", "maintain", "gain" ]
+      },
+      "Kind" : {
+        "type" : "string",
+        "enum" : [ "meat", "poultry", "fish", "produce", "fruit", "aromatics", "grain", "egg", "legume", "oil", "condiment", "spice", "pantry" ]
+      },
+      "Message" : {
+        "required" : [ "message" ],
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PlanRecord" : {
+        "required" : [ "id", "status" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/PlanStatus"
+          },
+          "week" : {
+            "$ref" : "#/components/schemas/WeekPlan"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PlanRequest" : {
+        "required" : [ "targetKcal", "budgetPhp", "goal", "storeIds" ],
+        "type" : "object",
+        "properties" : {
+          "targetKcal" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "budgetPhp" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "goal" : {
+            "$ref" : "#/components/schemas/Goal"
+          },
+          "storeIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "PlanStatus" : {
+        "type" : "string",
+        "enum" : [ "building", "ready", "failed" ]
+      },
+      "PlannedDay" : {
+        "type" : "object",
+        "required" : [ "weekday", "meals", "kcal", "pricePhp" ],
+        "properties" : {
+          "weekday" : {
+            "$ref" : "#/components/schemas/Weekday"
+          },
+          "meals" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PlannedMeal"
+            }
+          },
+          "kcal" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pricePhp" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "PlannedIngredient" : {
+        "type" : "object",
+        "required" : [ "id", "name", "kind", "unit", "qty", "pricePhp" ],
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "$ref" : "#/components/schemas/Kind"
+          },
+          "unit" : {
+            "$ref" : "#/components/schemas/Unit"
+          },
+          "qty" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "pricePhp" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        }
+      },
+      "PlannedMeal" : {
+        "type" : "object",
+        "required" : [ "slot", "id", "name", "kcal", "pricePhp", "image", "servings", "ingredients" ],
+        "properties" : {
+          "slot" : {
+            "$ref" : "#/components/schemas/Slot"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "kcal" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pricePhp" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "image" : {
+            "type" : "string"
+          },
+          "servings" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "ingredients" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PlannedIngredient"
+            }
+          }
+        }
+      },
+      "Problems" : {
+        "required" : [ "problems" ],
+        "type" : "object",
+        "properties" : {
+          "problems" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "Slot" : {
+        "type" : "string",
+        "enum" : [ "breakfast", "lunch", "dinner", "snack" ]
+      },
+      "SwapRequest" : {
+        "required" : [ "weekday", "slot" ],
+        "type" : "object",
+        "properties" : {
+          "weekday" : {
+            "$ref" : "#/components/schemas/Weekday"
+          },
+          "slot" : {
+            "$ref" : "#/components/schemas/Slot"
+          },
+          "note" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Unit" : {
+        "type" : "string",
+        "enum" : [ "g", "ml", "pc" ]
+      },
+      "WeekPlan" : {
+        "type" : "object",
+        "required" : [ "days", "pricePhp" ],
+        "properties" : {
+          "days" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PlannedDay"
+            }
+          },
+          "pricePhp" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "Weekday" : {
+        "type" : "string",
+        "enum" : [ "mon", "tue", "wed", "thu", "fri", "sat", "sun" ]
+      }
+    },
+    "securitySchemes" : {
+      "appKey" : {
+        "type" : "apiKey",
+        "description" : "The app's key. Unchecked when the server has none set.",
+        "name" : "X-MealPal-Key",
+        "in" : "header"
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Plans"
+  } ],
+  "paths" : {
+    "/v1/plans" : {
+      "post" : {
+        "summary" : "Start a plan",
+        "description" : "Opens a planner session for the person's numbers. The calorie target is the app's.",
+        "tags" : [ "Plans" ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlanRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "401" : {
+            "description" : "Missing or wrong app key.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "202" : {
+            "description" : "The plan is building; poll it by id.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlanRecord"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "The request is incomplete or out of range.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problems"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "The planner could not be reached; nothing was started.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "appKey" : [ ]
+        } ]
+      }
+    },
+    "/v1/plans/{id}" : {
+      "get" : {
+        "summary" : "Read a plan",
+        "tags" : [ "Plans" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "401" : {
+            "description" : "Missing or wrong app key.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Where the plan stands. Reading it moves the planner along.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlanRecord"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No such plan.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "appKey" : [ ]
+        } ]
+      }
+    },
+    "/v1/plans/{id}/swaps" : {
+      "post" : {
+        "summary" : "Swap a meal",
+        "description" : "Asks for a different dish at one day and slot, with an optional note.",
+        "tags" : [ "Plans" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SwapRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "401" : {
+            "description" : "Missing or wrong app key.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "202" : {
+            "description" : "The swap is building; poll the plan. The last week stays.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlanRecord"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "The day or the slot is missing.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problems"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No such plan.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "The week is still building.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "appKey" : [ ]
+        } ]
+      }
+    }
+  },
+  "info" : {
+    "title" : "MealPal API",
+    "version" : "1"
+  }
+}

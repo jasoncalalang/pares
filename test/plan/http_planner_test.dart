@@ -113,7 +113,7 @@ void main() {
       expect(snap.week, isNull);
       final r = rig.seen.single;
       expect(r.method, 'POST');
-      expect(r.url.toString(), 'http://host:8090/plans');
+      expect(r.url.toString(), 'http://host:8090/v1/plans');
       expect(r.headers['content-type'], contains('application/json'));
       expect(jsonDecode(r.body), brief.toJson());
     });
@@ -165,7 +165,7 @@ void main() {
       expect(snap.status, PlanStatus.ready);
       expect(snap.week, hasLength(7));
       expect(rig.seen.single.method, 'GET');
-      expect(rig.seen.single.url.path, '/plans/p1');
+      expect(rig.seen.single.url.path, '/v1/plans/p1');
     });
 
     test('404 is notFound', () async {
@@ -212,7 +212,7 @@ void main() {
       expect(snap.week, hasLength(7));
       final r = rig.seen.single;
       expect(r.method, 'POST');
-      expect(r.url.path, '/plans/p1/swaps');
+      expect(r.url.path, '/v1/plans/p1/swaps');
       expect(jsonDecode(r.body), {
         'weekday': 'tue',
         'slot': 'dinner',
@@ -312,25 +312,25 @@ void main() {
     }
 
     test('joins with or without a trailing slash', () async {
-      expect(await pathFor('http://h:1'), 'http://h:1/plans/p1');
-      expect(await pathFor('http://h:1/'), 'http://h:1/plans/p1');
+      expect(await pathFor('http://h:1'), 'http://h:1/v1/plans/p1');
+      expect(await pathFor('http://h:1/'), 'http://h:1/v1/plans/p1');
     });
 
     test('keeps a path prefix', () async {
       expect(
         await pathFor('https://h.run.app/api'),
-        'https://h.run.app/api/plans/p1',
+        'https://h.run.app/api/v1/plans/p1',
       );
       expect(
         await pathFor('https://h.run.app/api/'),
-        'https://h.run.app/api/plans/p1',
+        'https://h.run.app/api/v1/plans/p1',
       );
     });
 
     test('escapes the plan id', () async {
       final rig = answering(json(200, record('ready')));
       await rig.planner.fetch('a/b c');
-      expect(rig.seen.single.url.path, '/plans/a%2Fb%20c');
+      expect(rig.seen.single.url.path, '/v1/plans/a%2Fb%20c');
     });
   });
 

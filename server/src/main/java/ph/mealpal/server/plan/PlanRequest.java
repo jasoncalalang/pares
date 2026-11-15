@@ -2,11 +2,13 @@ package ph.mealpal.server.plan;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
  * What the app sends to start a plan. The calorie target is computed in the
  * app (Mifflin-St Jeor); the server and the agent never recompute it.
  */
+@Schema(requiredProperties = {"targetKcal", "budgetPhp", "goal", "storeIds"})
 public record PlanRequest(int targetKcal, int budgetPhp, Goal goal, List<String> storeIds) {
 
     static final int MIN_KCAL = 1200;
