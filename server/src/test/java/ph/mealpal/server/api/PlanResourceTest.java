@@ -52,17 +52,17 @@ class PlanResourceTest {
     /** Polls until the plan stops building; each read moves the planner along. */
     private static ValidatableResponse settled(String id) {
         for (int i = 0; i < 20; i++) {
-            String status = app().get("/plans/" + id).then().statusCode(200).extract().path("status");
+            String status = app().get("/v1/plans/" + id).then().statusCode(200).extract().path("status");
             if (!"building".equals(status)) {
                 break;
             }
         }
-        return app().get("/plans/" + id).then().statusCode(200);
+        return app().get("/v1/plans/" + id).then().statusCode(200);
     }
 
     private static String newPlan() {
         return app().contentType(ContentType.JSON).body(REQUEST)
-                .post("/plans")
+                .post("/v1/plans")
                 .then().statusCode(202)
                 .body("status", equalTo("building"))
                 .body("id", startsWith("sesn_"))
@@ -95,7 +95,7 @@ class PlanResourceTest {
 
         app().contentType(ContentType.JSON)
                 .body("{\"weekday\": \"tue\", \"slot\": \"lunch\", \"note\": \"no tinola\"}")
-                .post("/plans/" + id + "/swaps")
+                .post("/v1/plans/" + id + "/swaps")
                 .then().statusCode(202).body("status", equalTo("building"));
 
         settled(id)
@@ -107,7 +107,7 @@ class PlanResourceTest {
     void aSwapWhileBuildingIsAConflict() {
         String id = newPlan();
         app().contentType(ContentType.JSON).body("{\"weekday\": \"tue\", \"slot\": \"lunch\"}")
-                .post("/plans/" + id + "/swaps")
+                .post("/v1/plans/" + id + "/swaps")
                 .then().statusCode(409)
                 .body("message", equalTo("The week is still building."));
     }
@@ -116,7 +116,7 @@ class PlanResourceTest {
     void anIncompleteRequestIsRefusedWithItsProblems() {
         app().contentType(ContentType.JSON)
                 .body("{\"targetKcal\": 900, \"budgetPhp\": 2000, \"goal\": \"lose\", \"storeIds\": []}")
-                .post("/plans")
+                .post("/v1/plans")
                 .then().statusCode(400)
                 .body("problems", hasItem("targetKcal must be between 1,200 and 4,500."))
                 .body("problems", hasItem("Pick at least one store."));
@@ -126,7 +126,7 @@ class PlanResourceTest {
     void anUnknownGoalIsABadRequest() {
         app().contentType(ContentType.JSON)
                 .body("{\"targetKcal\": 2087, \"budgetPhp\": 2000, \"goal\": \"bulk\", \"storeIds\": [\"palengke\"]}")
-                .post("/plans")
+                .post("/v1/plans")
                 .then().statusCode(400);
     }
 
@@ -134,18 +134,18 @@ class PlanResourceTest {
     void whenThePlannerCannotBeReachedThePlanIsNotStarted() {
         agent.startFailure = new IllegalStateException("no credentials");
         app().contentType(ContentType.JSON).body(REQUEST)
-                .post("/plans")
+                .post("/v1/plans")
                 .then().statusCode(503)
                 .body("message", equalTo("Could not open a planner session: no credentials"));
     }
 
     @Test
     void unknownPlansAndOtherAppsSessionsAreNotFound() {
-        app().get("/plans/nope").then().statusCode(404);
-        app().get("/plans/" + agent.foreignSession()).then().statusCode(404);
+        app().get("/v1/plans/nope").then().statusCode(404);
+        app().get("/v1/plans/" + agent.foreignSession()).then().statusCode(404);
         app().contentType(ContentType.JSON)
                 .body("{\"weekday\": \"tue\", \"slot\": \"lunch\"}")
-                .post("/plans/nope/swaps")
+                .post("/v1/plans/nope/swaps")
                 .then().statusCode(404);
     }
 
@@ -154,16 +154,23 @@ class PlanResourceTest {
         String id = newPlan();
         settled(id);
         app().contentType(ContentType.JSON).body("{\"slot\": \"lunch\"}")
-                .post("/plans/" + id + "/swaps")
+                .post("/v1/plans/" + id + "/swaps")
                 .then().statusCode(400)
                 .body("problems", hasItem("weekday is required: mon to sun."));
     }
 
     @Test
+    void theApiIsVersionedAndTheUnversionedPathsAreGone() {
+        app().contentType(ContentType.JSON).body(REQUEST).post("/plans").then().statusCode(404);
+        app().get("/plans/nope").then().statusCode(404);
+        org.junit.jupiter.api.Assertions.assertEquals(0, agent.sessionCount(), "no session was started");
+    }
+
+    @Test
     void callsWithoutTheAppKeyAreRefused() {
-        given().get("/plans/nope").then().statusCode(401);
+        given().get("/v1/plans/nope").then().statusCode(401);
         given().header("X-MealPal-Key", "guess").contentType(ContentType.JSON).body(REQUEST)
-                .post("/plans").then().statusCode(401);
+                .post("/v1/plans").then().statusCode(401);
         org.junit.jupiter.api.Assertions.assertEquals(0, agent.sessionCount(), "no session was started");
     }
 }

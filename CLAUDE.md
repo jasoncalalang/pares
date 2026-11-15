@@ -31,7 +31,14 @@ MealPal PH.
 - `lib/src/plan/planner.dart`: the `Planner` interface, `PlanBrief`,
   `PlanSnapshot`, `PlanStatus` and `PlannerException`. `plan_json.dart` reads
   the server's plan record; `http_planner.dart` is the `Planner` over the
-  server's HTTP API (package:http, tested with `MockClient`).
+  server's HTTP API (package:http, tested with `MockClient`), under `/v1`.
+- The API is REST and its contract is `server/openapi.json` (OpenAPI 3.1,
+  generated from `PlanResource`). The server's `OpenApiContractTest` fails
+  when the served document and the file differ; `test/plan/api_contract_test.dart`
+  holds `HttpPlanner` to it (calls, request fields, every listed error code
+  mapped, enums). Change the API on the server, copy `build/openapi.json` over,
+  then make the app pass. A change an installed app cannot read goes under
+  `/v2`; `/v1` keeps answering. CI runs both halves (`server.yml`, `android.yml`).
 - `lib/state/plan_draft.dart`: one `ChangeNotifier` for the whole flow;
   `brief` is what the planner is asked for. `week_plan_controller.dart`
   drives a `Planner`: builds, polls, swaps, retries. The This week screen

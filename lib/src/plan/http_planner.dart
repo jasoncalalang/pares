@@ -9,7 +9,8 @@ import 'planner.dart';
 /// A [Planner] that talks to the MealPal server (see server/README.md).
 ///
 /// Every call is one request. The server keeps no state between them, so
-/// callers poll [fetch] to move a plan along.
+/// callers poll [fetch] to move a plan along. The calls follow the API
+/// contract in server/openapi.json (`api_contract_test.dart` holds them to it).
 class HttpPlanner implements Planner {
   HttpPlanner(
     this.baseUrl, {
@@ -27,12 +28,16 @@ class HttpPlanner implements Planner {
   final Duration requestTimeout;
   final http.Client _client;
 
-  @override
-  Future<PlanSnapshot> start(PlanBrief brief) =>
-      _send('POST', const ['plans'], body: brief.toJson());
+  /// The API version this app speaks. An installed app keeps calling it
+  /// after the server moves on, so the server must keep answering it.
+  static const _plans = ['v1', 'plans'];
 
   @override
-  Future<PlanSnapshot> fetch(String id) => _send('GET', ['plans', id]);
+  Future<PlanSnapshot> start(PlanBrief brief) =>
+      _send('POST', _plans, body: brief.toJson());
+
+  @override
+  Future<PlanSnapshot> fetch(String id) => _send('GET', [..._plans, id]);
 
   @override
   Future<PlanSnapshot> swap(
@@ -42,7 +47,7 @@ class HttpPlanner implements Planner {
     String? note,
   }) => _send(
     'POST',
-    ['plans', id, 'swaps'],
+    [..._plans, id, 'swaps'],
     body: {
       'weekday': day.name,
       'slot': slot.name,

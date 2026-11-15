@@ -8,7 +8,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Map;
 import java.util.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -37,7 +36,7 @@ public class AppKeyFilter implements ContainerRequestFilter {
                 sent.getBytes(StandardCharsets.UTF_8), appKey.get().getBytes(StandardCharsets.UTF_8))) {
             request.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                     .type(MediaType.APPLICATION_JSON)
-                    .entity(Map.of("message", "Missing or wrong " + HEADER + "."))
+                    .entity(new Message("Missing or wrong " + HEADER + "."))
                     .build());
         }
     }

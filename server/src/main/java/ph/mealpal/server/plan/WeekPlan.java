@@ -2,8 +2,10 @@ package ph.mealpal.server.plan;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /** An accepted week, Monday first, each day's meals in slot order. */
+@Schema(requiredProperties = {"days", "pricePhp"})
 public record WeekPlan(List<PlannedDay> days) {
 
     @JsonProperty
