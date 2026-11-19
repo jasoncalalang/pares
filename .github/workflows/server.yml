@@ -20,6 +20,20 @@ jobs:
     defaults:
       run:
         working-directory: server
+    # The store tests (postgresTest) build their databases from supabase/migrations here.
+    # Postgres 17, as Supabase runs.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -33,3 +47,7 @@ jobs:
       # server serves. The app's half (api_contract_test.dart) runs in the
       # Android workflow.
       - run: ./gradlew test --console=plain
+
+      - run: ./gradlew postgresTest --console=plain
+        env:
+          MEALPAL_TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/postgres?user=postgres&password=postgres

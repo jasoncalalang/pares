@@ -156,6 +156,41 @@ enforce them): breakfast 300-850, lunch and dinner 350-950, snack 80-450. Where
 a USDA food is only the closest, the `note` says which way the figure is off;
 saba, for one, is filed as a dessert banana and probably understates.
 
+## Prices
+
+The meal bank's unit prices are placeholders. The price checker replaces them
+with prices people actually see, in four parts:
+
+1. **The weekly run.** `anthropic/deployments/price-check-weekly.yaml` is a
+   scheduled Managed Agents deployment: Sundays 21:13 Asia/Manila, at most $5
+   a run. It starts `anthropic/agents/price-checker.md` with an outcome (a
+   starter rubric, to tune after the first runs) that lists every ingredient
+   in the bank. The agent searches only the sites in its sandbox
+   (`anthropic/environments/price-checker.yaml`) and writes `prices.json`,
+   `sources.md` and `README.md` to the price book memory store. It records
+   each price in the source's own amount (`per: {qty, unit}`); it does not
+   work out recipes or meal costs.
+2. **The checks.** `PriceIntake` reads `prices.json` and trusts none of it.
+   A line is rejected unless it names a bank ingredient and a covered store,
+   comes from an allowed site, is dated in the 14 days before the run, and
+   converts into the bank's unit (weight to g, or to ml and pc through the
+   bank's grams per unit; volume to ml; a count to pc). A line that passes
+   but moves more than 1.5 times from the last accepted price, or, for a first
+   price, more than 3 times from the bank's estimate, is held for a person.
+3. **The book.** `pricebook.runs` and `pricebook.observations` in Postgres
+   (Supabase), from `supabase/migrations/`. Every line is kept with its status,
+   reason and the agent's own words; `pricebook.current_prices` is each
+   ingredient's latest accepted price per store. The schema is not `public`,
+   so Supabase's Data API cannot reach it; the server connects as the owner.
+4. **Using them.** Not wired yet: the endpoint that takes a finished run,
+   and pricing meals from `current_prices`.
+
+`PriceCheckerFilesTest` keeps the parts in step: the server's stores and
+source sites (`mealpal.prices.*` in `application.properties`) must match the
+agent's, every store must exist in the app's catalog, and the weekly run must
+list exactly the bank's ingredients (when the bank changes, the failure prints
+the lines to paste).
+
 ## USDA tools
 
 `tools/usda/` looks foods up and checks a bank against the USDA data. Run
@@ -174,3 +209,14 @@ python3 -I tools/usda/check_bank.py src/main/resources/meal-bank.json
 ## Tests
 
 `./gradlew test` (use `./gradlew cleanTest test` to rerun cached results). No Docker needed: the HTTP tests mock the agent gateway.
+
+`./gradlew postgresTest` runs the tests tagged `postgres` (the price book's
+store) against a real Postgres. Point `MEALPAL_TEST_DATABASE_URL` at one the
+tests may create and drop databases in; each test class builds its own from
+`supabase/migrations/`:
+
+```sh
+MEALPAL_TEST_DATABASE_URL='jdbc:postgresql://127.0.0.1:5432/postgres?user=postgres' ./gradlew postgresTest
+```
+
+CI runs both, with Postgres 17 as Supabase runs.

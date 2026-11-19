@@ -1,0 +1,116 @@
+# The weekly price check: `ant apply` makes this a scheduled deployment, and each run is
+# a session whose outcome is a fresh prices.json in the price book. The server checks
+# every line before using it (PriceIntake). PriceCheckerFilesTest holds the ingredient
+# list below to the meal bank; when the bank changes, it prints the lines to paste.
+name: MealPal weekly price check
+agent: ../agents/price-checker.md
+environment_id: ../environments/price-checker.yaml
+resources:
+  - path: ../memory_stores/price-book.yaml
+    access: read_write
+schedule:
+  type: cron
+  # Sunday 21:13 in Manila, after the week's DA bulletins are out.
+  expression: "13 21 * * 0"
+  timezone: Asia/Manila
+budget:
+  type: limit
+  max_list_cost:
+    # US cents: at most $5 a run.
+    amount: "500"
+    currency: USD
+initial_events:
+  - type: user.define_outcome
+    max_iterations: 2
+    description: |
+      Update the MealPal price book for this week: find current prices for the
+      ingredients below at the stores in your instructions, and write
+      prices.json, sources.md and README.md to the price book as your
+      instructions describe. Use today's date as runOn.
+
+      Ingredients to price (id | name | counted in):
+      - rice | White rice | g
+      - egg | Egg | pc
+      - garlic | Garlic | g
+      - onion | Onion | g
+      - ginger | Ginger | g
+      - spring-onion | Spring onion | g
+      - cooking-oil | Cooking oil | ml
+      - soy-sauce | Soy sauce | ml
+      - vinegar | Vinegar | ml
+      - fish-sauce | Fish sauce | ml
+      - bagoong | Bagoong (shrimp paste) | g
+      - sinigang-mix | Sinigang (tamarind) mix | g
+      - beef-tapa | Beef tapa cut | g
+      - pork | Pork | g
+      - chicken | Chicken (bone in) | g
+      - daing-bangus | Daing na bangus | g
+      - green-papaya | Green papaya | g
+      - malunggay | Malunggay leaves | g
+      - kangkong | Kangkong | g
+      - tomato | Tomato | g
+      - radish | Radish | g
+      - string-beans | String beans | g
+      - eggplant | Eggplant | g
+      - squash | Squash | g
+      - okra | Okra | g
+      - ampalaya | Ampalaya | g
+      - mung-beans | Mung beans | g
+      - tofu | Tofu | g
+      - bay-leaf | Bay leaves | g
+      - peppercorn | Peppercorns | g
+      - saba | Saba banana | pc
+      - peanuts | Roasted peanuts | g
+      - grated-coconut | Grated coconut | g
+      - longganisa | Longganisa | g
+      - tocino | Tocino | g
+      - glutinous-rice | Glutinous rice (malagkit) | g
+      - tablea | Tablea (cacao tablet) | g
+      - sugar | White sugar | g
+      - brown-sugar | Brown sugar | g
+      - evaporated-milk | Evaporated milk | ml
+      - pandesal | Pandesal | pc
+      - potato | Potato | g
+      - carrot | Carrot | g
+      - bell-pepper | Bell pepper | g
+      - coconut-milk | Coconut milk | ml
+      - taro-leaves | Taro leaves (dahon ng gabi) | g
+      - tilapia | Tilapia fillet | g
+      - beef-sirloin | Beef sirloin | g
+      - beef-shank | Beef shank | g
+      - cabbage | Cabbage | g
+      - corn | Corn on the cob | pc
+      - chicken-breast | Chicken breast (boneless) | g
+      - rice-noodles | Rice noodles (bihon) | g
+      - sardines | Sardines in tomato sauce | g
+      - misua | Misua noodles | g
+      - sweet-potato | Sweet potato (kamote) | g
+      - lumpia-wrapper | Lumpia wrapper | pc
+      - silken-tofu | Silken tofu | g
+      - sago | Sago pearls | g
+      - chili | Chili (siling labuyo) | g
+      - calamansi | Calamansi | g
+      - tomato-sauce | Tomato sauce | g
+
+      "Counted in" is how the meal bank measures the ingredient. Record each
+      price in the source's own amount and unit; the server converts it.
+    rubric:
+      type: text
+      # A starter rubric: tune it after the first runs.
+      content: |
+        1. prices.json is at the root of the price book and is valid JSON with
+           runOn (YYYY-MM-DD), region, prices and missing.
+        2. Every line in prices has ingredientId, store, pricePhp, per (qty and
+           unit), source, sourceUrl and observedOn, and per.unit is one of kg,
+           g, l, ml or pc.
+        3. Every ingredientId is one of the ids in the task, and every store is
+           one of the store ids in the agent's instructions.
+        4. Every sourceUrl is on one of the allowed sites and points at a
+           specific page or PDF, not a site's home page.
+        5. Every observedOn is in the 14 days up to runOn.
+        6. No ingredient and store pair appears twice in prices.
+        7. Every ingredient in the task has a palengke price or a palengke line
+           in missing with its reason.
+        8. No price per bundle, tali or tumpok without a stated weight appears in
+           prices.
+        9. sources.md lists every site tried this run and whether it gave prices.

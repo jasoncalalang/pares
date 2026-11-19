@@ -40,11 +40,13 @@ public final class MealBank {
     private final List<Meal> meals;
     private final Map<String, Meal> byId;
     private final Map<String, Ingredient> catalog;
+    private final List<Ingredient> ingredients;
 
     private MealBank(List<Meal> meals, Map<String, Ingredient> catalog) {
         this.meals = List.copyOf(meals);
         this.byId = meals.stream().collect(Collectors.toUnmodifiableMap(Meal::id, Function.identity()));
         this.catalog = Map.copyOf(catalog);
+        this.ingredients = List.copyOf(catalog.values());
     }
 
     public static MealBank fromClasspath(String resource) {
@@ -232,6 +234,11 @@ public final class MealBank {
 
     public List<Meal> meals() {
         return meals;
+    }
+
+    /** The whole ingredient catalog, in the order the bank lists it. */
+    public List<Ingredient> ingredients() {
+        return ingredients;
     }
 
     public Optional<Ingredient> ingredient(String id) {

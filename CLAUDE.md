@@ -39,6 +39,13 @@ MealPal PH.
   mapped, enums). Change the API on the server, copy `build/openapi.json` over,
   then make the app pass. A change an installed app cannot read goes under
   `/v2`; `/v1` keeps answering. CI runs both halves (`server.yml`, `android.yml`).
+- Prices: the weekly price checker (`server/anthropic/deployments/`) writes
+  `prices.json` to the price book; the server's `PriceIntake` checks every line
+  and `JdbcPriceBook` keeps it in Supabase Postgres (`server/supabase/migrations/`,
+  schema `pricebook`, not `public`). The agent never touches the database.
+  `PriceCheckerFilesTest` keeps the agent, its sandbox, the deployment's
+  ingredient list and `mealpal.prices.*` in step. Store tests are tagged
+  `postgres` and run in `./gradlew postgresTest` (`MEALPAL_TEST_DATABASE_URL`).
 - `lib/state/plan_draft.dart`: one `ChangeNotifier` for the whole flow;
   `brief` is what the planner is asked for. `week_plan_controller.dart`
   drives a `Planner`: builds, polls, swaps, retries. The This week screen

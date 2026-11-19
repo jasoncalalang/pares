@@ -19,6 +19,13 @@ class MealBankTest {
     }
 
     @Test
+    void listsTheIngredientCatalogInBankOrder() {
+        List<Ingredient> catalog = bank.ingredients();
+        assertEquals(62, catalog.size());
+        assertEquals(List.of("rice", "egg", "garlic"), catalog.subList(0, 3).stream().map(Ingredient::id).toList());
+    }
+
+    @Test
     void findsAMealByIdWithItsNumbers() {
         Meal tapsilog = bank.find("tapsilog").orElseThrow();
         assertEquals(List.of(Slot.BREAKFAST), tapsilog.slots());

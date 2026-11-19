@@ -15,9 +15,11 @@ dependencies {
     implementation 'io.quarkus:quarkus-smallrye-openapi'
     implementation 'io.quarkus:quarkus-arc'
     implementation 'com.anthropic:anthropic-java:2.75.0'
+    implementation 'org.postgresql:postgresql'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.quarkus:quarkus-junit5-mockito'
     testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'org.yaml:snakeyaml'
 }
 
 group 'ph.mealpal'
@@ -30,6 +32,22 @@ java {
 
 test {
     systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+    // The tests tagged postgres need a database; they run in postgresTest.
+    useJUnitPlatform {
+        excludeTags 'postgres'
+    }
+}
+
+// The tests that need a real Postgres. MEALPAL_TEST_DATABASE_URL is a JDBC URL to one where the
+// tests may create and drop databases; each test class builds its own from supabase/migrations.
+tasks.register('postgresTest', Test) {
+    description = 'Runs the tests tagged postgres against MEALPAL_TEST_DATABASE_URL.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'postgres'
+    }
 }
 compileJava {
     options.encoding = 'UTF-8'
